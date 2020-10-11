@@ -53,3 +53,21 @@ TARGET  = helloworld
 
 # pogledati:
 # https://doc.qt.io/qt-5/qmake-project-files.html
+
+# Rezultat je Makefile (+ make)
+# Ocekujemo nesto nalik na ovo:
+#
+# TARGET   = helloworld
+# CXX      = clang++
+# CXXFLAGS = -Wall -Wextra -std=c++17
+# OBJECTS  = main.o \
+#            hello.o
+# 
+# $(TARGET): $(OBJECTS)
+# 	$(CXX) $(CXXFLAGS) -o $@ $^
+# 	
+# main.o: main.cpp hello.hpp
+# 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+# 	
+# hello.o: hello.cpp hello.hpp
+# 	$(CXX) $(CXXFLAGS) -c -o $@ $<

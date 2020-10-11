@@ -21,7 +21,7 @@ ApplicationWindow {
     TextField {
         y: 19
         anchors.horizontalCenterOffset: 0
-        placeholderText: qsTr("User name")
+        placeholderText: qsTr("Insert file name here...")
         anchors.horizontalCenter: parent.horizontalCenter
 
         onTextChanged: {

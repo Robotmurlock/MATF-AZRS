@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+// namespace - prostor imena - uopstenje pakate iz Jave
+// namespace Ui grupise MainWindow i generisan Ui_MainWindow
+
 namespace Ui {
 class MainWindow;
 }
@@ -12,6 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    // explicit konstruktor onemogucava implicitno pozivanje konstruktora
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 

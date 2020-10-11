@@ -14,13 +14,13 @@
 ``sudo apt install `apt-cache search qt | grep 5- | grep ^qt | awk '{print $1}' | xargs` ``
 
 ### izvor: 
-`https://doc.qt.io/qt-5/linux.html`\
-`https://stackoverflow.com/questions/48147356/install-qt-on-ubuntu`
+[qt linux installation guide](https://doc.qt.io/qt-5/linux.html)`\
+[stackoverflow linux installation guide](https://stackoverflow.com/questions/48147356/install-qt-on-ubuntu)
     
   --- 
 ## Mac:
-`https://doc.qt.io/qt-5/macos.html`
+[qt macos installation guide](https://doc.qt.io/qt-5/macos.html)
     
   ---
 ## Windows: 
-`https://doc.qt.io/qt-5/windows.html`
+[qt windows installation guide](https://doc.qt.io/qt-5/windows.html)
