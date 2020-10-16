@@ -124,6 +124,52 @@ Primer(istorija):
 
 `git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"`
 
+## Git vizuelizacija drveta verzija/komitova
+
+Na [ovoj stranici](https://nic-hartley.github.io/git-gud/) se možete igrati sa git-om i vežbati iz vizuelizaciju.
+
+## Git Verzije
+
+Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koje postoje između trenutnog komita i komita na koji se prelazi postaju invertovane.
+- Prelazak na drugi komit: `git checkout [KOMIT HES]`;
+- Komandom `git log --pretty=oneline` se prikazuju komitovi sa njihovim heš kodovima;
+- Primer: `git checkout f8d50f6f60721edc7d3663a69cf0e5e55ea989a7`
+- Prethodni primer predstavlja skok na "apsolutnu verziju". Alternativa je da se skače na "relativnu verziju" preko "pokazivača" na trenutni komit `HEAD`.
+- Primer: `git checkout HEAD~` skače na prethodni komit.
+- Primer: `git checkout HEAD~2` skače na pretprethodni komit. Možemo izabrati proizvoljan broj.
+- Primer: `git checkout master` skače na najnoviji komit na `master` grani.
+
+Takođe je moguće stavljati tagove verzija na bitne komitove. Na te komitove 
+možemo skočiti na sledeći način: `git checkout [TAG]`
+
+Primer:
+- `git tag v1`, postavlja se tag `v1` na trenutni komit;
+- `git checkout HEAD~`, skače se na prethodni komit;
+- `git tag v1-prior`, postavlja se tag `v1-prior` ne trenutni komit;
+- `git checkout v1`, skače se na komit sa `v1` tagom.
+
+## Invertovanje poslednjeg komita
+
+Šta ako smo izvršili komit i shvatili da to zapravo loše promene i da ih treba odbaciti. Sledećom komandom se pravi novi komit koji invertuje promene poslednjeg komita. Ako je komit koji se briše imao poruku `[PORUKA]`, onda će novi komit imati poruku `Revert "[PORUKA]"`.
+
+Primer:
+- `git add 1.txt`
+- `git commit -m "Dodat 1.txt"`
+- `git revert HEAD`
+
+Ovaj niz komandi ne menja datoteke, ali u istoriji ostaje obrisan komit, posle
+kojeg ide komit koji je taj prethodni komit obrisao. To znači da se git drvo ne ažurira. Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]`
+
+Primer:
+- `git add 1.txt`
+- `git commit -m "Dodat 1.txt"`
+- `git reset --hard HEAD~`
+
+Ovaj niz komandi ne menja datoteka, ali ne postoje tragovi promena u istoriji. Kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne datoteke koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
+se može koristiti opcija `--soft` koja ne briše lokalne promena nada datotekama.
+
+## 
+
 ## Reference
 `git strane`
 
