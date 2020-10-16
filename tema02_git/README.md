@@ -74,5 +74,61 @@ one neće biti zabeležene sledećim komitom.
 
 Datoteka `.git/index` je binarna datoteka i na sledećem [linku](https://mincong.io/2018/04/28/git-index/) se može pročitati detaljnije o strukturi indeksa.
 
+## Istorija projekta
+
+Komandom `git log` se u terminalu ispisuje istorija komitova:
+<pre>
+commit 0388628561d9d2155980f26851b46727f77ba7a2
+Author: Robotmurlock <momir.adzemovic@gmail.com>
+Date:   Thu Oct 8 17:49:31 2020 +0200
+
+    Azuriranje .gitignore za qt
+
+commit 1d6219dca4e13221e58f10d3b2d1d93140f05133
+Author: Robotmurlock <momir.adzemovic@gmail.com>
+Date:   Thu Oct 8 17:18:47 2020 +0200
+
+    Dodato upustvo za instalaciju i dodavanje cppreference u qtcreator
+
+commit 544995c2b22c158497eec9315e0a8a43f81b871d
+Author: Robotmurlock <32575918+Robotmurlock@users.noreply.github.com>
+Date:   Thu Oct 8 14:37:28 2020 +0200
+
+    Initial commit
+</pre>
+
+Svaki komit ima svoj `SHA-1 hash` koji jedinstven. Koriste se različiti metapodaci kao što su ime autora, vreme komita, ... za računanje heš koda. Heš kod je jedinstven.
+
+Skraćena verzija `git log --pretty=oneline`:
+<pre>
+0388628561d9d2155980f26851b46727f77ba7a2 Azuriranje .gitignore za qt
+1d6219dca4e13221e58f10d3b2d1d93140f05133 Dodato upustvo za instalaciju i dodavanje cppreference u qtcreator
+544995c2b22c158497eec9315e0a8a43f81b871d Initial commit
+</pre>
+
+Ako se doda opcija `--graph` ispisuje se stablo što je korisno ako želimo da vizuelizujemo grane (branches): `git log --graph`, ali umesto toga može da
+se koristi neki softver za vizuelizaciju.
+
+Postoji ogroman broj opcija i različiti format koji: `man git log`.
+
+## Definisanje aliasa
+
+Možemo definisati aliase (skraćenice) za neke duže komande.
+
+Primer:
+`git config --global alias.ci commit`
+
+Ovo je korisno ako često koristimo neku komandu sa istim parametrima (dodatnim opcijama). 
+
+Primer(istorija):
+
+`git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"`
+
 ## Reference
+`git strane`
+
+[githowto](https://githowto.com/)
+
 [medium-hackernoon-understanding-git-index](https://medium.com/hackernoon/understanding-git-index-4821a0765cf)
+
+[thoughtram-the-anatomy-of-a-git-commit](https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html)
