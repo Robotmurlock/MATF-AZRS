@@ -353,6 +353,84 @@ Automatic merge failed; fix conflicts and then commit the result.
 </pre>
 - Grane su spojene u jednu granu, što je u ovom slučaju `master` grana.
 
+## Rebase
+
+Primer. U okviru prvog komita je implementiran jednostavan `C++` program:
+<pre>
+#include <iostream>
+
+void hello()
+{
+    std::cout << "Hello Warld!" << std::endl;
+}
+
+void nPlusHello(unsigned n)
+{
+    while(n >= 0)
+    {
+        hello();
+        n--;
+    }
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    nPlusHello(n);
+    return 0;
+}
+</pre>
+- Pravi se git direktorijum: `git init`
+- Dodaje se `main.cpp` datoteka na `staging area`: 
+    * `git add main.cpp`
+- Postavlja se prvi komit: 
+    * `git commit -m "Implementiran main.cpp"`
+- U prethodnom kodu možemo uočiti dve relativno očigledne greške:
+    * Piše `Hello Warld!` umesto `Hello World`;
+    * Pošto je promenljiva `n` tipa `unsigned`, uslov `n >= 0` je uvek tačan i posledica je beskonačna petlja.
+- Pretpostavimo da ove greške nisu uočene. Pravimo novu granu `bugFix` za debagovanje beskonačne petlje: `git checkout -b bugFix`.
+- Usput je uočena (i ispravljena) stamparska greška i izvršen je komit: 
+    * `git add main.cpp`
+    * `git commit -m "Ispravljena štamparska greška u f-ji hello()"`
+- Pošto razlog beskonačne petlje nije očigledan, dodaje se u petlji linija:
+    * `std::cerr << "n = " << n << std::endl;`
+    * `git add main.cpp`
+    * `git commit -m "Dodat ispis za debagovanje"`
+- Sada je razlog beskonačne petlje očigledan i vrši se ispravka `unsigned n` u `int n`:
+    * `git add main.cpp`
+    * `git commit -m "Uklonjena je beskonačna petlja"`
+- Git stablo trenutno ima oblik sličan sledećem:
+<pre>
+* a847380 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
+* b2acfd5 2020-10-17 | Dodat ispis za debagovanje [Robotmurlock]
+* da63caf 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 742994c 2020-10-17 | Implementiran main.cpp (master) [Robotmurlock]
+</pre>
+- Potrebno je dodati ispravke na `master` granu. To se može izvršiti na sledeće načine:
+    * Može se izvršiti spajanje i onda obrisati deo za debagovanje u okviru `master` grane;
+    * Može se obrisati deo za debagovanje u okviru `bugFix` grane i onda izvršiti spajanje;
+    * Može se izvršiti `git rebase master` komande koja menja strukturu git drveta. Dobijeni rezultat je
+    ekvivalentan kao da su od početka vršeni komitovi na `master` grani tj. kao da `bugFix`
+    grana nikad nije ni postojala. Dobijeno drvo je sada postalo `linearno` i samim tim i čitljvije. I u tom slučaju je potrebno naknadno obrisati deo za debagovanje.
+    * Modifikacije prethodnog je da se koristi `git rebase -i master`, gde se komit za dodavanje
+    koda za debagovanje odbacuje kao da nikad nije ni postojao. Ako se instaliran i konfigurisan `git interactive rebase tool`, onda je korisnički interfejs malo prikladniji. Instalacija i 
+    konfiguracija ovog alata je objašnjenja u sledećoj sekciji. Potrebno je izabrati `pick` opciju
+    za prvi i poslednji komit grane `bugFix` (to znači da će komitovi biti prebačeni na `master` granu) i opciju `drop` za drugi komit (to znači da će komit biti odbačen).
+- Primenom poslednjeg rešenja se dobija sledeća struktura git drveta:
+<pre>
+* b109f1a 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
+* da63caf 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 742994c 2020-10-17 | Implementiran main.cpp (master) [Robotmurlock]
+</pre>
+- U datoteci `main.cpp` su ostale ispravke, ali kod za debagovanje je odbačen.
+
+U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komitove u jedan. Ovo je korisno ako su ti komitovi vezani za rešavanje iste greške i ima smisla da predstavljaju celinu.
+
+### git interactive rebase tool
+
+Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https://gitrebasetool.mitmaro.ca/).
+
 ## Reference
 `git strane`
 
