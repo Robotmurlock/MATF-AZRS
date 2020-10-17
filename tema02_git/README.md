@@ -431,6 +431,30 @@ U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komi
 
 Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https://gitrebasetool.mitmaro.ca/).
 
+### Cherry-pick
+
+- Postoji još jedan dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
+    * `git checkout master`
+    * `git cherry-pick da63caf a847380`
+- Ova komanda bira niz komitova i kopira ih na trenutnu `master` granu. Očekivani rezultat:
+<pre>
+* 9ca9122 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
+* 23305e7 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+| * 4848b43 2020-10-17 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
+| * c1e19b4 2020-10-17 | Dodat ispis za debagovanje [Robotmurlock]
+| * 97592f3 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+|/  
+* 2f51e15 2020-10-17 | Implementiran main.cpp [Robotmurlock]
+</pre>
+- Grana `bugFix` nam više nije od koristi:
+    * `git branch -D bugFix`
+- Očekivani konačan rezultat:
+<pre>
+* 9ca9122 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
+* 23305e7 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 2f51e15 2020-10-17 | Implementiran main.cpp [Robotmurlock]
+</pre>
+
 ## Reference
 `git strane`
 
