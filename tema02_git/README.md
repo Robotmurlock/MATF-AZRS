@@ -200,6 +200,68 @@ Primer. Potrebno je pomeriti `main.cpp` datoteku u `src` direktorijum:
 Primer. Potrebno je obrisati `1.txt` i `2.txt` datoteke:
 - `git rm 1.txt 2.txt`
 
+## Branching (grananje)
+
+### Kreiranje grane
+
+Nova grana se kreira komandom `git branch [IME GRANE]`. Da bi skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]`.
+
+Primer. Prvi način:
+- `git branch feature`
+- `git checkout feature`
+
+Primer. Drugi način:
+- `git checkout -b feature`
+
+Uvek možemo da skočimo nazad na `master` granu:
+- `git checkout master`
+
+### Pregled aktivnih grana
+
+Komandom `git branch -a` se ispisuju lokalne i remote grane. Trenutna grana ima `*` sa leve strane:
+<pre>
+  hello
+* main_input
+  master
+</pre>
+
+Komandom `git branch -r` se ispisuje remote grane. 
+
+Komandom `git show-branch` se ispisuju grane i njihovi komitova:
+<pre>
+! [hello] Implemented hello class
+ * [main_input] Implemented n input
+  ! [master] Implemented n input
+---
+ *+ [main_input] Implemented n input
++   [hello] Implemented hello class
++   [hello^] Implemented hello class template
++*+ [main_input^] Initial commit
+</pre>
+
+### Kada praviti grane
+
+- Treba praviti granu svaki put kada se dodaje neka nova `funkcionalnost (feature)`.
+- Treba praviti novu granu svaki put kada se vrši neki `eksperiment`.
+- Grananje ima znatno više smisla kada se radi u timu.
+- `git workflow`.
+
+### Spajanje grana
+
+Potrebno je u nekom trenutku spojiti granu (ako se grana ne odbaci) sa glavnom granom (npr. master grana). To se vrši preko komande `git merge [IME GRANE]`.
+Ova komanda se generalno koristi za spajanje trenutne grane sa izabranim komitovima tj. može se koristiti u opštijem slučaju.
+
+Primer:
+- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b hello_class`;
+- Implementira se `hello.hpp` `hello.cpp` i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
+- Ovo se može odraditi kroz jedan ili više komitova:
+    * `git commit -m "Implementirana osnova struktura za hello klasu"`.
+    * `git commit -m "Implementiran Makefile"`. Tip: Napisati `qmake` datoteku i generisati `Makefile` datoteku.
+    * `git commit -m "Implementirane osnovne funkcionalnost hello klase"`.
+- Sada je potrebno spojiti `hello_class` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
+    * Potrebno je prvo skočiti na `master` granu: `git checkout master`.
+    * Onda je potrebno spojiti grane: `git merge hello_class`.
+
 ## Reference
 `git strane`
 
