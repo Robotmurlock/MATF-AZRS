@@ -252,15 +252,106 @@ Potrebno je u nekom trenutku spojiti granu (ako se grana ne odbaci) sa glavnom g
 Ova komanda se generalno koristi za spajanje trenutne grane sa izabranim komitovima tj. može se koristiti u opštijem slučaju.
 
 Primer:
-- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b hello_class`;
+- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b helloClass`;
 - Implementira se `hello.hpp` `hello.cpp` i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
 - Ovo se može odraditi kroz jedan ili više komitova:
     * `git commit -m "Implementirana osnova struktura za hello klasu"`.
     * `git commit -m "Implementiran Makefile"`. Tip: Napisati `qmake` datoteku i generisati `Makefile` datoteku.
     * `git commit -m "Implementirane osnovne funkcionalnost hello klase"`.
-- Sada je potrebno spojiti `hello_class` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
+- Sada je potrebno spojiti `helloClass` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
     * Potrebno je prvo skočiti na `master` granu: `git checkout master`.
-    * Onda je potrebno spojiti grane: `git merge hello_class`.
+    * Onda je potrebno spojiti grane: `git merge helloClass`.
+
+### Brisanje grana
+
+Grana se može obrisati komandom `git branch -d [IME GRANE]`.
+
+## Konflitki
+
+Posmatramo sledeću situaciju:
+- Napravili smo `Hello` klasu u okviru `helloClass` grane i potrebno je spojiti ovu granu sa `master` granom.
+- Razlika u odnosu na prethodni primer je to što je `master` takođe izmenjena. Zbog toga je spajanje otežano i potrebno je odlučiti koje promene želimo da prihvatimo.
+
+Možemo da koristimo neki alat za rešavanje `konflitka spajanja (merge conflicts)` preko komande `git mergetool`. Postoji više izbora za ovakav alat. Jedan od takvih alata je `meld`.
+
+Alternativa je da koristimo neki napredniji editor kao što je `visual studio code` koji ima integrisan alat za rešavanje konflikta.
+
+Još jedna alternativa je da ručno vršimo rešavanje konflitka. 
+
+### Instalacija i konfiguracija Meld alata
+
+`sudo apt-get update -y`\
+`sudo apt-get install -y meld`\
+`git config --global merge.tool meld`\
+`git config --global mergetool.prompt false`
+
+### Primer konflitka
+
+Sledeći niz komandi pravi konflikt spajanje:
+- Pravljenje novog direktorijuma za git repozitorijum: 
+    * `mkdir makeconflict`
+    * `cd makeconflict`
+- Pravljenje novog git repozitorijuma: 
+    * `git init`
+- Prvi komit:
+    * `touch main.txt` 
+    * `echo "m1" >> main.txt` 
+    * `git add .`
+    * `git commit -m "Prvi komit"`
+- Pravljenje nove grane `newFeature` koja implementira funkcionalnost `f1`, `f2` i `f3`:
+    * `git checkout -b newFeature`
+    * `echo "f1" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Dodata funkcionalnost f1"`
+    * `echo "f2" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Dodata funkcionalnost f2"`
+    * `echo "f3" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Dodata funkcionalnost f3"`
+- Skok na granu `master` i dodavanje nove funkcionalnost `m2` (pretpostavimo da u realnoj situaciji dva različita člana tima vrše poslednja dva koraka tj. jedan radi na `master` grani, a drugi na `newFeature` grani):
+    * `git checkout master`
+    * `echo "m2" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Dodata funkcionalnost m2"`
+- Ovde je korisno za vizuelizaciju pokrenuti komandu `git hist --all`. Očekivani oblik izlaza:
+<pre>
+* 77032be 2020-10-17 | Dodata funkcionalnost m2 (HEAD -> master) [Robotmurlock]
+| * d9b4d4e 2020-10-17 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
+| * 8e246fc 2020-10-17 | Dodata funkcionalnost f2 [Robotmurlock]
+| * 6bf37c3 2020-10-17 | Dodata funkcionalnost f1 [Robotmurlock]
+|/  
+* 08a4d30 2020-10-17 | Prvi komit [Robotmurlock]
+</pre>
+- Desna grana je `master` grana, a leva je `newFeature` grana. Komitovi su poređani hronološki.
+- Sada je potrebno da se `newFeature` grana spoji sa granom `master`, jer su u "međuvremenu" implementirane sve funkcionalnosti:
+    * `git checkout master`
+    * `git merge newFeature`
+- Očekivani izlaz:
+<pre>
+Auto-merging main.txt
+CONFLICT (content): Merge conflict in main.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</pre>
+- Potrebno je pokrenuti alat `meld` preko komande `git mergetool` koja će otvoriti program sa tri prozora: 
+    * Promene na trenutnoj grani (levo),
+    * Spojene promene (sredina),
+    * Promene na grani "dolaznoj" grani (desno).
+- Kombinovanjem promena na trenutnoj i dolaznoj grani dobijamo spojene promene.
+- Nakon rešenih konflikta je potrebno izvršiti komit:
+    * `git commit -m "Rešeni konflikti"`
+- Očekivani rezultat `git hist --all` komande:
+<pre>
+*   d63a4cd 2020-10-17 | Reseni konflikti (HEAD -> master) [Robotmurlock]
+|\  
+| * d9b4d4e 2020-10-17 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
+| * 8e246fc 2020-10-17 | Dodata funkcionalnost f2 [Robotmurlock]
+| * 6bf37c3 2020-10-17 | Dodata funkcionalnost f1 [Robotmurlock]
+* | 77032be 2020-10-17 | Dodata funkcionalnost m2 [Robotmurlock]
+|/  
+* 08a4d30 2020-10-17 | Prvi komit [Robotmurlock]
+</pre>
+- Grane su spojene u jednu granu, što je u ovom slučaju `master` grana.
 
 ## Reference
 `git strane`
