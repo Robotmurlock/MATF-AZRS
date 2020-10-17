@@ -12,11 +12,12 @@ Github nalog možete napraviti na [zvaničnoj github stranici](https://github.co
 
 ## Dokumentacija
 
-Kao i za linux komande i C funkcije, postoje `man` strane za git komande: `man git [KOMANDA]`\
-Primeri:\
-`man git init`\
-`man git commit`\
-`man git branch`
+Kao i za linux komande i C funkcije, postoje `man` strane za git komande: `man git [KOMANDA]`
+
+Primeri:
+- `man git init`
+- `man git commit`
+- `man git branch`
 
 ## Kreiranje git repozitorijuma
 
@@ -116,13 +117,12 @@ Postoji ogroman broj opcija i različiti format koji: `man git log`.
 Možemo definisati aliase (skraćenice) za neke duže komande.
 
 Primer:
-`git config --global alias.ci commit`
+- `git config --global alias.ci commit`
 
 Ovo je korisno ako često koristimo neku komandu sa istim parametrima (dodatnim opcijama). 
 
 Primer(istorija):
-
-`git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"`
+- `git config --global alias.hist "log --pretty=format:'%h %ad | %s%d [%an]' --graph --date=short"`
 
 ## Git vizuelizacija drveta verzija/komitova
 
@@ -166,9 +166,39 @@ Primer:
 - `git reset --hard HEAD~`
 
 Ovaj niz komandi ne menja datoteka, ali ne postoje tragovi promena u istoriji. Kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne datoteke koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
-se može koristiti opcija `--soft` koja ne briše lokalne promena nada datotekama.
+se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama.
 
-## 
+Obrisani komitovi se i dalje mogu videti dodavanjem opcije `--all`:\
+`git log --all --pretty=oneline`
+
+## Izmena poslednjeg komita
+
+Recimo da smo ažurirali `README.md` datoteku i primetili smo da ima dve stamparske greške. Jedan način da se ovo reši je da se komituju ispravke kao novi komit. Alternativa je da se koristi `--amend`, gde se stari komit zamenjuje sa novim.
+
+Primer:
+- `code README.md` (izmeniti datoteku);
+- `git add README.md`;
+- `git commit -m "Azurirao README.md"`;
+- Ako je `remote` repozitorijum: `git push`
+- ovde je primećena greška!
+- `code README.md` (ispraviti greške);
+- `git add README.md`
+- `git commit -m "Azurirao README.md"`;
+- Ako je `remote` repozitorijum: `git push --force`.
+
+**Napomena:** Opciju `--amend` koristiti samo za komitove koji nisu deljeni sa ostalim članovima tima.
+
+## Brisanje i pomeranje datoteka
+
+Slično kao komande `mv` i `rm` na linux sistemima, postoje analogne komande `git mv` i `git rm` koje dodaju promene na `staging area`, što znači da je potrebno komitovati promene.
+
+Ako želimo da se datoteka obriše iz git repozitorijuma, ali da ostane u radnom direktorijumu, koristi se komanda `git rm --cached [IME DATOTEKE]`
+
+Primer. Potrebno je pomeriti `main.cpp` datoteku u `src` direktorijum: 
+- `git mv main.cpp src`
+
+Primer. Potrebno je obrisati `1.txt` i `2.txt` datoteke:
+- `git rm 1.txt 2.txt`
 
 ## Reference
 `git strane`
