@@ -455,6 +455,220 @@ Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https:
 * 2f51e15 2020-10-17 | Implementiran main.cpp [Robotmurlock]
 </pre>
 
+## Kloniranje repozitorijuma
+
+Kloniranje repozitorijuma se vrši komandom: \
+`git clone [LOKACIJA REPOZITORIJUMA] [IME NOVOG DIREKTORIJUMA]`, \
+gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili URL Github stranice repozitorijuma koji se klonira. 
+
+Primer: 
+- Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
+<pre>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+void hello()
+{
+    std::cout << "Hello World!" << std::endl;
+}
+
+void nPlusHello(int n)
+{
+    while(n >= 0)
+    {
+        hello();
+        n--;
+    }
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    nPlusHello(n);
+    return 0;
+}
+</pre>
+- Pravimo klon repozitorijuma: `git clone hello hello_cloned`
+<pre>
+Cloning into 'hello_cloned'...
+done.
+</pre>
+- Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
+- Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
+
+## Remote repozitorijum
+
+Komandom `git remote` dobijamo listu svih `remote`-ova. Ovde `remote` predstavlja git repozitorijum (skup verzija projekta) koji se uglavnom nalazi na internetu (npr. Github-u). Timski rad podrazuvema korišćenje `remote` repozitorijuma.
+- Podrazumevano ime za `remote` repozitorijum je `origin`, što i jeste rezultat prethodne komande u ovom slučaju. 
+- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova.
+<pre>
+origin  /home/mokoyo/Desktop/ALATI/cas2/hello (fetch)
+origin  /home/mokoyo/Desktop/ALATI/cas2/hello (push)
+</pre>
+Postoji skup komandi oblika `git remote [OPCIJA]` koja služi za rad sa `remote` repozitorijumima
+u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd... Detaljnije: `man git remote`.
+
+## Fetch, Merge i Pull
+
+**Šta se dešava ako izvršimo promenu na jednom repozitorijumu?**
+
+Primer:
+- Vratimo se na originalni repozitorijum:
+    * `cd ../hello`
+    * Dodajmo novu implementaciju nove funkcije `bye()`:
+<pre>
+void bye()
+{
+    std::cout << "Goodbye!" << std::endl;
+}
+</pre>
+- I dodajmo njen poziv pri kraju glavne funkcije.
+<pre>
+#include <iostream>
+
+void hello()
+{
+    std::cout << "Hello World!" << std::endl;
+}
+
+void nPlusHello(int n)
+{
+    while(n >= 0)
+    {
+        hello();
+        n--;
+    }
+}
+
+void bye()
+{
+    std::cout << "Goodbye!" << std::endl;
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    nPlusHello(n);
+    bye();
+    return 0;
+}
+</pre>
+- Potrebno je da se komituju izmene:
+    * `git add main.cpp`
+    * `git commit -m "Implementirana je bye() funkcija"` 
+    * Očekivani rezultat za `git hist --all`:
+<pre>
+* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (HEAD -> master) [Robotmurlock]
+* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+</pre>
+- Ako se sada vratimo na `hello_cloned`, možemo videti da je `main.cpp` nepromenjen, što je i očekivano, jer smo ga takvog i ostali u tom direktorijumu. Čak i `git hist --all` daje stari rezultat:
+<pre>
+* 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
+</pre>
+- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
+<pre>
+* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
+* 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master) [Robotmurlock]
+</pre>
+- Sa druge strane, datoteka `main.cpp` i dalje nema učitane promene. Da bi se spojile promene, potrebno je iskoristi komandu `git merge [LOKACIJA]` tj. u ovom slučaju `git merge origin/master`, što spaja promene sa `remote`, odnosno `hello` repozitorijumom. Očekivani rezultat:
+<pre>
+Updating 3c14a07..9bd65e2
+Fast-forward
+ main.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+</pre>
+- Ove dve komande se često korist jedna za drugom:
+    * `git fetch`
+    * `git merge`
+- Zbog toga postoji komanda `git pull` koji predstavlja kombinaciju prethodne dve komande tj. izvršava prvo `git fetch` operaciju, pa onda `git merge` operaciju.
+
+## Push
+
+Promene mogu da se vrše i na kloniranim repozitorijuma i da se onda `gurnu (pull)` da `remote` repozitorijum. 
+
+Primer:
+- Želimo da izvršimo promene na `hello_cloned` repozitorijumu:
+    * `cd hello_cloned`
+- Menjamo ispis funkcije `bye()`:
+<pre>
+void bye()
+{
+    std::cout << "Cya later alligator!" << std::endl;
+}
+</pre>
+- Potrebno je komitovati promene:
+    * `git add main.cpp`
+    * `git commit -m "Dodat lepši tekst u bye() funkciji"`
+    * Očekivani izlaz za `git hist --all`:
+<pre>
+* 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
+* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
+* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+</pre>
+- Ako se sada vratimo na `hello` repozitorijum i izvršimo `git fetch`, onda se ništa neće desiti:
+    * `cd ../hello`
+    * `git fetch`
+- To je zato što `remote` repozitorijum nije ažuriran. Potrebno je da se vratimo u `hello_cloned` repozitorijum i gurnemo izmene:
+    * `git push remote origin`
+    * Očekivani oblik izlaza:
+<pre>
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 327 bytes | 327.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+remote: error: refusing to update checked out branch: refs/heads/master
+remote: error: By default, updating the current branch in a non-bare repository
+remote: is denied, because it will make the index and work tree inconsistent
+remote: with what you pushed, and will require 'git reset --hard' to match
+remote: the work tree to HEAD.
+remote: 
+remote: You can set the 'receive.denyCurrentBranch' configuration variable
+remote: to 'ignore' or 'warn' in the remote repository to allow pushing into
+remote: its current branch; however, this is not recommended unless you
+remote: arranged to update its work tree to match what you pushed in some
+remote: other way.
+remote: 
+remote: To squelch this message and still keep the default behaviour, set
+remote: 'receive.denyCurrentBranch' configuration variable to 'refuse'.
+To /home/mokoyo/Desktop/ALATI/cas2/hello
+ ! [remote rejected] master -> master (branch is currently checked out)
+error: failed to push some refs to '/home/mokoyo/Desktop/ALATI/cas2/hello'
+</pre>
+- Ne može se izvršiti push osim ako `remote` repozitorijum nije `bare`. Detaljnije objašnjenje o tome šta su `bare` repozitorijumi u sledećoj sekciji.
+- Potrebno je postaviti da `hello` repozitorijum bude `bare`:
+    * `cd ../hello`
+    * `cd .git`
+    * Zameniti linuju `bare = false` u datoteci `config` unutar `.git` direktorijuma sa linijom `bare = true` i sačuvati izmene.
+- Sada možemo da se vratimo u `hello_cloned` i gurnemo promene:
+    * `cd ../../hello_cloned`
+    * `git push origin master`
+    * Očekivani oblik izlaza:
+<pre>
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 327 bytes | 327.00 KiB/s, done.
+Total 3 (delta 1), reused 0 (delta 0)
+To /home/mokoyo/Desktop/ALATI/cas2/hello
+   9bd65e2..380a25e  master -> master
+</pre>
+- Ako se vratimo u `hello` repozitorijum i izvršimo `git hist --all` dobijamo sledeći oblik izlaza:
+<pre>
+* 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
+* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija [Robotmurlock]
+* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+</pre>
+- Kao da je automatski izvršen `git fetch`. Međutim, promene nisu izvršene i `git pull` vraća sledeću poruku:
+<pre>
+fatal: this operation must be run in a work tree
+</pre>
+
+
+
 ## Reference
 `git strane`
 
