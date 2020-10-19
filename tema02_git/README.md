@@ -667,7 +667,22 @@ To /home/mokoyo/Desktop/ALATI/cas2/hello
 fatal: this operation must be run in a work tree
 </pre>
 
+## Bare repozitorijum
 
+Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurneme izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
+ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemote posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
+
+- Možemo napraviti još jedan klonirani repozitorijum:
+    * `git clone hello hello_another_cloned`
+    * `cd hello_another_cloned`
+    * `git pull origin master`
+- U okviru ovog repozitorijuma možemo vršiti promene i gurati ih na `remote` repozitorijum i 
+onda te izmene se mogu lako povući na `hello_cloned` i obrnuto. 
+- Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `hello_cloned` i `hello_another_cloned` repozitorijuma.
+
+![bare](https://i.stack.imgur.com/xeHHg.png)
+
+Repozitorijumi koji su `bare` se koriste za deljenje. Ako radimo u timu i potrebna je saradnja, onda je potrebno mesto za čuvanje promena repozitorijuma. U tom slučaju je potreban `bare` repozitorijum u centralizovanom smislu, gde svi korisnici mogu da guraju svoje promene i vuku tuđe promene. Pošto se samo čuvaju promene, onda `radni direktorijum (working tree)` nije potreban.
 
 ## Reference
 `git strane`
