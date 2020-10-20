@@ -161,7 +161,7 @@ Skraćena verzija `git log --pretty=oneline`:
 Ako se doda opcija `--graph` ispisuje se stablo što je korisno ako želimo da vizuelizujemo grane (branches): `git log --graph`, ali umesto toga može da
 se koristi neki softver za vizuelizaciju.
 
-Postoji ogroman broj opcija i različiti format koji: `man git log`.
+Postoji ogroman broj opcija i različiti formati koji: `man git log`.
 
 ## Definisanje aliasa
 
@@ -181,7 +181,7 @@ Na [ovoj stranici](https://nic-hartley.github.io/git-gud/) se možete igrati sa 
 
 ## Verzije
 
-Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koje postoje između trenutnog komita i komita na koji se prelazi postaju invertovane.
+Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koje postoje između trenutnog komita i komita na koji se prelazi postaju invertovane u okviru radnog repozitorijuma.
 - Prelazak na drugi komit: `git checkout [KOMIT HES]`;
 - Komandom `git log --pretty=oneline` se prikazuju komitovi sa njihovim heš kodovima;
 - Primer: `git checkout f8d50f6f60721edc7d3663a69cf0e5e55ea989a7`
@@ -191,7 +191,7 @@ Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koj
 - Primer: `git checkout master` skače na najnoviji komit na `master` grani.
 
 Takođe je moguće stavljati tagove verzija na bitne komitove. Na te komitove 
-možemo skočiti na sledeći način: `git checkout [TAG]`
+možemo skočiti na sledeći način: `git checkout [TAG]`. Ako postavimo tag, onda ne moramo da pamtimo heš indeks tog bitnog komita.
 
 Primer:
 - `git tag v1`, postavlja se tag `v1` na trenutni komit;
@@ -201,26 +201,53 @@ Primer:
 
 ## Invertovanje poslednjeg komita
 
-Šta ako smo izvršili komit i shvatili da to zapravo loše promene i da ih treba odbaciti. Sledećom komandom se pravi novi komit koji invertuje promene poslednjeg komita. Ako je komit koji se briše imao poruku `[PORUKA]`, onda će novi komit imati poruku `Revert "[PORUKA]"`.
+Šta ako smo izvršili komit i shvatili da su to zapravo loše promene i da ih treba odbaciti. Sledećom komandom se pravi novi komit koji invertuje promene poslednjeg komita. Ako je komit koji se briše imao poruku `[PORUKA]`, onda će novi komit imati poruku `Revert "[PORUKA]"`.
 
 Primer:
-- `git add 1.txt`
-- `git commit -m "Dodat 1.txt"`
-- `git revert HEAD`
+- Pravimo novu praznu datoteku: `git touch 3.txt`
+- Dodajemo `3.txt` na `staging area`: `git add 3.txt`
+- Komitujemo izmene: `git commit -m "Dodat je 3.txt"`
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* 47c4988 2020-10-20 | Dodat 3.txt (HEAD -> master) [Robotmurlock]
+* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
+* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+</pre>
+- Sledeća komanda otvara interfejs, gde možemo da biramo ime za komit koji briše poslednji komit (komit pre ovog): `git revert HEAD`. Neka se komit zove `Ipak ne bih...`.
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
+* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
+* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
+* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+</pre>
 
 Ovaj niz komandi ne menja datoteke, ali u istoriji ostaje obrisan komit, posle
-kojeg ide komit koji je taj prethodni komit obrisao. To znači da se git drvo ne ažurira. Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]`
+kojeg ide komit koji je taj prethodni komit obrisao. To znači da se git drvo ne ažurira (u smislu da stari komit ostaje). Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]`
 
-Primer:
-- `git add 1.txt`
-- `git commit -m "Dodat 1.txt"`
+Primer. Isti primer kao prethodni:
+- `touch 3.txt`
+- `git add 3.txt`
+- `git commit -m "Opet dodat 3.txt"`
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* bdab846 2020-10-20 | Opet dodat 3.txt (HEAD -> master) [Robotmurlock]
+* f0d061d 2020-10-20 | Ipak ne bih... [Robotmurlock]
+* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
+* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
+* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+</pre>
 - `git reset --hard HEAD~`
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
+* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
+* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
+* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+</pre>
 
-Ovaj niz komandi ne menja datoteka, ali ne postoje tragovi promena u istoriji. Kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne datoteke koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
+Ovde vidimo da se poslednji komit sada obrisan, kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne promene koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
 se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama.
-
-Obrisani komitovi se i dalje mogu videti dodavanjem opcije `--all`:\
-`git log --all --pretty=oneline`
 
 ## Izmena poslednjeg komita
 
@@ -255,7 +282,7 @@ Primer. Potrebno je obrisati `1.txt` i `2.txt` datoteke:
 
 ### Kreiranje grane
 
-Nova grana se kreira komandom `git branch [IME GRANE]`. Da bi skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]`.
+Nova grana se kreira komandom `git branch [IME GRANE]`. Da bi skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]` (slično kao za verzionisanje). Kada skačemo na neku granu sa `git checkout`, skačemo na poslednji komit. Ako ne želimo da skočimo na poslednji komit, nego npr. pretposlednji komit, onda možemo to da uradimo komandom: `git checkout [IME GRANE]~`.
 
 Primer. Prvi način:
 - `git branch feature`
@@ -269,7 +296,7 @@ Uvek možemo da skočimo nazad na `master` granu:
 
 ### Pregled aktivnih grana
 
-Komandom `git branch -a` se ispisuju lokalne i remote grane. Trenutna grana ima `*` sa leve strane:
+Komandom `git branch -a` se ispisuju lokalne i remote grane. Trenutna grana ima `*` sa leve strane. Primer:
 <pre>
   hello
 * main_input
@@ -302,16 +329,52 @@ Komandom `git show-branch` se ispisuju grane i njihovi komitova:
 Potrebno je u nekom trenutku spojiti granu (ako se grana ne odbaci) sa glavnom granom (npr. master grana). To se vrši preko komande `git merge [IME GRANE]`.
 Ova komanda se generalno koristi za spajanje trenutne grane sa izabranim komitovima tj. može se koristiti u opštijem slučaju.
 
-Primer:
-- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b helloClass`;
-- Implementira se `hello.hpp` `hello.cpp` i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
+Primer. Pretpostavimo da imamo git repozitorijum koji do sada ima samo jedan komit u okviru kojeg je implementiran `main.cpp` koji trenutno ne radi ništa:
+- Inicijalizacija:
+    * `mkdir hellocpp`
+    * `cd hellocpp`
+    * `git init`
+    * `code main.cpp`
+    * Oblik `main.cpp` datoteke:
+<pre>
+#include <iostream>
+
+int main()
+{
+    return 0;
+}
+</pre>
+
+- Nastavak inicijalizacije:
+    * `git add main.cpp`
+    * `git commit -m "Inicijalni komit"`
+
+- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b helloClass`. Očekivani oblik rezultata:
+<pre>
+Switched to a new branch 'helloClass'
+</pre>
+- Implementira se `hello.hpp`  i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
 - Ovo se može odraditi kroz jedan ili više komitova:
     * `git commit -m "Implementirana osnova struktura za hello klasu"`.
     * `git commit -m "Implementiran Makefile"`. Tip: Napisati `qmake` datoteku i generisati `Makefile` datoteku.
     * `git commit -m "Implementirane osnovne funkcionalnost hello klase"`.
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> helloClass) [Robotmurlock]
+* 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
+* 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
+* 8f674b5 2020-10-20 | Inicijalni komit (master) [Robotmurlock]
+</pre>
 - Sada je potrebno spojiti `helloClass` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
     * Potrebno je prvo skočiti na `master` granu: `git checkout master`.
     * Onda je potrebno spojiti grane: `git merge helloClass`.
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> master, helloClass) [Robotmurlock]
+* 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
+* 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
+* 8f674b5 2020-10-20 | Inicijalni komit [Robotmurlock]
+</pre>
 
 ### Brisanje grana
 
