@@ -592,6 +592,10 @@ Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a 
 
 Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https://gitrebasetool.mitmaro.ca/).
 
+### Upotreba rebase
+
+Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
+
 ### Cherry-pick
 
 - Postoji još jedan način da se dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
@@ -657,17 +661,13 @@ int main()
     return 0;
 }
 </pre>
-- Pravimo klon repozitorijuma: `git clone hello hello_cloned`
+- Pravimo klon repozitorijuma: `git clone hello hello_cloned`:
 <pre>
 Cloning into 'hello_cloned'...
 done.
 </pre>
 - Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
 - Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
-
-### Upotreba rebase
-
-Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
 
 ## Remote repozitorijum
 
@@ -683,12 +683,12 @@ u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd
 
 ## Fetch, Merge i Pull
 
-**Šta se dešava ako izvršimo promenu na jednom repozitorijumu?**
+**Šta se dešava ako izvršimo promenu na remote repozitorijumu?**
 
 Primer:
 - Vratimo se na originalni repozitorijum:
     * `cd ../hello`
-    * Dodajmo novu implementaciju nove funkcije `bye()`:
+    * Dodajmo implementaciju nove funkcije `bye()`:
 <pre>
 void bye()
 {
@@ -840,7 +840,7 @@ fatal: this operation must be run in a work tree
 
 ## Bare repozitorijum
 
-Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurneme izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
+Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
 ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemote posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
 
 - Možemo napraviti još jedan klonirani repozitorijum:
