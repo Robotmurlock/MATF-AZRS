@@ -72,19 +72,19 @@ Primer. Kreiranje git repozitorijuma:
 - Sada možemo da od ovog `hello` repozitorijuma napravimo git repozitorijum:
     * `git init`
     * Očekivani rezultat:
-<pre>
+```
 Initialized empty Git repository in /home/mokoyo/Desktop/ALATI/cas2/bonus/hello/.git/
-</pre>
+```
 - Možemo da napravimo datoteke `1.txt` i `2.txt` i da ih dodamo u git repozitorijum:
     * `touch 1.txt 2.txt`, komanda `touch` pravi prazne datoteke.
     * `git add 1.txt 2.txt`, ovom komandom su dodate datoteka na `staging area`.
     * `git commit -m "Inicijalni komit"`, ovom komandom su komitovane promene u git repozitorijum. Očekivani rezultat:
-<pre>
+```
 [master (root-commit) 566876f] Inicijalni komit
  2 files changed, 0 insertions(+), 0 deletions(-)
  create mode 100644 1.txt
  create mode 100644 2.txt
-</pre>
+```
 
 Primer. Rad sa `staging area`:
 - U radnom direktorijumu postoje dve tekstualne datoteke (neka su napravljeni u okviru prethodnog komita - prethodni primer):
@@ -94,7 +94,7 @@ Primer. Rad sa `staging area`:
     * `echo "Hello World" >> 1.txt`
     * `echo "Hello World" >> 2.txt`
 - Očekivani rezltat komande `git status`:
-<pre>
+```
 On branch master
 Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
@@ -104,10 +104,10 @@ Changes not staged for commit:
         modified:   2.txt
 
 no changes added to commit (use "git add" and/or "git commit -a")
-</pre>
+```
 - Izvršimo sad komandu `git add 2.txt`.
 - Očekivani rezultat `git status` komande je:
-<pre>
+```
 On branch master
 Changes to be committed:
   (use "git reset HEAD <file>..." to unstage)
@@ -119,7 +119,7 @@ Changes not staged for commit:
   (use "git checkout -- <file>..." to discard changes in working directory)
 
         modified:   1.txt
-</pre>
+```
 - Ovo znači da se promene na `2.txt` nalaze u okviru `staging area`, jer se izvršena komanda `git add` i zbog toga će te promene biti zabeležene na git repozitorijum kad se pozove `git commit` komanda, dok će promene na `1.txt` ostati samo u okviru radnog direktorijum.
 - Komandom `git reset 2.txt HEAD` se sklanjamo promene sa `staging area` i
 one neće biti zabeležene sledećim komitom. Možemo opet testirati komandu `git status`
@@ -129,7 +129,7 @@ Datoteka `.git/index` je binarna datoteka i na sledećem [linku](https://mincong
 ## Istorija projekta
 
 Komandom `git log` se u terminalu ispisuje istorija komitova:
-<pre>
+```
 commit 0388628561d9d2155980f26851b46727f77ba7a2
 Author: Robotmurlock <momir.adzemovic@gmail.com>
 Date:   Thu Oct 8 17:49:31 2020 +0200
@@ -147,16 +147,16 @@ Author: Robotmurlock <32575918+Robotmurlock@users.noreply.github.com>
 Date:   Thu Oct 8 14:37:28 2020 +0200
 
     Initial commit
-</pre>
+```
 
 Svaki komit ima svoj `SHA-1 hash` koji jedinstven. Koriste se različiti metapodaci kao što su ime autora, vreme komita, ... za računanje heš koda. Heš kod je jedinstven.
 
 Skraćena verzija `git log --pretty=oneline`:
-<pre>
+```
 0388628561d9d2155980f26851b46727f77ba7a2 Azuriranje .gitignore za qt
 1d6219dca4e13221e58f10d3b2d1d93140f05133 Dodato upustvo za instalaciju i dodavanje cppreference u qtcreator
 544995c2b22c158497eec9315e0a8a43f81b871d Initial commit
-</pre>
+```
 
 Ako se doda opcija `--graph` ispisuje se stablo što je korisno ako želimo da vizuelizujemo grane (branches): `git log --graph`, ali umesto toga može da
 se koristi neki softver za vizuelizaciju.
@@ -208,19 +208,19 @@ Primer:
 - Dodajemo `3.txt` na `staging area`: `git add 3.txt`
 - Komitujemo izmene: `git commit -m "Dodat je 3.txt"`
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * 47c4988 2020-10-20 | Dodat 3.txt (HEAD -> master) [Robotmurlock]
 * e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
 * 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 - Sledeća komanda otvara interfejs, gde možemo da biramo ime za komit koji briše poslednji komit (komit pre ovog): `git revert HEAD`. Neka se komit zove `Ipak ne bih...`.
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
 * 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
 * e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
 * 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 
 Ovaj niz komandi ne menja datoteke, ali u istoriji ostaje obrisan komit, posle
 kojeg ide komit koji je taj prethodni komit obrisao. To znači da se git drvo ne ažurira (u smislu da stari komit ostaje). Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]`
@@ -230,21 +230,21 @@ Primer. Isti primer kao prethodni:
 - `git add 3.txt`
 - `git commit -m "Opet dodat 3.txt"`
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * bdab846 2020-10-20 | Opet dodat 3.txt (HEAD -> master) [Robotmurlock]
 * f0d061d 2020-10-20 | Ipak ne bih... [Robotmurlock]
 * 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
 * e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
 * 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 - `git reset --hard HEAD~`
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
 * 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
 * e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
 * 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 
 Ovde vidimo da se poslednji komit sada obrisan, kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne promene koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
 se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama.
@@ -297,16 +297,16 @@ Uvek možemo da skočimo nazad na `master` granu:
 ### Pregled aktivnih grana
 
 Komandom `git branch -a` se ispisuju lokalne i remote grane. Trenutna grana ima `*` sa leve strane. Primer:
-<pre>
+```
   hello
 * main_input
   master
-</pre>
+```
 
 Komandom `git branch -r` se ispisuje remote grane. 
 
 Komandom `git show-branch` se ispisuju grane i njihovi komitova:
-<pre>
+```
 ! [hello] Implemented hello class
  * [main_input] Implemented n input
   ! [master] Implemented n input
@@ -315,7 +315,7 @@ Komandom `git show-branch` se ispisuju grane i njihovi komitova:
 +   [hello] Implemented hello class
 +   [hello^] Implemented hello class template
 +*+ [main_input^] Initial commit
-</pre>
+```
 
 ### Kada praviti grane
 
@@ -336,45 +336,45 @@ Primer. Pretpostavimo da imamo git repozitorijum koji do sada ima samo jedan kom
     * `git init`
     * `code main.cpp`
     * Oblik `main.cpp` datoteke:
-<pre>
+```
 #include <iostream>
 
 int main()
 {
     return 0;
 }
-</pre>
+```
 
 - Nastavak inicijalizacije:
     * `git add main.cpp`
     * `git commit -m "Inicijalni komit"`
 
 - Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b hello-class`. Očekivani oblik rezultata:
-<pre>
+```
 Switched to a new branch 'hello-class'
-</pre>
+```
 - Implementira se `hello.hpp`  i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
 - Ovo se može odraditi kroz jedan ili više komitova:
     * `git commit -m "Implementirana osnova struktura za hello klasu"`.
     * `git commit -m "Implementiran Makefile"`. Tip: Napisati `qmake` datoteku i generisati `Makefile` datoteku.
     * `git commit -m "Implementirane osnovne funkcionalnost hello klase"`.
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> hello-class) [Robotmurlock]
 * 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
 * 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
 * 8f674b5 2020-10-20 | Inicijalni komit (master) [Robotmurlock]
-</pre>
+```
 - Sada je potrebno spojiti `hello-class` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
     * Potrebno je prvo skočiti na `master` granu: `git checkout master`.
     * Onda je potrebno spojiti grane: `git merge hello-class`.
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> master, hello-class) [Robotmurlock]
 * 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
 * 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
 * 8f674b5 2020-10-20 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 
 ### Brisanje grana
 
@@ -414,9 +414,9 @@ Sledeći niz komandi pravi konflikt spajanje:
     * `git add .`
     * `git commit -m "Prvi komit"`
 - Očekivani oblik izlaza za `git hist --all`:
-<pre>
+```
 * ffa86da 2020-10-20 | Prvi komit (HEAD -> master) [Robotmurlock]
-</pre>
+```
 - Pravljenje nove grane `newFeature` koja implementira funkcionalnost `f1`, `f2` i `f3`:
     * `git checkout -b newFeature`
     * `echo "f1" >> main.txt`
@@ -429,36 +429,36 @@ Sledeći niz komandi pravi konflikt spajanje:
     * `git add main.txt`
     * `git commit -m "Dodata funkcionalnost f3"`
 - Očekivani oblik izlaza za `git hist --all`:
-<pre>
+```
 * fe6f518 2020-10-20 | Dodata funkcionalnost f3 (HEAD -> newFeature) [Robotmurlock]
 * e896068 2020-10-20 | Dodata funkcionalnost f2 [Robotmurlock]
 * cb07f11 2020-10-20 | Dodata funkcionalnost f1 [Robotmurlock]
 * ffa86da 2020-10-20 | Prvi komit (master) [Robotmurlock]
-</pre>
+```
 - Skok na granu `master` i dodavanje nove funkcionalnost `m2` (pretpostavimo da u realnoj situaciji dva različita člana tima vrše poslednja dva koraka tj. jedan radi na `master` grani, a drugi na `newFeature` grani):
     * `git checkout master`
     * `echo "m2" >> main.txt`
     * `git add main.txt`
     * `git commit -m "Dodata funkcionalnost m2"`
 - Očekivani oblik izlaza `git hist --all`:
-<pre>
+```
 * 7a369bd 2020-10-20 | Dodata funkcionalnost m2 (HEAD -> master) [Robotmurlock]
 | * fe6f518 2020-10-20 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
 | * e896068 2020-10-20 | Dodata funkcionalnost f2 [Robotmurlock]
 | * cb07f11 2020-10-20 | Dodata funkcionalnost f1 [Robotmurlock]
 |/  
 * ffa86da 2020-10-20 | Prvi komit [Robotmurlock]
-</pre>
+```
 - Leva grana je `master` grana, a desna je `newFeature` grana. Komitovi su poređani hronološki.
 - Sada je potrebno da se `newFeature` grana spoji sa granom `master`, jer su u "međuvremenu" implementirane sve funkcionalnosti:
     * `git checkout master`
     * `git merge newFeature`
 - Očekivani izlaz:
-<pre>
+```
 Auto-merging main.txt
 CONFLICT (content): Merge conflict in main.txt
 Automatic merge failed; fix conflicts and then commit the result.
-</pre>
+```
 - Potrebno je pokrenuti alat `meld` preko komande `git mergetool` koja će otvoriti program sa tri prozora: 
     * Promene na trenutnoj grani (levo),
     * Spojene promene (sredina),
@@ -467,7 +467,7 @@ Automatic merge failed; fix conflicts and then commit the result.
 - Nakon rešenih konflikta je potrebno izvršiti komit:
     * `git commit -m "Rešeni konflikti"`
 - Očekivani rezultat `git hist --all` komande:
-<pre>
+```
 *   9963f5b 2020-10-20 | Rešeni konflikti (HEAD -> master) [Robotmurlock]
 |\  
 | * fe6f518 2020-10-20 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
@@ -476,13 +476,13 @@ Automatic merge failed; fix conflicts and then commit the result.
 * | 7a369bd 2020-10-20 | Dodata funkcionalnost m2 [Robotmurlock]
 |/  
 * ffa86da 2020-10-20 | Prvi komit [Robotmurlock]
-</pre>
+```
 - Grane su spojene u jednu granu, što je u ovom slučaju `master` grana.
 
 ## Rebase
 
 Primer. U okviru prvog komita je implementiran jednostavan `C++` program:
-<pre>
+```
 #include <iostream>
 
 void hello()
@@ -506,7 +506,7 @@ int main()
     nPlusHello(n);
     return 0;
 }
-</pre>
+```
 - Pravi se git direktorijum: `git init`
 - Dodaje se `main.cpp` datoteka na `staging area`: 
     * `git add main.cpp`
@@ -527,31 +527,31 @@ int main()
     * `git add main.cpp`
     * `git commit -m "Uklonjena je beskonačna petlja"`
 - Git stablo trenutno ima oblik sličan sledećem:
-<pre>
+```
 * 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
 * f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
 * a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 * 9e98493 2020-10-20 | Implementiran main.cpp (master) [Robotmurlock]
-</pre>
+```
 - Pretpostavimo još da je u `master` grani dodat neki komit koji uključuje novu datoteku `input.txt`:
-<pre>
+```
 5
 1 2 3 4 5
-</pre>
+```
 - Izvšene su sledeće komande:
     * `git checkout master`
     * `code input.txt`, unesen je prethodni sadržaj
     * `git add input.txt`
     * `git commit -m "Dodat je primer unosa za buduću mnogo dobru funkcionalnost"`
 - Očekivani oblik rezultata za `git hist --all`:
-<pre>
+```
 * 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (HEAD -> master) [Robotmurlock]
 | * 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
 | * f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
 | * a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 |/  
 * 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
-</pre>
+```
 - Potrebno je dodati ispravke na `master` granu. To se može izvršiti na sledeće načine:
     1. Može se izvršiti spajanje i onda obrisati deo za debagovanje u okviru `master` grane;
     2. Može se obrisati deo za debagovanje u okviru `bugFix` grane i onda izvršiti spajanje;
@@ -563,24 +563,24 @@ int main()
     konfiguracija ovog alata je objašnjenja u sledećoj sekciji. Potrebno je izabrati `pick` opciju
     za prvi i poslednji komit grane `bugFix` (to znači da će komitovi biti prebačeni na `master` granu) i opciju `drop` za drugi komit (to znači da će komit biti odbačen).
 - Primenom poslednjeg rešenja se dobija sledeća struktura git drveta:
-<pre>
+```
 * df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
 * 068b021 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 * 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (master) [Robotmurlock]
 * 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
-</pre>
+```
 - U datoteci `main.cpp` su ostale ispravke, ali kod za debagovanje je odbačen.
 
 - Ostalo je još samo da se `bugFix` spoji sa trenutnim komitom:
     * `git checkout master`
     * `git merge bugFix`
 - Očekivani rezultat za `git hist --all`:
-<pre>
+```
 * df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master, bugFix) [Robotmurlock]
 * 068b021 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 * 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
 * 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
-</pre>
+```
 
 - Primetimo ovde da imamo mnogo čistiju istoriju, nego kad smo koristili `git merge`.
 
@@ -602,7 +602,7 @@ Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je
     * `git checkout master`
     * `git cherry-pick da63caf a847380`
 - Ova komanda bira niz komitova i kopira ih na trenutnu `master` granu. Očekivani rezultat:
-<pre>
+```
 * 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
 * ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 * f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
@@ -611,16 +611,16 @@ Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je
 | * f6b2c45 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 |/  
 * 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
-</pre>
+```
 - Grana `bugFix` nam više nije od koristi:
     * `git branch -D bugFix` (Koristimo opciju `-D` jer je to grana koja nije spojena)
 - Očekivani konačan rezultat:
-<pre>
+```
 * 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
 * ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 * f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
 * 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
-</pre>
+```
 
 ## Vežbanje
 
@@ -634,10 +634,6 @@ gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili 
 
 Primer: 
 - Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
-    * `mkdir hello`
-    * `cd hello`
-    * `git init`
-    * `code main.cpp` (dodati fajl)
 ```
 #include <iostream>
 #include <vector>
@@ -665,42 +661,46 @@ int main()
     return 0;
 }
 ```
-- Pravimo klon repozitorijuma: `git clone hello hello_cloned`:
-<pre>
+- Pravimo klon repozitorijuma: `git clone hello hello_cloned`
+```
 Cloning into 'hello_cloned'...
 done.
-</pre>
+```
 - Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
 - Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
+
+### Upotreba rebase
+
+Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
 
 ## Remote repozitorijum
 
 Komandom `git remote` dobijamo listu svih `remote`-ova. Ovde `remote` predstavlja git repozitorijum (skup verzija projekta) koji se uglavnom nalazi na internetu (npr. Github-u). Timski rad podrazuvema korišćenje `remote` repozitorijuma.
 - Podrazumevano ime za `remote` repozitorijum je `origin`, što i jeste rezultat prethodne komande u ovom slučaju. 
-- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova:
-<pre>
+- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova.
+```
 origin  /home/mokoyo/Desktop/ALATI/cas2/hello (fetch)
 origin  /home/mokoyo/Desktop/ALATI/cas2/hello (push)
-</pre>
+```
 Postoji skup komandi oblika `git remote [OPCIJA]` koja služi za rad sa `remote` repozitorijumima
 u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd... Detaljnije: `man git remote`.
 
 ## Fetch, Merge i Pull
 
-**Šta se dešava ako izvršimo promenu na remote repozitorijumu?**
+**Šta se dešava ako izvršimo promenu na jednom repozitorijumu?**
 
 Primer:
 - Vratimo se na originalni repozitorijum:
     * `cd ../hello`
-    * Dodajmo implementaciju nove funkcije `bye()`:
-<pre>
+    * Dodajmo novu implementaciju nove funkcije `bye()`:
+```
 void bye()
 {
     std::cout << "Goodbye!" << std::endl;
 }
-</pre>
+```
 - I dodajmo njen poziv pri kraju glavne funkcije.
-<pre>
+```
 #include <iostream>
 
 void hello()
@@ -730,32 +730,32 @@ int main()
     bye();
     return 0;
 }
-</pre>
+```
 - Potrebno je da se komituju izmene:
     * `git add main.cpp`
     * `git commit -m "Implementirana je bye() funkcija"` 
     * Očekivani rezultat za `git hist --all`:
-<pre>
+```
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (HEAD -> master) [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 - Ako se sada vratimo na `hello_cloned`, možemo videti da je `main.cpp` nepromenjen, što je i očekivano, jer smo ga takvog i ostali u tom direktorijumu. Čak i `git hist --all` daje stari rezultat:
-<pre>
+```
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
-</pre>
-- Potrebno je da ažuriramo istoriju `master` grane. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
-<pre>
+```
+- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
+```
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master) [Robotmurlock]
-</pre>
+```
 - Sa druge strane, datoteka `main.cpp` i dalje nema učitane promene. Da bi se spojile promene, potrebno je iskoristi komandu `git merge [LOKACIJA]` tj. u ovom slučaju `git merge origin/master`, što spaja promene sa `remote`, odnosno `hello` repozitorijumom. Očekivani rezultat:
-<pre>
+```
 Updating 3c14a07..9bd65e2
 Fast-forward
  main.cpp | 6 ++++++
  1 file changed, 6 insertions(+)
-</pre>
-- Ove dve komande se često koriste jedna za drugom:
+```
+- Ove dve komande se često korist jedna za drugom:
     * `git fetch`
     * `git merge`
 - Zbog toga postoji komanda `git pull` koji predstavlja kombinaciju prethodne dve komande tj. izvršava prvo `git fetch` operaciju, pa onda `git merge` operaciju.
@@ -768,28 +768,28 @@ Primer:
 - Želimo da izvršimo promene na `hello_cloned` repozitorijumu:
     * `cd hello_cloned`
 - Menjamo ispis funkcije `bye()`:
-<pre>
+```
 void bye()
 {
     std::cout << "Cya later alligator!" << std::endl;
 }
-</pre>
+```
 - Potrebno je komitovati promene:
     * `git add main.cpp`
     * `git commit -m "Dodat lepši tekst u bye() funkciji"`
     * Očekivani izlaz za `git hist --all`:
-<pre>
+```
 * 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 - Ako se sada vratimo na `hello` repozitorijum i izvršimo `git fetch`, onda se ništa neće desiti:
     * `cd ../hello`
     * `git fetch`
 - To je zato što `remote` repozitorijum nije ažuriran. Potrebno je da se vratimo u `hello_cloned` repozitorijum i gurnemo izmene:
     * `git push remote origin`
     * Očekivani oblik izlaza:
-<pre>
+```
 Counting objects: 3, done.
 Delta compression using up to 4 threads.
 Compressing objects: 100% (2/2), done.
@@ -812,7 +812,7 @@ remote: 'receive.denyCurrentBranch' configuration variable to 'refuse'.
 To /home/mokoyo/Desktop/ALATI/cas2/hello
  ! [remote rejected] master -> master (branch is currently checked out)
 error: failed to push some refs to '/home/mokoyo/Desktop/ALATI/cas2/hello'
-</pre>
+```
 - Ne može se izvršiti push osim ako `remote` repozitorijum nije `bare`. Detaljnije objašnjenje o tome šta su `bare` repozitorijumi u sledećoj sekciji.
 - Potrebno je postaviti da `hello` repozitorijum bude `bare`:
     * `cd ../hello`
@@ -822,7 +822,7 @@ error: failed to push some refs to '/home/mokoyo/Desktop/ALATI/cas2/hello'
     * `cd ../../hello_cloned`
     * `git push origin master`
     * Očekivani oblik izlaza:
-<pre>
+```
 Counting objects: 3, done.
 Delta compression using up to 4 threads.
 Compressing objects: 100% (2/2), done.
@@ -830,21 +830,21 @@ Writing objects: 100% (3/3), 327 bytes | 327.00 KiB/s, done.
 Total 3 (delta 1), reused 0 (delta 0)
 To /home/mokoyo/Desktop/ALATI/cas2/hello
    9bd65e2..380a25e  master -> master
-</pre>
+```
 - Ako se vratimo u `hello` repozitorijum i izvršimo `git hist --all` dobijamo sledeći oblik izlaza:
-<pre>
+```
 * 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
-</pre>
+```
 - Kao da je automatski izvršen `git fetch`. Međutim, promene nisu izvršene i `git pull` vraća sledeću poruku:
-<pre>
+```
 fatal: this operation must be run in a work tree
-</pre>
+```
 
 ## Bare repozitorijum
 
-Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
+Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurneme izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
 ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemote posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
 
 - Možemo napraviti još jedan klonirani repozitorijum:
