@@ -382,7 +382,7 @@ Grana se može obrisati komandom `git branch -d [IME GRANE]`.
 
 ## Konflitki
 
-Posmatramo sledeću situaciju:
+Posmatramo sledeću situaciju(pogledati `helloClass` direktorijum):
 - Napravili smo `Hello` klasu u okviru `helloClass` grane i potrebno je spojiti ovu granu sa `master` granom.
 - Razlika u odnosu na prethodni primer je to što je `master` takođe izmenjena. Zbog toga je spajanje otežano i potrebno je odlučiti koje promene želimo da prihvatimo.
 
@@ -412,6 +412,10 @@ Sledeći niz komandi pravi konflikt spajanje:
     * `echo "m1" >> main.txt` 
     * `git add .`
     * `git commit -m "Prvi komit"`
+- Očekivani oblik izlaza za `git hist --all`:
+<pre>
+* ffa86da 2020-10-20 | Prvi komit (HEAD -> master) [Robotmurlock]
+</pre>
 - Pravljenje nove grane `newFeature` koja implementira funkcionalnost `f1`, `f2` i `f3`:
     * `git checkout -b newFeature`
     * `echo "f1" >> main.txt`
@@ -423,21 +427,28 @@ Sledeći niz komandi pravi konflikt spajanje:
     * `echo "f3" >> main.txt`
     * `git add main.txt`
     * `git commit -m "Dodata funkcionalnost f3"`
+- Očekivani oblik izlaza za `git hist --all`:
+<pre>
+* fe6f518 2020-10-20 | Dodata funkcionalnost f3 (HEAD -> newFeature) [Robotmurlock]
+* e896068 2020-10-20 | Dodata funkcionalnost f2 [Robotmurlock]
+* cb07f11 2020-10-20 | Dodata funkcionalnost f1 [Robotmurlock]
+* ffa86da 2020-10-20 | Prvi komit (master) [Robotmurlock]
+</pre>
 - Skok na granu `master` i dodavanje nove funkcionalnost `m2` (pretpostavimo da u realnoj situaciji dva različita člana tima vrše poslednja dva koraka tj. jedan radi na `master` grani, a drugi na `newFeature` grani):
     * `git checkout master`
     * `echo "m2" >> main.txt`
     * `git add main.txt`
     * `git commit -m "Dodata funkcionalnost m2"`
-- Ovde je korisno za vizuelizaciju pokrenuti komandu `git hist --all`. Očekivani oblik izlaza:
+- Očekivani oblik izlaza `git hist --all`:
 <pre>
-* 77032be 2020-10-17 | Dodata funkcionalnost m2 (HEAD -> master) [Robotmurlock]
-| * d9b4d4e 2020-10-17 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
-| * 8e246fc 2020-10-17 | Dodata funkcionalnost f2 [Robotmurlock]
-| * 6bf37c3 2020-10-17 | Dodata funkcionalnost f1 [Robotmurlock]
+* 7a369bd 2020-10-20 | Dodata funkcionalnost m2 (HEAD -> master) [Robotmurlock]
+| * fe6f518 2020-10-20 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
+| * e896068 2020-10-20 | Dodata funkcionalnost f2 [Robotmurlock]
+| * cb07f11 2020-10-20 | Dodata funkcionalnost f1 [Robotmurlock]
 |/  
-* 08a4d30 2020-10-17 | Prvi komit [Robotmurlock]
+* ffa86da 2020-10-20 | Prvi komit [Robotmurlock]
 </pre>
-- Desna grana je `master` grana, a leva je `newFeature` grana. Komitovi su poređani hronološki.
+- Leva grana je `master` grana, a desna je `newFeature` grana. Komitovi su poređani hronološki.
 - Sada je potrebno da se `newFeature` grana spoji sa granom `master`, jer su u "međuvremenu" implementirane sve funkcionalnosti:
     * `git checkout master`
     * `git merge newFeature`
@@ -456,14 +467,14 @@ Automatic merge failed; fix conflicts and then commit the result.
     * `git commit -m "Rešeni konflikti"`
 - Očekivani rezultat `git hist --all` komande:
 <pre>
-*   d63a4cd 2020-10-17 | Reseni konflikti (HEAD -> master) [Robotmurlock]
+*   9963f5b 2020-10-20 | Rešeni konflikti (HEAD -> master) [Robotmurlock]
 |\  
-| * d9b4d4e 2020-10-17 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
-| * 8e246fc 2020-10-17 | Dodata funkcionalnost f2 [Robotmurlock]
-| * 6bf37c3 2020-10-17 | Dodata funkcionalnost f1 [Robotmurlock]
-* | 77032be 2020-10-17 | Dodata funkcionalnost m2 [Robotmurlock]
+| * fe6f518 2020-10-20 | Dodata funkcionalnost f3 (newFeature) [Robotmurlock]
+| * e896068 2020-10-20 | Dodata funkcionalnost f2 [Robotmurlock]
+| * cb07f11 2020-10-20 | Dodata funkcionalnost f1 [Robotmurlock]
+* | 7a369bd 2020-10-20 | Dodata funkcionalnost m2 [Robotmurlock]
 |/  
-* 08a4d30 2020-10-17 | Prvi komit [Robotmurlock]
+* ffa86da 2020-10-20 | Prvi komit [Robotmurlock]
 </pre>
 - Grane su spojene u jednu granu, što je u ovom slučaju `master` grana.
 
@@ -516,28 +527,61 @@ int main()
     * `git commit -m "Uklonjena je beskonačna petlja"`
 - Git stablo trenutno ima oblik sličan sledećem:
 <pre>
-* a847380 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
-* b2acfd5 2020-10-17 | Dodat ispis za debagovanje [Robotmurlock]
-* da63caf 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* 742994c 2020-10-17 | Implementiran main.cpp (master) [Robotmurlock]
+* 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
+* f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
+* a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 9e98493 2020-10-20 | Implementiran main.cpp (master) [Robotmurlock]
+</pre>
+- Pretpostavimo još da je u `master` grani dodat neki komit koji uključuje novu datoteku `input.txt`:
+<pre>
+5
+1 2 3 4 5
+</pre>
+- Izvšene su sledeće komande:
+    * `git checkout master`
+    * `code input.txt`, unesen je prethodni sadržaj
+    * `git add input.txt`
+    * `git commit -m "Dodat je primer unosa za buduću mnogo dobru funkcionalnost"`
+- Očekivani oblik rezultata za `git hist --all`:
+<pre>
+* 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (HEAD -> master) [Robotmurlock]
+| * 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
+| * f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
+| * a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+|/  
+* 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 </pre>
 - Potrebno je dodati ispravke na `master` granu. To se može izvršiti na sledeće načine:
-    * Može se izvršiti spajanje i onda obrisati deo za debagovanje u okviru `master` grane;
-    * Može se obrisati deo za debagovanje u okviru `bugFix` grane i onda izvršiti spajanje;
-    * Može se izvršiti `git rebase master` komande koja menja strukturu git drveta. Dobijeni rezultat je
+    1. Može se izvršiti spajanje i onda obrisati deo za debagovanje u okviru `master` grane;
+    2. Može se obrisati deo za debagovanje u okviru `bugFix` grane i onda izvršiti spajanje;
+    3. Može se izvršiti `git rebase master` komanda koja menja strukturu git drveta. Dobijeni rezultat je
     ekvivalentan kao da su od početka vršeni komitovi na `master` grani tj. kao da `bugFix`
     grana nikad nije ni postojala. Dobijeno drvo je sada postalo `linearno` i samim tim i čitljvije. I u tom slučaju je potrebno naknadno obrisati deo za debagovanje.
-    * Modifikacije prethodnog je da se koristi `git rebase -i master`, gde se komit za dodavanje
+    4. Modifikacije prethodnog je da se koristi `git rebase -i master`, gde se komit za dodavanje
     koda za debagovanje odbacuje kao da nikad nije ni postojao. Ako se instaliran i konfigurisan `git interactive rebase tool`, onda je korisnički interfejs malo prikladniji. Instalacija i 
     konfiguracija ovog alata je objašnjenja u sledećoj sekciji. Potrebno je izabrati `pick` opciju
     za prvi i poslednji komit grane `bugFix` (to znači da će komitovi biti prebačeni na `master` granu) i opciju `drop` za drugi komit (to znači da će komit biti odbačen).
 - Primenom poslednjeg rešenja se dobija sledeća struktura git drveta:
 <pre>
-* b109f1a 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
-* da63caf 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* 742994c 2020-10-17 | Implementiran main.cpp (master) [Robotmurlock]
+* df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
+* 068b021 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (master) [Robotmurlock]
+* 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 </pre>
 - U datoteci `main.cpp` su ostale ispravke, ali kod za debagovanje je odbačen.
+
+- Ostalo je još samo da se `bugFix` spoji sa trenutnim komitom:
+    * `git checkout master`
+    * `git merge bugFix`
+- Očekivani rezultat za `git hist --all`:
+<pre>
+* df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master, bugFix) [Robotmurlock]
+* 068b021 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+* 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
+</pre>
+
+- Primetimo ovde da imamo mnogo čistiju istoriju, nego kad smo koristili `git merge`.
 
 U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komitove u jedan. Ovo je korisno ako su ti komitovi vezani za rešavanje iste greške i ima smisla da predstavljaju celinu.
 
@@ -552,22 +596,28 @@ Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https:
     * `git cherry-pick da63caf a847380`
 - Ova komanda bira niz komitova i kopira ih na trenutnu `master` granu. Očekivani rezultat:
 <pre>
-* 9ca9122 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
-* 23305e7 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-| * 4848b43 2020-10-17 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
-| * c1e19b4 2020-10-17 | Dodat ispis za debagovanje [Robotmurlock]
-| * 97592f3 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
+* ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+| * 02641c6 2020-10-20 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
+| * 3b1e768 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
+| * f6b2c45 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 |/  
-* 2f51e15 2020-10-17 | Implementiran main.cpp [Robotmurlock]
+* 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 </pre>
 - Grana `bugFix` nam više nije od koristi:
     * `git branch -D bugFix`
 - Očekivani konačan rezultat:
 <pre>
-* 9ca9122 2020-10-17 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
-* 23305e7 2020-10-17 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* 2f51e15 2020-10-17 | Implementiran main.cpp [Robotmurlock]
+* 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
+* ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+* 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 </pre>
+
+## Vežbanje
+
+Uraditi zadatake na sledećoj [stranici](https://learngitbranching.js.org/).
 
 ## Kloniranje repozitorijuma
 
