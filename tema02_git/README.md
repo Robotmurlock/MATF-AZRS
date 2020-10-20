@@ -1,14 +1,31 @@
-# Uvod u git
+# Šta je Github
 
-## Instalacija (linux)
+**Github** je platforma za hostovanje koda koja se sastoji iz **Git**-a, sistema za kontrolu verzija.
 
-Za linux distribuciju je dovoljno pokrenuti sledeće komande za instalaciju osnovnih git operacija:\
-`sudo apt install git-all` \
-`sudo apt install git-extra`
+**Sistem za verzionisanje** je sistem koji je zaduženi za čuvanje i kontrolisanje izmena programskih kodova, dokumenata i slično.
+
+## Zašto koristiti sistem za kontrolu verzija?
+
+Situacije u kojima je sistem za kontrolu verzija koristan:
+- Ako smo napravili promene u kodu i onda nakon nekog vremena smo shvatili da je ta promena greška;
+- Ako izgubimo lokalne podatke, onda možemo preuzeti podatke poslednje verzije;
+- Ako želimo da uporedimo kod sad i pre;
+- Ako želimo da dokažemo da je određena promena izazvala greške;
+- Ako želimo da analiziramo istoriju koda;
+- Ako želimo kod sa drugim ljudima;
+- Ako želimo da dodamo novu "eksperimentalnu" funkcionalnost, ali da ne menjamo trenutni kod.
 
 ## Pravljenje naloga
 
 Github nalog možete napraviti na [zvaničnoj github stranici](https://github.com/).
+
+# Uvod u Git
+
+## Instalacija (linux)
+
+Za linux distribuciju je dovoljno pokrenuti sledeće komande u okviru terminala za instalaciju osnovnih git operacija:\
+`sudo apt install git-all` \
+`sudo apt install git-extra`
 
 ## Dokumentacija
 
@@ -19,41 +36,76 @@ Primeri:
 - `man git commit`
 - `man git branch`
 
+Na sledećem [linku](https://git-scm.com/doc) možete pronaći dokumentacija koja je identična sa man stranama.
+
 ## Kreiranje git repozitorijuma
 
 Lokalni repozitorijum možemo napraviti koristeći komandu `git init` koja 
 pravi prazan git repozitorijum tj. kreira `.git` direktorijum koji je neophodan za rad sa git operacijama. Informacije kao što je istorija komitova se
 čuvaju u okviru ovog direktorijuma. Komanda `git clone` takođe kreira `.git` direktorijum.
 
-Na Linux-u su sve datoteke oblika `.[IME]` 
-sakriveni (ignorišu se) od `ls` komande. Ako se pokrene `ls` komanda, ne može se videti `.git` direktorijum. Potrebno je dodati opciju `-a` tj. pokrenuti komandu `ls -a`.
+Na Linux-u su sve datoteke oblika `.[IME]` sakrivene u smislu da se ignorišu od strane `ls` komande. Ako se pokrene `ls` komanda, ne može se videti `.git` direktorijum. Potrebno je dodati opciju `-a` tj. pokrenuti komandu `ls -a`.
 
-## Git indeks
+## Indeks
 
-Kada menjamo kod na računaru, zapravo ažuriramo `radni direktorijum (working directory)`. Te promene se ne ažuriraju u okviru git repozitorijuma dok se 
-eksplicitno ne dodaju i onda komituju. \
-\
-Komandom `git add [IME DATOTEKE]` se datoteka dodaje na `staging area (oblast za postavljanje)` koji
-otprilike predstavlja sledeći potencijalni komit tj. izmenu git repozitorijuma. Komandom `git commit` se zapisuju izmene zabeležene u okviru `staging area` na git repozitorijum (beleži se u `.git/objects`).\
+Kada menjamo kod na računaru, zapravo ažuriramo `radni direktorijum (working directory/working tree)`. Te promene se ne ažuriraju u okviru git repozitorijuma dok se 
+eksplicitno ne dodaju i onda komituju. 
+
+Komandom `git add [IME DATOTEKE]` se datoteka dodaje na `oblast za postavljanje (staging area)`, koja
+otprilike predstavlja sledeći potencijalni komit tj. izmenu lokalnog git repozitorijuma. Komandom `git commit` se zapisuju izmene zabeležene u okviru `staging area` na git repozitorijum (beleži se u `.git/objects`).\
 ![working-staging-repository](https://miro.medium.com/max/700/1*zw0bLFWkaAP2QPfhxkoDEA.png)\
 Potrebno je da se nekako razlikuju promene datoteka u okviru tri sekcije:
 - radni direktorijum,
 - oblast za postavljanje,
 - git repozitorijum.
 
-Ove promene se beleže u `index`-u tj. `.git/index` datoteci.\
+Ove promene se beleže u `indeksu` tj. `.git/index` datoteci.
 
-Koristeći kamandu `git status` možemo videti koje promene posle poslednjeg komita tj. promene u okviru radnog direktorijum koji se nalaze u `staging area` i
-promene koje se ne nalaze u okviru `staging area` (nalaze se samo u okviru randog direktorijuma). 
+Koristeći kamandu `git status` možemo videti promene posle poslednjeg komita tj. promene u okviru radnog direktorijum koji se nalaze u `staging area` i
+promene koje se ne nalaze u okviru `staging area` (nalaze se samo u okviru radnog direktorijuma). 
 
+Primer. Kreiranje git repozitorijuma:
+- Potrebno je prvo da napravimo novi direktorijum:
+    * `mkdir hello`
+- Potrebno da se pozicioniramo u taj direktorijum:
+    * `cd hello`
+- Sada možemo da od ovog `hello` repozitorijuma napravimo git repozitorijum:
+    * `git init`
+    * Očekivani rezultat:
+<pre>
+Initialized empty Git repository in /home/mokoyo/Desktop/ALATI/cas2/bonus/hello/.git/
+</pre>
+- Možemo da napravimo datoteke `1.txt` i `2.txt` i da ih dodamo u git repozitorijum:
+    * `touch 1.txt 2.txt`, komanda `touch` pravi prazne datoteke.
+    * `git add 1.txt 2.txt`, ovom komandom su dodate datoteka na `staging area`.
+    * `git commit -m "Inicijalni komit"`, ovom komandom su komitovane promene u git repozitorijum. Očekivani rezultat:
+<pre>
+[master (root-commit) 566876f] Inicijalni komit
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+ create mode 100644 1.txt
+ create mode 100644 2.txt
+</pre>
 
-Primer:
-- U radnom direktorijumu postoje dve tekstualne datoteke (neka su napravljeni u okviru prethodnog komita):
+Primer. Rad sa `staging area`:
+- U radnom direktorijumu postoje dve tekstualne datoteke (neka su napravljeni u okviru prethodnog komita - prethodni primer):
     * `1.txt`
     * `2.txt`
-    * Pomoć: `touch 1.txt 2.txt`
-- Dodat je `Hello World` tekst na kraju obe datoteke.
-- Izvršena je komanda `git add 2.txt`.
+- Dodat je `Hello World` tekst na kraju obe datoteke:
+    * `echo "Hello World" >> 1.txt`
+    * `echo "Hello World" >> 2.txt`
+- Očekivani rezltat komande `git status`:
+<pre>
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   1.txt
+        modified:   2.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+</pre>
+- Izvršimo sad komandu `git add 2.txt`.
 - Očekivani rezultat `git status` komande je:
 <pre>
 On branch master
@@ -68,10 +120,9 @@ Changes not staged for commit:
 
         modified:   1.txt
 </pre>
-- Što znači da se promene na `2.txt` nalaze u okviru `staging area`, jer se izvršena komanda `git add` i zbog toga će te promene biti zabeležene na git repozitorijum kad se pozove `git commit` komanda, dok će promene na `1.txt`
-ostati samo u okviru radnog direktorijum.
-- Komandom `git reset 2.txt HEAD` se sklanjaju promene sa `staging area` i
-one neće biti zabeležene sledećim komitom.
+- Ovo znači da se promene na `2.txt` nalaze u okviru `staging area`, jer se izvršena komanda `git add` i zbog toga će te promene biti zabeležene na git repozitorijum kad se pozove `git commit` komanda, dok će promene na `1.txt` ostati samo u okviru radnog direktorijum.
+- Komandom `git reset 2.txt HEAD` se sklanjamo promene sa `staging area` i
+one neće biti zabeležene sledećim komitom. Možemo opet testirati komandu `git status`
 
 Datoteka `.git/index` je binarna datoteka i na sledećem [linku](https://mincong.io/2018/04/28/git-index/) se može pročitati detaljnije o strukturi indeksa.
 
@@ -128,7 +179,7 @@ Primer(istorija):
 
 Na [ovoj stranici](https://nic-hartley.github.io/git-gud/) se možete igrati sa git-om i vežbati iz vizuelizaciju.
 
-## Git Verzije
+## Verzije
 
 Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koje postoje između trenutnog komita i komita na koji se prelazi postaju invertovane.
 - Prelazak na drugi komit: `git checkout [KOMIT HES]`;
