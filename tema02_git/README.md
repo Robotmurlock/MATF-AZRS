@@ -12,7 +12,7 @@ Situacije u kojima je sistem za kontrolu verzija koristan:
 - Ako želimo da uporedimo kod sad i pre;
 - Ako želimo da dokažemo da je određena promena izazvala greške;
 - Ako želimo da analiziramo istoriju koda;
-- Ako želimo kod sa drugim ljudima;
+- Ako želimo da delimo kod sa drugim ljudima;
 - Ako želimo da dodamo novu "eksperimentalnu" funkcionalnost, ali da ne menjamo trenutni kod.
 
 ## Pravljenje naloga
@@ -254,7 +254,7 @@ se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama
 Recimo da smo ažurirali `README.md` datoteku i primetili smo da ima dve stamparske greške. Jedan način da se ovo reši je da se komituju ispravke kao novi komit. Alternativa je da se koristi `--amend`, gde se stari komit zamenjuje sa novim.
 
 Primer:
-- `code README.md` (izmeniti datoteku);
+- `code README.md` (izmeniti datoteku, može i `kate` ili bilo koji drug editor umesto `code`);
 - `git add README.md`;
 - `git commit -m "Azurirao README.md"`;
 - Ako je `remote` repozitorijum: `git push`
@@ -349,9 +349,9 @@ int main()
     * `git add main.cpp`
     * `git commit -m "Inicijalni komit"`
 
-- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b helloClass`. Očekivani oblik rezultata:
+- Pravimo granu koja će implementirati klasu `Hello` i njene funkcionalnost: `git checkout -b hello-class`. Očekivani oblik rezultata:
 <pre>
-Switched to a new branch 'helloClass'
+Switched to a new branch 'hello-class'
 </pre>
 - Implementira se `hello.hpp`  i opciono `Makefile` (ako ne postoji). Nije toliko bitno šta je poenta klase. Neka se objekat `Hello` pravi preko konstruktora koji prima jedan ceo broj `val`. Ovaj objekat ima jednu metodu `hey()` i pozivom ove metode se ispisuje `val` puta `"Hello World!"`.
 - Ovo se može odraditi kroz jedan ili više komitova:
@@ -360,17 +360,17 @@ Switched to a new branch 'helloClass'
     * `git commit -m "Implementirane osnovne funkcionalnost hello klase"`.
 - Očekivani oblik rezultata za `git hist --all`:
 <pre>
-* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> helloClass) [Robotmurlock]
+* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> hello-class) [Robotmurlock]
 * 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
 * 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
 * 8f674b5 2020-10-20 | Inicijalni komit (master) [Robotmurlock]
 </pre>
-- Sada je potrebno spojiti `helloClass` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
+- Sada je potrebno spojiti `hello-class` granu sa `master` granom. Ovo je veoma jednostavno ako ne postoje promene na master grani od kad je kreirana nova grana:
     * Potrebno je prvo skočiti na `master` granu: `git checkout master`.
-    * Onda je potrebno spojiti grane: `git merge helloClass`.
+    * Onda je potrebno spojiti grane: `git merge hello-class`.
 - Očekivani oblik rezultata za `git hist --all`:
 <pre>
-* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> master, helloClass) [Robotmurlock]
+* e6cc675 2020-10-20 | Implementirane osnovne funkcionalnost hello klase (HEAD -> master, hello-class) [Robotmurlock]
 * 7dbedec 2020-10-20 | Implementiran Makefile [Robotmurlock]
 * 8c94b76 2020-10-20 | Implementirana osnova struktura za hello klasu [Robotmurlock]
 * 8f674b5 2020-10-20 | Inicijalni komit [Robotmurlock]
@@ -378,12 +378,13 @@ Switched to a new branch 'helloClass'
 
 ### Brisanje grana
 
-Grana se može obrisati komandom `git branch -d [IME GRANE]`.
+Grana se može obrisati komandom `git branch -d [IME GRANE]` ako je grana spojena (`merge`) ili
+`git branch -D [IME GRANE]` ako grana nije spojena. 
 
 ## Konflitki
 
-Posmatramo sledeću situaciju(pogledati `helloClass` direktorijum):
-- Napravili smo `Hello` klasu u okviru `helloClass` grane i potrebno je spojiti ovu granu sa `master` granom.
+Posmatramo sledeću situaciju(pogledati `hello-class` direktorijum):
+- Napravili smo `Hello` klasu u okviru `hello-class` grane i potrebno je spojiti ovu granu sa `master` granom.
 - Razlika u odnosu na prethodni primer je to što je `master` takođe izmenjena. Zbog toga je spajanje otežano i potrebno je odlučiti koje promene želimo da prihvatimo.
 
 Možemo da koristimo neki alat za rešavanje `konflitka spajanja (merge conflicts)` preko komande `git mergetool`. Postoji više izbora za ovakav alat. Jedan od takvih alata je `meld`.
@@ -583,7 +584,9 @@ int main()
 
 - Primetimo ovde da imamo mnogo čistiju istoriju, nego kad smo koristili `git merge`.
 
-U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komitove u jedan. Ovo je korisno ako su ti komitovi vezani za rešavanje iste greške i ima smisla da predstavljaju celinu.
+U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komitove u jedan. Ovo je korisno ako su ti komitovi vezani za rešavanje iste greške i ima smisla da predstavljaju celinu. 
+
+Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a nisu butno da znamo sve komitove u unutar te implementacije. Time se dobija čitljivija istorija komitova.
 
 ### git interactive rebase tool
 
@@ -591,7 +594,7 @@ Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https:
 
 ### Cherry-pick
 
-- Postoji još jedan dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
+- Postoji još jedan način da se dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
     * `git checkout master`
     * `git cherry-pick da63caf a847380`
 - Ova komanda bira niz komitova i kopira ih na trenutnu `master` granu. Očekivani rezultat:
@@ -606,7 +609,7 @@ Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https:
 * 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 </pre>
 - Grana `bugFix` nam više nije od koristi:
-    * `git branch -D bugFix`
+    * `git branch -D bugFix` (Koristimo opciju `-D` jer je to grana koja nije spojena)
 - Očekivani konačan rezultat:
 <pre>
 * 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
@@ -661,6 +664,10 @@ done.
 </pre>
 - Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
 - Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
+
+### Upotreba rebase
+
+Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
 
 ## Remote repozitorijum
 
