@@ -592,6 +592,10 @@ Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a 
 
 Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https://gitrebasetool.mitmaro.ca/).
 
+### Upotreba rebase
+
+Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
+
 ### Cherry-pick
 
 - Postoji još jedan način da se dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
@@ -630,7 +634,11 @@ gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili 
 
 Primer: 
 - Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
-<pre>
+    * `mkdir hello`
+    * `cd hello`
+    * `git init`
+    * `code main.cpp` (dodati fajl)
+```
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -656,8 +664,8 @@ int main()
     nPlusHello(n);
     return 0;
 }
-</pre>
-- Pravimo klon repozitorijuma: `git clone hello hello_cloned`
+```
+- Pravimo klon repozitorijuma: `git clone hello hello_cloned`:
 <pre>
 Cloning into 'hello_cloned'...
 done.
@@ -665,15 +673,11 @@ done.
 - Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
 - Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
 
-### Upotreba rebase
-
-Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
-
 ## Remote repozitorijum
 
 Komandom `git remote` dobijamo listu svih `remote`-ova. Ovde `remote` predstavlja git repozitorijum (skup verzija projekta) koji se uglavnom nalazi na internetu (npr. Github-u). Timski rad podrazuvema korišćenje `remote` repozitorijuma.
 - Podrazumevano ime za `remote` repozitorijum je `origin`, što i jeste rezultat prethodne komande u ovom slučaju. 
-- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova.
+- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova:
 <pre>
 origin  /home/mokoyo/Desktop/ALATI/cas2/hello (fetch)
 origin  /home/mokoyo/Desktop/ALATI/cas2/hello (push)
@@ -683,12 +687,12 @@ u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd
 
 ## Fetch, Merge i Pull
 
-**Šta se dešava ako izvršimo promenu na jednom repozitorijumu?**
+**Šta se dešava ako izvršimo promenu na remote repozitorijumu?**
 
 Primer:
 - Vratimo se na originalni repozitorijum:
     * `cd ../hello`
-    * Dodajmo novu implementaciju nove funkcije `bye()`:
+    * Dodajmo implementaciju nove funkcije `bye()`:
 <pre>
 void bye()
 {
@@ -739,7 +743,7 @@ int main()
 <pre>
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
 </pre>
-- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
+- Potrebno je da ažuriramo istoriju `master` grane. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
 <pre>
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master) [Robotmurlock]
@@ -751,7 +755,7 @@ Fast-forward
  main.cpp | 6 ++++++
  1 file changed, 6 insertions(+)
 </pre>
-- Ove dve komande se često korist jedna za drugom:
+- Ove dve komande se često koriste jedna za drugom:
     * `git fetch`
     * `git merge`
 - Zbog toga postoji komanda `git pull` koji predstavlja kombinaciju prethodne dve komande tj. izvršava prvo `git fetch` operaciju, pa onda `git merge` operaciju.
@@ -840,7 +844,7 @@ fatal: this operation must be run in a work tree
 
 ## Bare repozitorijum
 
-Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurneme izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
+Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
 ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemote posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
 
 - Možemo napraviti još jedan klonirani repozitorijum:
