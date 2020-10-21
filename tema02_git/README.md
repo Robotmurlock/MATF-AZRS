@@ -634,6 +634,10 @@ gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili 
 
 Primer: 
 - Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
+    * `mkdir hello`
+    * `cd hello`
+    * `git init`
+    * `code main.cpp` (ovde umetnuti naredni kod)
 ```
 #include <iostream>
 #include <vector>
@@ -661,6 +665,9 @@ int main()
     return 0;
 }
 ```
+- Postavljamo inicijalni komit:
+    * `git add .`
+    * `git commit -m "Inicijalni komit"`
 - Pravimo klon repozitorijuma: `git clone hello hello_cloned`
 ```
 Cloning into 'hello_cloned'...
@@ -668,10 +675,6 @@ done.
 ```
 - Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
 - Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
-
-### Upotreba rebase
-
-Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
 
 ## Remote repozitorijum
 
@@ -687,7 +690,7 @@ u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd
 
 ## Fetch, Merge i Pull
 
-**Šta se dešava ako izvršimo promenu na jednom repozitorijumu?**
+**Šta se dešava ako izvršimo promenu na remote repozitorijumu?**
 
 Primer:
 - Vratimo se na originalni repozitorijum:
@@ -743,7 +746,8 @@ int main()
 ```
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
 ```
-- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. Sada je očekivani rezultat za `git hist --all`:
+- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. 
+- Sada je očekivani rezultat za `git hist --all`:
 ```
 * 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
 * 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master) [Robotmurlock]
@@ -762,7 +766,7 @@ Fast-forward
 
 ## Push
 
-Promene mogu da se vrše i na kloniranim repozitorijuma i da se onda `gurnu (pull)` da `remote` repozitorijum. 
+Promene mogu da se vrše i na kloniranim repozitorijuma koji nisu `remote` repozitorijumi i da se onda `gurnu (pull)` na `remote` repozitorijum. 
 
 Primer:
 - Želimo da izvršimo promene na `hello_cloned` repozitorijumu:
@@ -818,6 +822,7 @@ error: failed to push some refs to '/home/mokoyo/Desktop/ALATI/cas2/hello'
     * `cd ../hello`
     * `cd .git`
     * Zameniti linuju `bare = false` u datoteci `config` unutar `.git` direktorijuma sa linijom `bare = true` i sačuvati izmene.
+- Alternativa je da se iskoristi komanda `git config --bool core.bare true` koja daje isti rezultat.
 - Sada možemo da se vratimo u `hello_cloned` i gurnemo promene:
     * `cd ../../hello_cloned`
     * `git push origin master`
@@ -844,20 +849,163 @@ fatal: this operation must be run in a work tree
 
 ## Bare repozitorijum
 
-Razlog zašto u prethodnom nije radio `push` je skroz logičan. Nema smisla da gurneme izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
-ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemote posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
+Razlog zašto u prethodnom nije radila komanda `git pull` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`-ovan), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
+ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemo posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
 
 - Možemo napraviti još jedan klonirani repozitorijum:
     * `git clone hello hello_another_cloned`
     * `cd hello_another_cloned`
     * `git pull origin master`
 - U okviru ovog repozitorijuma možemo vršiti promene i gurati ih na `remote` repozitorijum i 
-onda te izmene se mogu lako povući na `hello_cloned` i obrnuto. 
-- Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `hello_cloned` i `hello_another_cloned` repozitorijuma.
+onda te izmene se mogu lako povući na `hello_cloned` i obrnuto:
+
+- Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `hello_cloned` i `hello_another_cloned` repozitorijuma:
+    * `cd hello_another_cloned`
+    * `code main.cpp` (izmeniti bye() funkciju)
+    * `git add main.cpp`
+    * `git commit -m "Izmenjena bye() funkcija"`
+    * `git push`
+```
+void bye()
+{
+    std::cout << "Cya later alligator! <3" << std::endl;
+}
+```
+- Pređimo u `hello_cloned`:
+    * `cd ../hello_cloned`
+    * `git pull`
+- Rezultat:
+```
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 3 (delta 1), reused 0 (delta 0)
+Unpacking objects: 100% (3/3), done.
+From /home/mokoyo/Desktop/ALATI/cas2/klon/hello
+   7f5285d..2db08ca  master     -> origin/master
+Updating 7f5285d..2db08ca
+Fast-forward
+ main.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+```
 
 ![bare](https://i.stack.imgur.com/xeHHg.png)
 
 Repozitorijumi koji su `bare` se koriste za deljenje. Ako radimo u timu i potrebna je saradnja, onda je potrebno mesto za čuvanje promena repozitorijuma. U tom slučaju je potreban `bare` repozitorijum u centralizovanom smislu, gde svi korisnici mogu da guraju svoje promene i vuku tuđe promene. Pošto se samo čuvaju promene, onda `radni direktorijum (working tree)` nije potreban.
+
+Primer. Dovoljno je da `remote` repozitorijum bude `bare` za komunikaciju između ostalih `non-bare` repozitorijuma:
+- Pravimo `bare` repozitorijum:
+    * `mkdir github`
+    * `cd github`
+    * `git --bare init`
+- Ako pokrenemo komandu `ls -a`, vidimo da su napravljene neke datoteke i ne postoji `.git` direktorijum. Pošto `bare` direktorijum nema `working tree`, on predstavlja samo `.git` direktorijum. Sadržaj ovog direktorijuma odgovara `.git` direktorijumu.
+- Prvo kloniranje:
+    * `clone github klon1`
+    * `cd klon1`
+- Implementacija funkcionalnosti "f1" u okviru klon1:
+    * `touch main.txt`
+    * `echo "f1" >> main.txt`
+    * `git add .`
+    * `git commit -m "Implementirao f1"`
+    * `git push`
+- Drugo kloniranje:
+    * `clone github klon2`
+    * `cd klon2`
+- Ako pokrenemo komandu `cat main.txt` rezultat je `f1`. To je zato što smo klonirali ažuriran `remote` (ažuriran je kada smo uradili `git push` iz `klon1`). 
+- Implementacija funkcionalnost "f2" u okviru klon2:
+    * `echo "f2" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Implementirao f2"`
+    * `git push`
+- Implementacija funkcionalnost "f3" u okviru klon1:
+    * `cd ../klon1`
+    * `git pull` (moramo da povučemo izmene sa `remote`)
+    * `echo "f3" >> main.txt`
+    * `git add main.txt`
+    * `git commit -m "Implementirao f3"`
+    * `git push`
+
+### Pravljenje Github repozitorijuma
+
+Na [github](https://github.com/) stranici je moguće napraviti `remote` repozitorijum. Taj repozitorijum je zapravo `bare` repozitorijum, a veb interfejs nam nudi reprezentaciju sadržaja.
+
+## Gitignore
+
+Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objekte datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka bi morali da vršimo dodavanje na `staging area` jedan po jedan. Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama. Zbog toga postoji opcija da dodamo `.gitignore` datoteku u okviru koje se definišu pravila za ignorisanje datoteka.
+
+Primer. Posmatrajmo `helloClass` primer:
+- Neka to bude novi git repozitorjum:
+    `git init`
+- Inicijalni komit:
+    * `git add *`
+    * `git commit -m "Inicijalni komit"`
+- Imamo sledeće datoteke: `hello.cpp` `hello.hpp` `hello.pro` `main.cpp`
+- Ove datoteke su dovoljne za generisanje svih ostalih datoteka:
+    * `qmake -o Makefile hello.pro` (ova komanda generiše Makefile)
+    * `make` (ovo generiše objekte i izvršne datoteke)
+- Sada imamo sledeće dodatne datoteke: `helloworld` `hello.o` `main.o` `Makefile`
+- Ako obrišemo ove datoteke, možemo ih generisati na isti način. Ne želimo da dodajemo datoteke koje se uvek mogu generisati, a dodatno mogu praviti neke konflitke koje možemo izbeći.
+- Dodatno ako pokrenemo komandu `git status` očekivani izlaz je:
+```
+On branch master
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        .qmake.stash
+        Makefile
+        hello.o
+        helloworld
+        main.o
+
+nothing added to commit but untracked files present (use "git add" to track)
+```
+- Ne interesuje nas status za ove datoteke.
+- Pravimo `.gitignore` datoteku:
+```
+*.o
+Makefile
+.qmake.*
+helloworld
+```
+- Objašnjenje:
+    * `*.o` je pravilo kojim se ignorišu sve datoteke sa ekstenzijom `.o`.
+    * `Makefile` ignoriše baš tu datoteku.
+    * `.qmake.*` ignoriše sakrivene datoteke koje generiše `qmake`.
+    * `helloworld` ignoriše baš tu datoteku.
+- Komitujemo `.gitignore` datoteku:
+    * `git add .gitignore`
+    * `git commit -m "Dodat .gitignore`
+- Sada ako pokrenemo komandu `git status`, očekivani izlaz je:
+```
+On branch master
+nothing to commit, working tree clean
+```
+- Ako pokrenemo komandu `git add *`, očekivani izlaz je:
+```
+The following paths are ignored by one of your .gitignore files:
+Makefile
+hello.o
+helloworld
+main.o
+Use -f if you really want to add them.
+```
+
+Pravila:
+- Razmaci se ignorišu osim ako se ne navede ispred razmaka `\`"
+    * `hello\ world`
+- Za komentare se koristi `#`, a `\#` za baš taj karakter:
+    * `# ovo je jedan komentar`
+- Operator `!` vrši suprotnu operaciju tj. neignoriše datoteke:
+    * Ako dodamo pravilo `*.txt` u `.gitignore`, onda se ignorišu sve `.txt` datoteke;
+    * Ako dodamo ispod toga pravilo `!log.txt`, onda se ignorišu sve `.txt` datoteke sem te.
+- Može da se navodi relativna putanja, gde se ignorišu datoteke:
+    * `src/*.txt`
+    * `docs/images/*.txt`
+- Dupla zvezdica `**` predstavlja nula ili više datoteka:
+    * `**/*.txt`, ignoriše sve `.txt` datoteke u svim direktorijumima.
+- Jedna zvezdica označava bilo koji šta sem `/`.
+- Upitnik označava bilo koji karakter sem `/` (kao zvezdica za jedan karakter).
+- Notacija za opseg: `[a-zA-Z]`.
+- Celu dokumentaciju pogledati na sledećoj [stranici](https://git-scm.com/docs/gitignore).
 
 ## Reference
 `git strane`
