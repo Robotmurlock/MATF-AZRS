@@ -1007,6 +1007,96 @@ Pravila:
 - Notacija za opseg: `[a-zA-Z]`.
 - Celu dokumentaciju pogledati na sledećoj [stranici](https://git-scm.com/docs/gitignore).
 
+## Kako pisati komitove?
+
+Pisanje komitova kroz komandu:
+    * `git commit -m "title" -m "description"`
+
+Postavljanje podrazumevanog editora za `git commit` komandu:
+    * `git config --global core.editor "code --wait"`
+
+### Zašto je bitno pisati dobre komitove?
+
+- **Bolja saradnja:** Ako radimo u firmi ili projektu otvorenog koda onda je neophodno da se poštuju određena pravila za bolju saradnju. Potrebno je da se poštuju pravila projekta, što povećava efikasnost izrade softvera. Ovo povećava efikasnost čak i kada radimo sami na projektu i ostavlja prostor da se neko lakše priključi da radi na projektu.
+- **Bolje razumevanje:** Bitno je da se pišu čiste i jednostavne poruke. Primer komitova gde se ništa ne razume: 
+![](https://res.cloudinary.com/practicaldev/image/fetch/s--OgQS1n33--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://herewecode.io/blog/content/images/2020/03/bad-git-commits.png)
+- **Generisanje changelog-a:** Lista promena - [link](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
+
+### Kako pisati dobre komitove?
+
+- **Komitovi moraju da budu gramatički ispravni**.
+- **Jedan komit za jednu promenu:** Želimo da imamo svaku promenu na jednom komitu. Na taj način je lakše da se vratimo na prethodni posao.
+- **Izbegavati dvosmislenost**.
+- **Objasniti šta je promenjeno**.
+- **Git smernice (guideline)**.
+
+### Udacity guidelines
+
+Struktura komita:
+```
+type: subject
+
+body
+
+footer
+```
+
+#### The Type (tip)
+- **feat:** Nova funkcionalnost (feature)
+- **fix:** Ispravka greške
+- **docs:** Izmena dokumentacije
+- **style:** Stvari koje nisu vezane za kod kao što su formatiranje i slično
+- **refactor:** Refaktorisanje koda
+- **test:** Dodavanje testova, refaktorisanje testova
+- **chore:** "updating build tasks, package manager configs, etc"
+
+#### The Subject (predmet)
+- Predmet je dužine ispod 50 karaktera. 
+- Predmet počinje velikim slovom.
+- Predmet nema tačku na kraju.
+- Potrebno je pisati u imperativu. Primer: `change`, ne `changes` ili `changed`.
+
+#### The Body (telo)
+- Telo je opcionalno i može se izostaviti u slučaju jednostavnih komitova. 
+- U telu se objašnjava `šta` i `zašto` u okviru komita, a ne `kako`.
+- Potrebno je razdvojiti predmet i telo praznom linijom.
+- Dužina svake stavke ne bi trebalo da bude duža od 72 karaktera.
+
+#### The Footer (podnožje)
+- Podnožje se opciono i koristi se za referisanje `issue ID`-ova i slično. 
+
+#### Primer
+
+```
+feat: Summarize changes in around 50 characters or less
+
+More detailed explanatory text, if necessary. Wrap it to about 72
+characters or so. In some contexts, the first line is treated as the
+subject of the commit and the rest of the text as the body. The
+blank line separating the summary from the body is critical (unless
+you omit the body entirely); various tools like `log`, `shortlog`
+and `rebase` can get confused if you run the two together.
+
+Explain the problem that this commit is solving. Focus on why you
+are making this change as opposed to how (the code explains that).
+Are there side effects or other unintuitive consequenses of this
+change? Here's the place to explain them.
+
+Further paragraphs come after blank lines.
+
+ - Bullet points are okay, too
+
+ - Typically a hyphen or asterisk is used for the bullet, preceded
+   by a single space, with blank lines in between, but conventions
+   vary here
+
+If you use an issue tracker, put references to them at the bottom,
+like this:
+
+Resolves: #123
+See also: #456, #789
+```
+
 ## Reference
 `git strane`
 
@@ -1015,3 +1105,9 @@ Pravila:
 [medium-hackernoon-understanding-git-index](https://medium.com/hackernoon/understanding-git-index-4821a0765cf)
 
 [thoughtram-the-anatomy-of-a-git-commit](https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html)
+
+[git-commits](https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49)
+
+[git-changelog](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
+
+[udacity-commit-message-style-guide](http://udacity.github.io/git-styleguide/)
