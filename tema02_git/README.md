@@ -280,6 +280,8 @@ Primer. Potrebno je obrisati `1.txt` i `2.txt` datoteke:
 
 ## Branching (grananje)
 
+![](https://static.javatpoint.com/tutorial/git/images/git-branch.png)
+
 ### Kreiranje grane
 
 Nova grana se kreira komandom `git branch [IME GRANE]`. Da bi skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]` (slično kao za verzionisanje). Kada skačemo na neku granu sa `git checkout`, skačemo na poslednji komit. Ako ne želimo da skočimo na poslednji komit, nego npr. pretposlednji komit, onda možemo to da uradimo komandom: `git checkout [IME GRANE]~`.
@@ -622,6 +624,11 @@ Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je
 * 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 ```
 
+Primer: Problem je pronađen na produkcionoj `master` grani (za detaljnije objašnjenje pogledati gitflow sekciju). Problem je nastao na grani `H`, ali `develop` grani nije potreban komit `G`. Zbog toga se `git cherry-pick` komandom bira komit `H` sa grane `master` i dodaje se kao kopija ``H` ``
+na `develop` granu, gde se može nastaviti dalje razvoj.
+
+![](https://www.farreachinc.com/images/default-source/default-album/results-in-commit-h.png?sfvrsn=f7d17163_0)
+
 ## Vežbanje
 
 Uraditi zadatake na sledećoj [stranici](https://learngitbranching.js.org/).
@@ -928,6 +935,12 @@ Primer. Dovoljno je da `remote` repozitorijum bude `bare` za komunikaciju izmeđ
 
 Na [github](https://github.com/) stranici je moguće napraviti `remote` repozitorijum. Taj repozitorijum je zapravo `bare` repozitorijum, a veb interfejs nam nudi reprezentaciju sadržaja.
 
+## Rezime
+
+![](https://miro.medium.com/max/3172/1*bOJNQKIe6YDGN2jJhPhd0g.png)
+
+Pogledati sledeći [video](https://www.youtube.com/watch?v=3a2x1iJFJWc&ab_channel=Udacity) kao rezime.
+
 ## Gitignore
 
 Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objekte datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka bi morali da vršimo dodavanje na `staging area` jedan po jedan. Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama. Zbog toga postoji opcija da dodamo `.gitignore` datoteku u okviru koje se definišu pravila za ignorisanje datoteka.
@@ -1161,6 +1174,8 @@ Lista komandi:
 [githowto](https://githowto.com/)
 
 [medium-hackernoon-understanding-git-index](https://medium.com/hackernoon/understanding-git-index-4821a0765cf)
+
+[cherry-pick-example](https://www.farreachinc.com/blog/git-cherry-pick-why-and-how)
 
 [thoughtram-the-anatomy-of-a-git-commit](https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html)
 
