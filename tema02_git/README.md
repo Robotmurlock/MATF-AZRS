@@ -53,7 +53,7 @@ eksplicitno ne dodaju i onda komituju.
 
 Komandom `git add [IME DATOTEKE]` se datoteka dodaje na `oblast za postavljanje (staging area)`, koja
 otprilike predstavlja sledeći potencijalni komit tj. izmenu lokalnog git repozitorijuma. Komandom `git commit` se zapisuju izmene zabeležene u okviru `staging area` na git repozitorijum (beleži se u `.git/objects`).\
-![working-staging-repository](https://miro.medium.com/max/700/1*zw0bLFWkaAP2QPfhxkoDEA.png)\
+![](./slike/indeks.png)\
 Potrebno je da se nekako razlikuju promene datoteka u okviru tri sekcije:
 - radni direktorijum,
 - oblast za postavljanje,
@@ -177,7 +177,7 @@ Primer(istorija):
 
 ## Git vizuelizacija drveta verzija/komitova
 
-Na [ovoj stranici](https://nic-hartley.github.io/git-gud/) se možete igrati sa git-om i vežbati iz vizuelizaciju.
+Na [ovoj stranici](https://nic-hartley.github.io/git-gud/) se možete igrati sa git-om i vežbati uz vizuelizaciju.
 
 ## Verzije
 
@@ -280,7 +280,7 @@ Primer. Potrebno je obrisati `1.txt` i `2.txt` datoteke:
 
 ## Branching (grananje)
 
-![](https://static.javatpoint.com/tutorial/git/images/git-branch.png)
+![](./slike/grananje.png)
 
 ### Kreiranje grane
 
@@ -627,7 +627,7 @@ Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je
 Primer: Problem je pronađen na produkcionoj `master` grani (za detaljnije objašnjenje pogledati gitflow sekciju). Problem je nastao na grani `H`, ali `develop` grani nije potreban komit `G`. Zbog toga se `git cherry-pick` komandom bira komit `H` sa grane `master` i dodaje se kao kopija ``H` ``
 na `develop` granu, gde se može nastaviti dalje razvoj.
 
-![](https://www.farreachinc.com/images/default-source/default-album/results-in-commit-h.png?sfvrsn=f7d17163_0)
+![](./slike/cherry_pick.png)
 
 ## Vežbanje
 
@@ -895,7 +895,7 @@ Fast-forward
  1 file changed, 1 insertion(+), 1 deletion(-)
 ```
 
-![bare](https://i.stack.imgur.com/xeHHg.png)
+![](./slike/bare.png)
 
 Repozitorijumi koji su `bare` se koriste za deljenje. Ako radimo u timu i potrebna je saradnja, onda je potrebno mesto za čuvanje promena repozitorijuma. U tom slučaju je potreban `bare` repozitorijum u centralizovanom smislu, gde svi korisnici mogu da guraju svoje promene i vuku tuđe promene. Pošto se samo čuvaju promene, onda `radni direktorijum (working tree)` nije potreban.
 
@@ -937,7 +937,7 @@ Na [github](https://github.com/) stranici je moguće napraviti `remote` repozito
 
 ## Rezime
 
-![](https://miro.medium.com/max/3172/1*bOJNQKIe6YDGN2jJhPhd0g.png)
+![](./slike/git_workflow_rezime.png)
 
 Pogledati sledeći [video](https://www.youtube.com/watch?v=3a2x1iJFJWc&ab_channel=Udacity) kao rezime.
 
@@ -1032,7 +1032,7 @@ Postavljanje podrazumevanog editora za `git commit` komandu:
 
 - **Bolja saradnja:** Ako radimo u firmi ili projektu otvorenog koda onda je neophodno da se poštuju određena pravila za bolju saradnju. Potrebno je da se poštuju pravila projekta, što povećava efikasnost izrade softvera. Ovo povećava efikasnost čak i kada radimo sami na projektu i ostavlja prostor da se neko lakše priključi da radi na projektu.
 - **Bolje razumevanje:** Bitno je da se pišu čiste i jednostavne poruke. Primer komitova gde se ništa ne razume: 
-![](https://res.cloudinary.com/practicaldev/image/fetch/s--OgQS1n33--/c_limit%2Cf_auto%2Cfl_progressive%2Cq_auto%2Cw_880/https://herewecode.io/blog/content/images/2020/03/bad-git-commits.png)
+![](./slike/losi_komitovi.png)
 - **Generisanje changelog-a:** Lista promena - [link](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
 
 ### Kako pisati dobre komitove?
@@ -1116,7 +1116,7 @@ Primeri:
 - [imgui](https://github.com/ocornut/imgui/commits/master)
 
 # Gitflow
-![](https://i2.wp.com/lanziani.com/slides/gitflow/images/gitflow_1.png)
+![](./slike/gitflow1.png)
 
 ## Šta je gitflow?
 
@@ -1129,23 +1129,23 @@ Primeri:
 Postoje dve glavne glavne grane: 
 - `master` grana na kojoj se nalazi produkcioni kod. Ovde se ne dešavaju promene dok neko ne pusti kod u produkciju.
 - `develop` grana je za kod koji je trenutno u izradnji. Funkcionalnost i popravke grešaka se ovde spajaju. Na ovoj grani ima više gužve.
-![](https://www.codewall.co.uk/wp-content/uploads/2019/05/Screenshot-2019-05-30-at-19.44.41.png)
+![](./slike/gitflow2.png)
 - Pored ove dve grane postoje i pomoćne `feature`, `release` i `hotfix` grane.
 
 ### Feature grana
 
 Grana `feature` služi za implementaciju nove funkcionalnosti. Na ovaj način se odvajamo od `develop` grane dok se vrši implementacija nove funkcionalnost i kasnije se vraćamo na `develop` granu kada se ta implementacija završi. Svi delovi koda koji su i dalje u izradnji se nalaze trenutno nalaze u nekoj `feature` grani. Ako je potrebno da se izvrši eksperiment, ovo je idealna grana za to, jer kasnije je možemo samo obrisati.
-![](https://www.codewall.co.uk/wp-content/uploads/2019/05/Screenshot-2019-05-30-at-19.44.50.png)
+![](./slike/gitflow3.png)
 
 ### Release grana
 
 Grana `release` služi za kod koji je dovoljno testiran da bude u produkcionom kodu. Ovde se ne vrše implementacije novih funkcionalnost, već se samo ispravljaju neke sitne greške u poslednjim trenutku ili slično. Grana `release` se pravi u okviru `develop` grane i spaja se sa `develop` i `master` granom. Razlog za ovu granu je mogućnost da se gleda kod za produkcioni, dok se na `develop` grani ne prestaje sa implementacijom novih funkcionalnosti. Kada se napravi `release` grana, onda dobije svoju verziju.
-![](https://www.codewall.co.uk/wp-content/uploads/2019/05/Screenshot-2019-05-30-at-19.44.58.png)
+![](./slike/gitflow4.png)
 
 ### Hotfix grana
 
 Grana `hotfix` služi za ispravke koda u trenutku kada je on već pušten u produkciju. Ova grana se pravi nad `master` granom, gde se vrše potrebne ispravke i onda se spaja sa `master` i `merge` granom. Grane `hotfix` dobijaju broj verzije kada se naprave (Primer. ako je release 1.2, onda je hotfix 1.2.1).
-![](https://www.codewall.co.uk/wp-content/uploads/2019/05/Screenshot-2019-05-30-at-19.45.14.png)
+![](./slike/gitflow5.png)
 
 ### Bonus
 
