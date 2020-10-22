@@ -1,4 +1,4 @@
-# MATF-AZRA
+# MATF-AZRS
 
 ## Snimci vežbi
 
