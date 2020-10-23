@@ -2,7 +2,7 @@
 
 **Github** je platforma za hostovanje koda koja se sastoji iz **Git**-a, sistema za kontrolu verzija.
 
-**Sistem za verzionisanje** je sistem koji je zaduženi za čuvanje i kontrolisanje izmena programskih kodova, dokumenata i slično.
+**Sistem za verzionisanje** je sistem koji je zadužen za čuvanje i kontrolisanje izmena programskih kodova, dokumenata i slično.
 
 ## Zašto koristiti sistem za kontrolu verzija?
 
@@ -196,7 +196,7 @@ možemo skočiti na sledeći način: `git checkout [TAG]`. Ako postavimo tag, on
 Primer:
 - `git tag v1`, postavlja se tag `v1` na trenutni komit;
 - `git checkout HEAD~`, skače se na prethodni komit;
-- `git tag v1-prior`, postavlja se tag `v1-prior` ne trenutni komit;
+- `git tag v1-prior`, postavlja se tag `v1-prior` na trenutni komit;
 - `git checkout v1`, skače se na komit sa `v1` tagom.
 
 ## Invertovanje poslednjeg komita
@@ -1167,6 +1167,10 @@ Lista komandi:
 - Završavanje novog izdvanja: `git flow release finish version-number`
 - Inicijalizacija nove hitne ispravke: `git flow hotfix start new-version-number`
 - Završavanje nove hitne ispravke: `git flow hotfix finish new-version-number`
+
+## Dodatak
+
+Na sledećem [linku](https://training.github.com/downloads/github-git-cheat-sheet/) možete pogledati rezime komandi za git. Dobar kandidat za `bookmark`.
 
 ## Reference
 `git strane`
