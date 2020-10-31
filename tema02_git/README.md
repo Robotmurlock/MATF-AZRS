@@ -943,7 +943,7 @@ Pogledati sledeći [video](https://www.youtube.com/watch?v=3a2x1iJFJWc&ab_channe
 
 ## Gitignore
 
-Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objekte datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka bi morali da vršimo dodavanje na `staging area` jedan po jedan. Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama. Zbog toga postoji opcija da dodamo `.gitignore` datoteku u okviru koje se definišu pravila za ignorisanje datoteka.
+Često želimo da komitujemo izmene sa više datoteka. Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objektne datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka morali bismo da vršimo dodavanje na `staging area` jedan po jedan. Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama. Zbog toga postoji opcija da dodamo `.gitignore` datoteku na naš repozitorijum u okviru koje se definišu pravila za ignorisanje datoteka.
 
 Primer. Posmatrajmo `helloClass` primer:
 - Neka to bude novi git repozitorjum:
