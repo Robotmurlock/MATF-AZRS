@@ -17,7 +17,7 @@ Postoje dve glavne glavne grane:
 
 ### Feature grana
 
-Grana `feature` služi za implementaciju nove funkcionalnosti. Na ovaj način se odvajamo od `develop` grane dok se vrši implementacija nove funkcionalnost i kasnije se vraćamo na `develop` granu kada se ta implementacija završi. Svi delovi koda koji su i dalje u izradnji se nalaze trenutno nalaze u nekoj `feature` grani. Ako je potrebno da se izvrši eksperiment, ovo je idealna grana za to, jer kasnije je možemo samo obrisati.
+Grana `feature` služi za implementaciju nove funkcionalnosti. Na ovaj način se odvajamo od `develop` grane dok se vrši implementacija nove funkcionalnost i kasnije se vraćamo na `develop` granu kada se ta implementacija završi. Svi delovi koda koji su i dalje u izradnji se trenutno nalaze u nekoj `feature` grani. Ako je potrebno da se izvrši eksperiment, ovo je idealna grana za to, a kasnije je možemo samo obrisati ako nije od koristi.
 ![](./slike/gitflow3.png)
 
 ### Release grana
@@ -51,9 +51,9 @@ Lista komandi:
 - Inicijalizacija nove hitne ispravke: `git flow hotfix start new-version-number`
 - Završavanje nove hitne ispravke: `git flow hotfix finish new-version-number`
 
-## Primer: Blackjack u C-u
+# Mini projekat: Blackjack u C-u
 
-Pravila igre "Blackjack" se mogu pronaći [ovde](https://www.youtube.com/watch?v=qd5oc9hLrXg&ab_channel=Howcast).
+Sada želimo da napravimo jednostavniji projekat za demonstraciju `gitflow` alata i pisanja komitova korisćenjem `udacity guideline`. Potrebno je pogledati sledeći [video](https://www.youtube.com/watch?v=qd5oc9hLrXg&ab_channel=Howcast) ako ne znate pravila `blackjack` igre.
 
 Potrebno je prvo da napravimo [Github repozitorijum](https://github.com/) i izvršimo kloniranje:
 - `git clone https://github.com/Robotmurlock/MATF-AZRS-GitFlow-Tutorial-BlackJack` (unesite vaš URL)
@@ -84,13 +84,9 @@ To push the current branch and set the remote as upstream, use
 Potrebno je samo pokrenuti komandu koja je ponuđenja:
 - `git push --set-upstream origin develop`
 
-Plan implementacije aplikacije se može pronaći u okviru `tasks.txt` datoteke.
+Plan implementacije aplikacije se može pronaći u okviru `blackjack/tasks.txt` datoteke.
 
-# Mini projekat - Blackjack
-
-Sada želimo da napravimo jednostavniji projekat za demonstraciju `gitflow` alata i pisanja komitova korisćenjem `udacity guideline`. Potrebno je pogledati sledeći [video](https://www.youtube.com/watch?v=qd5oc9hLrXg&ab_channel=Howcast) ako ne znate pravila `blackjack` igre.
-
-Demonstracija: [blackjack](#)
+Projekat: [blackjack](https://github.com/Robotmurlock/MATF-AZRS-GitFlow-Tutorial-BlackJack)
 
 ## Reference
 
