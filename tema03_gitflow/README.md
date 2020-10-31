@@ -86,7 +86,11 @@ Potrebno je samo pokrenuti komandu koja je ponuđenja:
 
 Plan implementacije aplikacije se može pronaći u okviru `tasks.txt` datoteke.
 
+# Mini projekat - Blackjack
 
+Sada želimo da napravimo jednostavniji projekat za demonstraciju `gitflow` alata i pisanja komitova korisćenjem `udacity guideline`. Potrebno je pogledati sledeći [video](https://www.youtube.com/watch?v=qd5oc9hLrXg&ab_channel=Howcast) ako ne znate pravila `blackjack` igre.
+
+Demonstracija: [blackjack](#)
 
 ## Reference
 
