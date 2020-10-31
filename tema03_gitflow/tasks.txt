@@ -1,0 +1,82 @@
+```
+Blackjack (v0):
+1. [Initial commit]
+
+{main-utility : start}
+2. [feat(utility): Implement error function]
+
+3. [feat(main): Implement file name input]
+    * Has program usage check
+
+4. [feat(main): Implement seed input]
+
+5. [chores: Implement Makefile]
+
+6. [chores: Setup .gitignore]
+{main-utility : end}
+
+{plan : start}
+7. [docs(tasks): Add README]
+{plan : end}
+
+{card-struct : start}
+8. [feat(card): Implement struct]
+    * Implement card types using enum
+    * Implement card struct
+
+9. [feat(card): Implement hand struct]
+
+10. [feat(card): Create image files]
+    * Draw card images
+    * Store images in cards directory
+
+11. [feat(card): Load cards from dir]
+    * Implement open card images dir
+    * Implement card load
+    * Implement card path check
+{card-struct : end}
+
+{deck-struct : start}
+12. [feat(deck): Implement deck struct and initialization]
+{deck-struct : end}
+
+{hand-funcs : start}
+13. [feat(hand): Implement hit function]
+    * Draws a card for a player
+    * Takes player hand as argument
+
+14. [feat(hand): Implement hand value function]
+    * Implement hand value that calculates player hand value
+    * Handle special case (#)
+
+15. [feat(hand): Implement show hand card images function]
+    * Implement show_hand(hand) function that displays all player hand cards
+    * Handle memory leak (#)
+{hand-funcs : end}
+
+{game-init : start}
+16. [feat(game): Implement game initialization]
+    * Implement player and dealer hand initialization
+    * Implement deck initialization
+{game-init : end}
+
+{game-logic : start}
+17. [feat(game): Implement game logic]
+
+    This is some long explanation
+    that explains how this big chunk of
+    code works NOT
+{game-logic : end}
+
+--------------------------------------------------------------------------------
+Blackjack (v1):
+
+{deck-shuffle : start}
+18. [feat(deck): Implement deck shuffle]
+    * Implement deck shuffle() function using Fisher Yahtes algorithm
+{deck-shuffle : end}
+
+{plan-update : start}
+19. [docs(tasks): Update README]
+{plan-update : end}
+```

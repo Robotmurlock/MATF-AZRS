@@ -51,6 +51,43 @@ Lista komandi:
 - Inicijalizacija nove hitne ispravke: `git flow hotfix start new-version-number`
 - Završavanje nove hitne ispravke: `git flow hotfix finish new-version-number`
 
+## Primer: Blackjack u C-u
+
+Pravila igre "Blackjack" se mogu pronaći [ovde](https://www.youtube.com/watch?v=qd5oc9hLrXg&ab_channel=Howcast).
+
+Potrebno je prvo da napravimo [Github repozitorijum](https://github.com/) i izvršimo kloniranje:
+- `git clone https://github.com/Robotmurlock/MATF-AZRS-GitFlow-Tutorial-BlackJack` (unesite vaš URL)
+Sad je potrebno da inicijalizujemo gitflow okruženje:
+- `git flow init` 
+- Možemo da izabere podrazumevana podešavanja tako što pretiskamo `ENTER` za svaku opciju.
+Očekivani oblik izlaza za `git hist`:
+```
+* 926abf8 2020-10-30 | Initial commit (HEAD -> develop, master) [Robotmurlock]
+```
+- To znači da je izvršen jedan komit.
+- Primetimo da `HEAD` pokazuje na `develop` granu (izvršen je skok).
+Očekivani izlaz za `git branch':
+```
+* develop
+  master
+```
+- To su nam dve glavne grane, gde je `develop` naša razvojna grana, a `master` je grana za produkciju.
+Potrebno je gurnuti promene na `remote` repozitorijum:
+- `git push`
+Očekivani izlaz:
+```
+fatal: The current branch develop has no upstream branch.
+To push the current branch and set the remote as upstream, use
+
+    git push --set-upstream origin develop
+```
+Potrebno je samo pokrenuti komandu koja je ponuđenja:
+- `git push --set-upstream origin develop`
+
+Plan implementacije aplikacije se može pronaći u okviru `tasks.txt` datoteke.
+
+
+
 ## Reference
 
 [git-flow](https://www.codewall.co.uk/a-git-flow-explainer-how-to-tutorial/)
