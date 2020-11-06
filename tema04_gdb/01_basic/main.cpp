@@ -1,7 +1,6 @@
 #include <iostream>
 
-int main()
-{
+int main() {
     int j = 3;
     int k = 7;
 
