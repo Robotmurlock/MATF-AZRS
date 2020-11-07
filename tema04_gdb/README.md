@@ -58,6 +58,19 @@ Dodavanjem opcije `-g` kompilator potencijalno odbacuje neke optimizacije. To je
 Debager `gdb` nudi interfejs tj. `TUI (Textual User Interface)`. Za neke jezike postoji i `GUI` podrška.
 
 ### Prvi primer (01_basic)
+```
+#include <iostream>
+
+int main() {
+    int j = 3;
+    int k = 7;
+
+    j += k;
+    k = j*2;
+    std::cout << "Hello there!" << std::endl;
+    return 0;
+}
+```
 
 - Izvršiti kompilaciju programa u okviru `01_basic` direktorijuma (potrebno je da se pozicioniramo):
     * `g++ -g -o basic main.cpp`
@@ -144,8 +157,76 @@ Breakpoint 1, main () at main.cpp:3
     * `print k+j`, izlaz: `$5 = 10`
     * `print 2*k-3*j`, izlaz : `$6 = 5`
 
+### Drugi primer (02_list)
+```
+#include <stdio.h>
+#include <stdlib.h>
 
+typedef struct node{
+    int value;
+    struct node* next;
+} Node;
 
+Node* newNode(int val)
+{
+    Node n;
+    n.value = val;
+    n.next = NULL;
+    return &n;
+}
+
+int main()
+{
+    Node* n = newNode(5);
+    printf("%d\n", n->value);
+
+    return 0;
+}
+```
+- Već imamo `Makefile` implementiran za ovaj program:
+    * `make`, izlaz: `list.out`
+- Pokrećemo izvršnu datoteku: 
+    * `./list.out`
+- Očekivana greška:
+```
+Segmentation fault (core dumped)
+```
+- Ovo je ona najgora greška koja može da nastane iz više razloga i daje nam veoma malo informacija o grešci.
+- Ako posmatramo `main` f-ju, program je pukao u `newNode` f-ji ili u `printf` f-ji
+- Pokrećemo debager:
+    * `gdb list.out`
+- Postavljamo `breakpoint` na `main`:
+    * `b main`, izlaz: `Breakpoint 1 at 0x11b0: file main.c, line 18.`
+- Pokrećemo program:
+    * `r`, program staje na liniji 18 
+- Ova linija sadrži samo `{` i nije nam mnogo interesatna:
+    * `n`, izlaz: `Node* n = newNode(5);`
+- Ako opet pokrenemo `n`, program će preći na sledeću liniju u `main` f-ji. Ako želimo da uđemo u `newNode()` f-ju, potrebno je da pokrenemo komandu `step` (odnosno `s`):
+    * `step`, izlaz: `10      {` (f-ja `newNode` počinje na 9-toj liniji)
+- Možemo odmah da pređemo na sledeći liniju
+    * `n`
+- **Napomena:** Trenutna linija je linija koja još nije izvršena.
+- Ako se zagubimo u kodu, uvek možemo da pokrenemo komandu `list`.
+- Komandom `p [exp]` možemo da posmatramo promene:
+    * `p n.value`
+    * `p n.next`
+    * `p n` (ovo nam daje `n.value` i `n.next`)
+    * `p &n`
+- Kada dođemo na liniju `14` i proverimo `n` i `&n`, sve deluje dobro:
+    * `n` ima očekivanu vrednost
+    * `&n` nije `NULL`
+- Preskočimo sledeće dve komande da bismo prešli u `main`. Sada znamo da u `newNode` f-ji ne dolazi do greške, ali ako pokrenemo `p n` na `printf` liniji, onda uviđamo grešku:
+    * `p n`, izlaz: `(Node *) 0x0`
+- Ovo znači da je `n` zapravo `NULL` pokazivač. To je zato što smo vratili adresu lokalne promenljive koje se briše sa steka nakon što se završi f-ja `newNode`. 
+- Ako pređemo na sledeću liniju, dolazimo do greške:
+```
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555551ce in main () at main.c:20
+20          printf("%d\n", n->value);
+```
+- Umesto da stalno pišemo `next` pa `print n` za svaku liniju, možemo da iskoristimo komandu `display [var_name]`:
+    * `display n`
+- Svaki put kad se zaustavimo na nekoj liniji (u odgovarajućem opsegu), vrednost ove promenljive se ispiše. Ukoliko u nekom trenutku ne želimo više da se ispisuje vrednost neke promenljive, možemo da iskoristimo komandu `undisplay [var_id]`. **Napomena:** Primetimo da se za `undisplay` piše `[var_id]` umesto `[var_name]`. To je zato što svaka promenljiva (tačnije izraz) koju ispisujemo ima neki svoj `id`.
 
 
 ## Reference
