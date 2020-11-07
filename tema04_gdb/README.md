@@ -57,6 +57,10 @@ Dodavanjem opcije `-g` kompilator potencijalno odbacuje neke optimizacije. To je
 
 Debager `gdb` nudi interfejs tj. `TUI (Textual User Interface)`. Za neke jezike postoji i `GUI` podrška.
 
+### GDB cheat sheet
+
+Ovde možete da pronađete [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf)
+
 ### Prvi primer (01_basic)
 ```
 #include <iostream>
@@ -227,6 +231,78 @@ Program received signal SIGSEGV, Segmentation fault.
 - Umesto da stalno pišemo `next` pa `print n` za svaku liniju, možemo da iskoristimo komandu `display [var_name]`:
     * `display n`
 - Svaki put kad se zaustavimo na nekoj liniji (u odgovarajućem opsegu), vrednost ove promenljive se ispiše. Ukoliko u nekom trenutku ne želimo više da se ispisuje vrednost neke promenljive, možemo da iskoristimo komandu `undisplay [var_id]`. **Napomena:** Primetimo da se za `undisplay` piše `[var_id]` umesto `[var_name]`. To je zato što svaka promenljiva (tačnije izraz) koju ispisujemo ima neki svoj `id`.
+
+### Treći primer (03_stack)
+```
+void A();
+void B();
+void C() {}
+void D();
+void E() {}
+void F();
+void G() {}
+
+void F(){
+    D();
+}
+void D() {
+    G();
+}
+void B(){
+    C();
+    D();
+}
+void A(){
+    B();
+    E();
+    F();
+}
+int main(){
+    A();
+    return 0;
+}
+```
+Ovo je program koji ne radi ništa, a opet nije toliko jednostavno da se odredi šta se tačno dešava na steku tokom izvršavanja programa. Debuger `gdb` nam tu olakšava posao.
+
+Kompilator je dovoljno pametan da je prethodni kod semantički ekvivalentan sledećem kodu:
+```
+int main(){
+    return 0;
+}
+```
+Ovo je nešto što očekujemo sa `-O2` optimizacijom (drugi nivo). Postoji alat [godbolt](https://godbolt.org/) koji će nam pomoći da se uverimo u to. Ovaj sajt nam nudi opciju da pišemo kod, gde nam se sa desne strane prikazuje `asembler` kod. Nas ovde konkretno zanima `C` i `C++`, ali postoje i druge opcije tj. jezici. Ako prekopiramo naš kod, dobićemo odgovarajući asembler kod koji ima oko 50 linija. Svaka linija u našem kodu ima neku boju preko koje možemo da odredimo asembler kod koji odgovara toj liniji. Podrazumevana opcija za prevođenje na asembler kod je `-g`. Možemo da zamenimo tu opciju sa `-O2` i dobićemo asembler kod dužine 15-20 linija. Ovde vidimo da su samo deklarisanje f-je i da `main` f-ja ima samo `return 0`. Povratna vrednost f-je je vrednost u registru `eax`, a `xor eax, eax` postavlja vrednost `eax` na nulu. Sada smo se uverili da je prethodna pretpostavka tačna.
+
+Kada radimo na nekom projektu, želimo da imamo `produkcioni` kod na koji se primenjuje optimizacija nekog nivoa (efikasniji program) i `kod za debagovanje` koji nema nikakve optimizacija i uključuje dodatne opcije koje usporavaju rad programa (manje efikasan program). Zbog toga ima smisla da imamo dve različite `izgradnje (build)` koda tj. jednu za produkciju i jednu za debagovanje. Ako koristimo neko okruženje kao što je `qtcreator`, onda nam on već nudi lak način da se prebacimo sa jednog `build`-a na drugi `build`. Ako radimo u nekom običnom `editor`-u, onda možemo da to izvedemo koristeći `GNU make` tj. `Makefile`. 
+```
+CXX      = g++ 
+CXXFLAGS = -std=c++17 -Wall -Wextra
+TARGET   = stack
+DEBFLAGS = -g
+RELFLAGS = -O2
+
+ifneq ($(BUILD),release)
+    BUILD = debug
+	FLAGS = $(DEBFLAGS)
+else
+	FLAGS = $(RELFLAGS)
+endif
+
+$(BUILD)_$(TARGET): main.cpp
+	$(CXX) $(CXXFLAGS) $(FLAGS) -o $@ $<
+
+.PHONY: release debug clean
+
+release:
+	$(MAKE) BUILD=$@
+
+debug:
+	$(MAKE) BUILD=$@
+
+clean:
+	rm -r release_$(TARGET) debug_$(TARGET)
+```
+Ključna razlika u odnosu na klasičan `Makefile` koji smo do sada viđali je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavi određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo jednostavan program za debagovanje i produkciju.
+
 
 
 ## Reference
