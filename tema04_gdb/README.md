@@ -426,6 +426,10 @@ Postoji komanda `info` koja može da nam da svakakve informacije u zavisnosti od
 Postoji komanda `whatis` koja može da nas podseti kojeg je šta je neka promenljiva tj. kojeg je ona tipa:
 - `whatis sol`, izlaz: `type = int`
 
+### Peti primer (05_parser)
+
+Primeniti prethodno naučeno znanje i popraviti program.
+
 ## Reference
 
 [gdb](https://www.gnu.org/software/gdb/)
