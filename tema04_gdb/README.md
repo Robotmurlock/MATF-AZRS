@@ -331,6 +331,100 @@ Ključna razlika u odnosu na klasičan `Makefile` koji smo do sada viđali je `g
 10          D();
 ```
 - Ako želimo da zaustavimo program, to možemo da uradimo komandom `kill`.
+- Ako želimo da završimo f-ju na trenutnom stek okviru i vidimo njenu povratnu vrednost, to možemo da uradimo komandom `finish`.
+
+### Četvrti primer (04_factorial)
+```
+#include <iostream>
+
+int a = 3, b = 5, c = 7;
+
+int factorial(int n)
+{
+    int sol = 1;
+    while(n--)
+    {
+        a = a*c - b;
+        sol *= n;
+        b = 3*c - a;
+        c = 20*a - 7*(a-b+c*c);
+    }
+    return sol;
+}
+
+int main()
+{
+    std::cout << "5! = " << factorial(5) << std::endl;  
+    return 0;
+}
+```
+- Prvo je potrebno da kompiliramo program:
+    * `g++ -g -o fact main.cpp`
+- Kada pokrenemo program dobijamo sledećeoi rezultat: `5! = 0`.
+- Imamo `bag` koji želimo da popravimo. Pokrećemo debager:
+    * `gdb fact`
+- U f-ji `factorial` imamo svakakva računanja, ali nas samo interesuje `sol` i `n`. Umesto da idemo liniju po liniju kroz koda i u svakoj liniji da ispisujemo preko `display` vrednosti ovih promenljivih, možemo da postavimo `breakpoint`-ove na kritične lokacije i da preskačemo linije koje nas ne interesuju sa komandom `continue` (ili `c` skraćeno):
+    * `b 8`
+    * `b 11`
+    * `b 15`
+    * `b 20`
+- Pokrećemo program i očekujemo da nas zaustavi na liniji 20. Nastavljamo dalje sa `continue`.
+- Ulazimo u f-ju `factorial` i zaustavlja nas na `while` naredbi. Ovde možemo da postavimo ispisivanje promenljivih `n` i `sol` preko `display`, jer smo u odgovarajućem opsegu:
+    * `display n`
+    * `display sol`
+- Nastavljamo dalje... U nekom trenutku stižemo u sledeće stanje:
+```
+Breakpoint 2, factorial (n=0) at main.cpp:11
+11              sol *= n;
+1: n = 0
+2: sol = 24
+```
+- Rezultat faktorijel funkcije je već izračunat, ali imamo poslednje množenje sa nulom, pri čemu dobijamo rezultat nula. Ako nastavimo dalje, videćemo da stvarno i jeste problem:
+```
+Breakpoint 1, factorial (n=0) at main.cpp:8
+8           while(n--)
+1: n = 0
+2: sol = 0
+```
+- Iz f-je `factorial` izlazimo sa `sol = 0`.
+- Program na kraju ispisuje `5! = 0`.
+- Popravka:
+```
+    while(n)
+    {
+        a = a*c - b;
+        sol *= n;
+        b = 3*c - a;
+        c = 20*a - 7*(a-b+c*c);
+        n--;
+    }
+```
+- Sada program radi kako to i želimo.
+
+Postoji i alternativni način i bolji način za debagovanje ovog problema korišćenjem komande `watch` koja postavlja `watchpoint` na promenljivu (izraz). U tom slučaju se program zaustavlja svaki put kada se ta promenljiva (izraz) promeni, što je u suštini baš ono što smo mi želimo i što smo simulirali u prethodnom rešenju. 
+
+- Pokrećemo opet program: `gdb fact`
+- Postavljamo `breakpoint` na `factorial` f-ju i pokrećemo program:
+    * `b factorial`
+    * `run`
+- Program bi trebalo da se zaustavi na početku `factorial` f-je. Postavljamo `watchpoint`-ove:
+    * `watch sol`
+    * `watch n`
+- Sada možemo da nastavljamo program sa komandom `continue` i posmatra šta se dešava i kako se menjaju promenljive. Možemo nastavljati program i sa `ENTER`.
+
+Ponekad želimo da neki `watchpoint` ili `breakpoint` obrišemo ili isključimo, pa kasnije opet uključimo. Za to postoje komande `delete [breakpoint/watchpoint]`, `disable [breakpoint/watchpoint]`, `enable [breakpoint/watchpoint]`. Postoji i komanda `clear` koja briše sve `breakpoint`-ove.
+
+Postoji komanda `info` koja može da nam da svakakve informacije u zavisnosti od argumenta:
+- `info args`, ipisuje argumente f-je na trenutnom stek okviru;
+- `info breakpoint`, ispisuje informacije o `breakpoint`-ovima;
+- `info display`;
+- `info locals`, ispisuje informacije o lokalnim promenljivima na trenutnom stek okviru;
+- `info threads`, ispisuje informacije o nitima;
+- `info watchpoint`, ispisuje informacije o `watchpoint`-ovima;
+- itd...
+
+Postoji komanda `whatis` koja može da nas podseti kojeg je šta je neka promenljiva tj. kojeg je ona tipa:
+- `whatis sol`, izlaz: `type = int`
 
 ## Reference
 
