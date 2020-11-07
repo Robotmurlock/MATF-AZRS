@@ -303,7 +303,34 @@ clean:
 ```
 Ključna razlika u odnosu na klasičan `Makefile` koji smo do sada viđali je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavi određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo jednostavan program za debagovanje i produkciju.
 
-
+- Vratimo se sada na `gdb`. Pokrećemo debager:
+    * `gdb debug_stack`
+- Postavljamo `breakpoint` na `main`:
+    * `b main`
+- Pokrećemo program sa `r` i preskačemo prvu liniju sa `n`.
+- Očekivana linija je `25` tj. `A();`
+- Želimo da uđemo u ovu f-ju: `step`, i da pređemo na sledeću liniju `n`.
+- Očekivana linija je `20` tj. `B();`
+- Možemo da se podsetimo gde se nalazimo u kodu komandom `list`.
+- Preskačemo dve linije i ulazimo u f-ju `F()` komandom `step` i tu preskačemo prvu liniju.
+- Očekivana linija je `10` tj. `D();`
+- Sada smo verovatno već malo izgubljeni na steku. Ovo je skroz realno situacija ne nekom ozbiljnom kodu. Komandom `backtrace` ili `where`. Očekivani izlaz:
+```
+#0  F () at main.cpp:9
+#1  0x0000555555555196 in A () at main.cpp:22
+#2  0x00005555555551a6 in main () at main.cpp:25
+```
+- Ovde vidimo trenutan stek. Komandama `down` i `up` možemo da se pomeramo po steku. Očekivani izlaz za `up`:
+```
+#1  0x0000555555555196 in A () at main.cpp:22
+22          F();
+```
+- Očekivani izlaz za `down` nakon prethodne komande:
+```
+#0  F () at main.cpp:10
+10          D();
+```
+- Ako želimo da zaustavimo program, to možemo da uradimo komandom `kill`.
 
 ## Reference
 
