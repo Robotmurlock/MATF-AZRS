@@ -59,7 +59,7 @@ Debager `gdb` nudi interfejs tj. `TUI (Textual User Interface)`. Za neke jezike 
 
 ### GDB cheat sheet
 
-Ovde možete da pronađete [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf)
+Ovde možete da pronađete [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf).
 
 ### Prvi primer (01_basic)
 ```
@@ -76,9 +76,9 @@ int main() {
 }
 ```
 
-- Izvršiti kompilaciju programa u okviru `01_basic` direktorijuma (potrebno je da se pozicioniramo):
+- Prvo je potrebno da izvršimo kompilaciju programa u okviru `01_basic` direktorijuma (potrebno je da se pozicioniramo, ako već nismo pozicionirani):
     * `g++ -g -o basic main.cpp`
-- Pokrenuti gdb nad izvršnom datotekom:
+- Sada možemo da pokrenemo `gdb` nad izvršnom datotekom:
     * `gdb ./basic`
 - Očekivani izlaz:
 ```
@@ -105,9 +105,9 @@ Reading symbols from ./basic...
 ``` 
 - Sada je otvoren `(gdb)` interfejs. Tu možemo da unosimo debager komande.
 
-Program pokrećemo komandom `run`, što se u ovom slučaju svodi na normalno pokretanje programa (kao preko `./a.out`). U nastavku komande `run` možemo da dodamo argumente komandne linije. Primer: `run input.txt`. 
+Program pokrećemo komandom `run` (ili `r` skraćeno), što se u ovom slučaju svodi na normalno pokretanje programa (kao preko `./a.out`). U nastavku komande `run` možemo da dodamo argumente komandne linije. Primer: `run input.txt`. 
 
-Program `gdb` prekidamo komandom `quit`, `q` skraćeno ili prečicom `ctrl + d`.
+Program `gdb` prekidamo komandom `quit`, `q` ili prečicom `ctrl + d`.
 
 Da bi komanda `run` bila smislena, potrebno je da postavimo neki `breakpoint (tačka prekida)`. Koncept `breakpoint`-a je relativno jednostavan. Ideja je da kažemo debageru da zaustavi izvšavanje programa u nekoj tački. Ta tačka može biti:
 - Funkcija: `break func_name`
@@ -115,7 +115,7 @@ Da bi komanda `run` bila smislena, potrebno je da postavimo neki `breakpoint (ta
 - Relativna lokacija: `break +offset` `break -offset`
 - itd... Pogledati sve mogućnosti [ovde](https://ftp.gnu.org/old-gnu/Manuals/gdb/html_node/gdb_28.html)
 
-Primer. Postavljanje `breakpoint` na funkciju:
+Primer. Postavljanje `breakpoint`-a na funkciju:
 - Postavljamo `breakpoint` na `main` funkciju:
     * `break main` (ili skraćeno `b main`)
 - Očekivani oblik izlaza:
@@ -123,19 +123,19 @@ Primer. Postavljanje `breakpoint` na funkciju:
 Breakpoint 1 at 0x5555555551a9: file main.cpp, line 3.
 ```
 - Pokrenimo program:
-    * `run` (ili skraćeno samo `r`)
+    * `run`
 - Očekivani izlaz:
 ```
 Breakpoint 1, main () at main.cpp:3
 3       int main() {
 ``` 
-- Ako želimo da pokrenemo liniju i da se zaustavimo na sledećoj liniji, to možemo da uradimo preko komande `next` koja pokreće program i zaustavlja se na sledećoj liniji:
+- Ako želimo da izvršimo trenutnu liniju i da se zaustavimo na sledećoj liniji, onda to možemo da uradimo preko komande `next` koja pokreće (nastavlja) program i zaustavlja se na sledećoj liniji:
     * `next` (ili skraćeno samo `n`)
 - Očekivani izlaz:
 ```
 4           int j = 3;
 ```
-- Ako želimo da vidimo gde okolinu koda, možemo da pokrenemo komandu `list` koja prikazuje deo izvornog koda gde se "nalazimo":
+- Ako želimo da vidimo okolinu koda (gde se nalazimo), možemo da pokrenemo komandu `list` koja prikazuje deo izvornog koda:
     * `list` (ili skraćeno `l`)
 - Očekivani oblik izlaza:
 ```
@@ -195,8 +195,8 @@ int main()
 ```
 Segmentation fault (core dumped)
 ```
-- Ovo je ona najgora greška koja može da nastane iz više razloga i daje nam veoma malo informacija o grešci.
-- Ako posmatramo `main` f-ju, program je pukao u `newNode` f-ji ili u `printf` f-ji
+- Ovo je ona najgora greška koja može da nastane iz više razloga, a kompilator nam daje veoma malo informacija o grešci.
+- Ako posmatramo `main` f-ju, do greške je moglo da dođe u f-ji `newNode` ili u f-ji `printf`. 
 - Pokrećemo debager:
     * `gdb list.out`
 - Postavljamo `breakpoint` na `main`:
@@ -219,7 +219,8 @@ Segmentation fault (core dumped)
 - Kada dođemo na liniju `14` i proverimo `n` i `&n`, sve deluje dobro:
     * `n` ima očekivanu vrednost
     * `&n` nije `NULL`
-- Preskočimo sledeće dve komande da bismo prešli u `main`. Sada znamo da u `newNode` f-ji ne dolazi do greške, ali ako pokrenemo `p n` na `printf` liniji, onda uviđamo grešku:
+- Probajmo da preskočimo sledeće dve komande u nadi da ćemo se vratitu u `main`. 
+- Sada znamo da u `newNode` f-ji ne dolazi do greške, ali ako pokrenemo `p n` na `printf` liniji, onda uviđamo grešku:
     * `p n`, izlaz: `(Node *) 0x0`
 - Ovo znači da je `n` zapravo `NULL` pokazivač. To je zato što smo vratili adresu lokalne promenljive koje se briše sa steka nakon što se završi f-ja `newNode`. 
 - Ako pređemo na sledeću liniju, dolazimo do greške:
@@ -264,7 +265,7 @@ int main(){
 ```
 Ovo je program koji ne radi ništa, a opet nije toliko jednostavno da se odredi šta se tačno dešava na steku tokom izvršavanja programa. Debuger `gdb` nam tu olakšava posao.
 
-Kompilator je dovoljno pametan da je prethodni kod semantički ekvivalentan sledećem kodu:
+Kompilator je dovoljno pametan da uvidi da je prethodni kod semantički ekvivalentan sledećem kodu:
 ```
 int main(){
     return 0;
@@ -292,16 +293,13 @@ $(BUILD)_$(TARGET): main.cpp
 
 .PHONY: release debug clean
 
-release:
-	$(MAKE) BUILD=$@
-
-debug:
+release debug:
 	$(MAKE) BUILD=$@
 
 clean:
 	rm -r release_$(TARGET) debug_$(TARGET)
 ```
-Ključna razlika u odnosu na klasičan `Makefile` koji smo do sada viđali je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavi određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo jednostavan program za debagovanje i produkciju.
+Ključna razlika u odnosu na klasičan `Makefile` (koji smo do sada viđali) je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavimo određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo kompiliramo program za debagovanje i produkciju u zavisnosti od potrebe.
 
 - Vratimo se sada na `gdb`. Pokrećemo debager:
     * `gdb debug_stack`
@@ -360,10 +358,10 @@ int main()
 ```
 - Prvo je potrebno da kompiliramo program:
     * `g++ -g -o fact main.cpp`
-- Kada pokrenemo program dobijamo sledećeoi rezultat: `5! = 0`.
+- Kada pokrenemo program dobijamo sledeći rezultat: `5! = 0`.
 - Imamo `bag` koji želimo da popravimo. Pokrećemo debager:
     * `gdb fact`
-- U f-ji `factorial` imamo svakakva računanja, ali nas samo interesuje `sol` i `n`. Umesto da idemo liniju po liniju kroz koda i u svakoj liniji da ispisujemo preko `display` vrednosti ovih promenljivih, možemo da postavimo `breakpoint`-ove na kritične lokacije i da preskačemo linije koje nas ne interesuju sa komandom `continue` (ili `c` skraćeno):
+- U f-ji `factorial` imamo svakakva računanja, ali nas samo interesuje `sol` i `n`. Umesto da idemo liniju po liniju kroz kod i u svakoj liniji da ispisujemo preko `display` vrednosti ovih promenljivih, možemo da postavimo `breakpoint`-ove na kritične lokacije i da preskačemo linije koje nas ne interesuju koristeći komandu `continue` (ili `c` skraćeno). Komanda `continue` je slična kao `run`, samo što nastavlja program umesto da ga opet pokrene:
     * `b 8`
     * `b 11`
     * `b 15`
@@ -390,20 +388,21 @@ Breakpoint 1, factorial (n=0) at main.cpp:8
 - Program na kraju ispisuje `5! = 0`.
 - Popravka:
 ```
-    while(n)
-    {
-        a = a*c - b;
-        sol *= n;
-        b = 3*c - a;
-        c = 20*a - 7*(a-b+c*c);
-        n--;
-    }
+while(n)
+{
+    a = a*c - b;
+    sol *= n;
+    b = 3*c - a;
+    c = 20*a - 7*(a-b+c*c);
+    n--;
+}
 ```
 - Sada program radi kako to i želimo.
 
 Postoji i alternativni način i bolji način za debagovanje ovog problema korišćenjem komande `watch` koja postavlja `watchpoint` na promenljivu (izraz). U tom slučaju se program zaustavlja svaki put kada se ta promenljiva (izraz) promeni, što je u suštini baš ono što smo mi želimo i što smo simulirali u prethodnom rešenju. 
 
-- Pokrećemo opet program: `gdb fact`
+- Pokrećemo opet program: 
+    * `gdb fact`
 - Postavljamo `breakpoint` na `factorial` f-ju i pokrećemo program:
     * `b factorial`
     * `run`
@@ -415,7 +414,7 @@ Postoji i alternativni način i bolji način za debagovanje ovog problema koriš
 Ponekad želimo da neki `watchpoint` ili `breakpoint` obrišemo ili isključimo, pa kasnije opet uključimo. Za to postoje komande `delete [breakpoint/watchpoint]`, `disable [breakpoint/watchpoint]`, `enable [breakpoint/watchpoint]`. Postoji i komanda `clear` koja briše sve `breakpoint`-ove.
 
 Postoji komanda `info` koja može da nam da svakakve informacije u zavisnosti od argumenta:
-- `info args`, ipisuje argumente f-je na trenutnom stek okviru;
+- `info args`, ispisuje argumente f-je na trenutnom stek okviru;
 - `info breakpoint`, ispisuje informacije o `breakpoint`-ovima;
 - `info display`;
 - `info locals`, ispisuje informacije o lokalnim promenljivima na trenutnom stek okviru;
