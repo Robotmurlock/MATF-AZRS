@@ -429,6 +429,10 @@ Postoji komanda `whatis` koja može da nas podseti kojeg je šta je neka promenl
 
 Primeniti prethodno naučeno znanje i popraviti program.
 
+Problem: `05_parser/main.cpp`
+
+Rešenje: `05_parser/solution.cpp`
+
 ## LLDB
 
 Alternativa za `gdb` debager je `lldb` (`LLVM` projekat) debager koji se koristi na sličan način. Debager `lldb` se pokreće preko komandne linije za debagovanje `C`, `C++` ili `Objective C` programskog jezika. Komande se razlikuju, ali postoji [mapa](http://lldb.llvm.org/use/map.html) preslikavanja komandi. Ovaj debager je verovatno bolje koristiti na `MacOS`-u, zbog bolje podrške, a `gdb` je bolji za `unix` sisteme (jer duže postoji i ima implementirane sve funkcionalnosti). Debager `lldb` je implementiran u modernijem `c++`-u i ima potencijala da u budućnosti zameni `gdb` i na `unix` sistemima.
