@@ -3,7 +3,7 @@
 ## Šta je CMake?
 
 `CMake` je projekat [otvorenog koda](https://github.com/Kitware/CMake) koji se sastoji iz alata za izgradnju (build), testiranje i rad sa paketima. Omogućava da se proces kompilacije apstrahuje u odnosu
-na platformu na kojoj se projekat prevodi. Autor `CMake`-a je [kitware](https://www.kitware.com/).
+na platformu na kojoj se projekat prevodi. `CMake`-a je proizvod [kitware](https://www.kitware.com/)-a.
 
 ## Instalacija
 
@@ -34,8 +34,8 @@ int main()
 }
 ```
 - Podrazumevano ime za `cmake` datoteku je `CMakeLists.txt` (slično kao `Makefile` za `GNU Make`):
-    * `touch CMakeLists.txt` ili odmah `code CMakeLists.txt`
-    * Ako koristimo `VSC`, možemo da instaliramo dodatak (plugin) za isticanje (highlighting) koda.
+    * `touch CMakeLists.txt` ili `code CMakeLists.txt`
+    * Ako koristimo `VSC`, možemo da instaliramo dodatak (plugin) za rad sa `CMake` i dodatak isticanje (highlighting) koda.
 - Potrebno je da napišemo jednostavan `cmake`:
 ```
 cmake_minimum_required(VERSION 3.16)
@@ -48,14 +48,14 @@ add_executable(hello main.cpp)
     pogledati koje funkcionalnosti koristimo. Tada možemo da izaberemo najstariju verziju koja
     sadrži sve funkcionalnosti. U našem slučaju je dovoljno da stavimo verziju našeg `cmake`.
     Verziju `cmake`-a možemo proveriti komandom: `cmake --version` (3.16.3 u mom slučaju).
-    * `project` definiše ime projekta i njegovu verziju preko ključne reči `VERSION`. Ovo takođe
-    vrši i neke dodatne funkcije, kao što je npr. definisanje promenljive `PROJECT_NAME` koja u 
+    * `project` definiše ime projekta i njegovu verziju preko ključne reči `VERSION`. Ova komanda takođe
+    vrši i neke dodatne operacije, kao što je npr. definisanje promenljive `PROJECT_NAME` koja u 
     našem slučaju ima vrednost `HelloWorld`. Dereferenciranje promenljivih (dobijanje vrednosti) se vrši preko operatora `$(...)` (kao i kod `GNU Make`).
-    * `add_executable` definiše ime izvršne datoteke i ime potrebne izvorne datoteke.
+    * `add_executable` definiše ime izvršne datoteke i ime potrebnih izvornih datoteka.
 - Želimo da se naš `build` nalazi u posebnom direktorijumu. U suprotnom `cmake` generiše datoteke u
 trenutnom radnom direktorijumu, što nije nešto što želimo:
     * `mkdir build`
-    * `cd build` (ili `cd !$`, gde je `!$` poslednji argument pretodne komande)
+    * `cd build` (ili `cd !$`, gde je `!$` poslednji argument prethodne komande)
 - Pokrećemo `cmake` komandu koja izvršava konfigurisanje, generisanje datoteka za `build`:
     * `cmake -G "Unix Makefiles" ..` 
     * Dodatna opcija `-G "Unix Makefiles"` služi za izbor sistema za generisanje izgradnje (pogledati `man cmake`) 
@@ -87,7 +87,7 @@ trenutnom radnom direktorijumu, što nije nešto što želimo:
     * `Makefile`
 - Koristeći `Makefile` datoteku, možemo generisati izvršnu datoteku:
     * `make`
-- Postoje i dodatne opcije koje su generisane u `Makefile` datoteci preko `cmake` komande. Primer `make help` koja nam daje sve opcije za korisćenje genrisanog `Makefile`-a. Očekivani izlaz:
+- Postoje i dodatne opcije koje su generisane u `Makefile` datoteci preko `cmake` komande. Primer `make help` koja nam daje sve opcije za korisćenje generisanog `Makefile`-a. Očekivani izlaz:
 ```
 The following are some of the valid targets for this Makefile:
 ... all (the default if no target is provided)
@@ -110,14 +110,14 @@ The following are some of the valid targets for this Makefile:
 ## Biblioteka (02_library)
 
 Želimo da napravimo biblioteku za rad sa niskama u `C++`-u. Standardna biblioteka nam već nudi `string` 
-klasu sa funkcijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okvir standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
+klasu sa funkcijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okviru standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
 po tom specijalnom karakteru. Primer:
-    * `split("Ahoy there matey!", ' ') = ["Ahoy", "there", "matey"]`
-    * `split("123,456,789", ',') = ["123", "456", "789"]`
+- `split("Ahoy there matey!", ' ') = ["Ahoy", "there", "matey"]`
+- `split("123,456,789", ',') = ["123", "456", "789"]`
 
 - Želimo da implementiramo ovu funkciju u našoj biblioteci i da je testiramo. Za testiranje pišemo odvojen kod `test.cpp`, a kompilaciju celog koda želimo da apstrahujemo preko `cmake`.
-- Za testiranje biblioteke koristimo [Arange-Act-Assert](https://wiki.c2.com/?ArrangeActAssert) obrazac bez nekog naprednog `framework`-a za testiranje, već samo `assert` funkciju.
-- Potrebno je da se pogleda kod za datoteke `string_lib.cpp` `string_lib.hpp` i `test.cpp` u `02_library`
+- Za testiranje biblioteke koristimo [Arange-Act-Assert](https://wiki.c2.com/?ArrangeActAssert) obrazac bez nekog naprednog `framework`-a za testiranje, već samo `assert` funkciju iz `assert.h` tj. `cassert` biblioteke.
+- **Napomena:** Pogledati kod za datoteke `string_lib.cpp` `string_lib.hpp` i `test.cpp` u `02_library`
 direktorijumu.
 - Potrebno je da se napravi izvršna datoteka na osnovu prethodno navedenog izvornog koda:
     * `code CMakeLists.txt`
@@ -196,12 +196,11 @@ add_library(
     * Ako je biblioteka `SHARED`, onda se kod biblioteke referencira od strane programa za vreme izvršavanja. 
     * Biblioteke tipa `STATIC` zauzimaju više mesta (veće binarne datoteke). Kod je već tu, pa ne postoji
     dodatan trošak referenciranja.
-    * Biblioteke tipa `SHARED` zauzimaju manje mesta, ali je odvojena, zauzima manje mesta i ima dodatni trošak. Prednost je u tome što se biblioteka može zameniti sa sličnom bibliotekom koja možda ima 
-    bolje performanse u nekim slučajevima, ali ne mora da se opet prevodi kod.
+    * Biblioteke tipa `SHARED` zauzimaju manje mesta, ali su odvojene i samim tim zauzimaju manje mesta i imaju dodatni trošak. Prednost je u tome što se biblioteka može zameniti sa sličnom bibliotekom koja možda ima bolje performanse u nekim slučajevima a da se pritom ne prevodi opet kod.
 
 ## Projekat (03_project)
 
-- Želimo da iskoristimo biblioteku prethodnog iz prethodnog primera da implementiramo program koji vraća broj linija i broj reči ulazne datoteke. Demonstracija:
+- Želimo da iskoristimo biblioteku iz prethodnog primera da implementiramo program koji vraća broj linija i broj reči ulazne datoteke. Demonstracija:
 ```
 This is first line
 This line has 5 words
@@ -209,7 +208,7 @@ This line does not have 5 words
 This is just another line
 Savvy
 ```
-- Ako pokrenemo program, očekivani izlaz je:
+- Ako pokrenemo program, željeni izlaz je:
 ```
 Number of lines: 5
 Number of words: 22
@@ -232,7 +231,7 @@ add_executable(myprogram src/main.cpp)
 
 target_link_libraries(myprogram PRIVATE string_lib)
 ```
-- Imamo novu ključna opcija `add_subdirectory` koju koristimo kada želimo da dodamo neki poddirektorijum, što u ovom slučaju želimo da uradimo za `lib`. Dobijamo slično funkcionalnost kao kad bi kopirali kod iz `CMakeLists.txt` iz poddirektorijuma i ažurirali relativne putanje. Datoteka `CMakeLists.txt` u `lib` direktorijumu:
+- Nova komanda je `add_subdirectory`. Ovu komandu koristimo kada želimo da dodamo neki poddirektorijum, što u ovom slučaju želimo da uradimo za `lib` direktorijum. Dobijamo sličnu funkcionalnost kao da smo kopirali kod iz `CMakeLists.txt` iz poddirektorijuma i ažurirali relativne putanje. Datoteka `CMakeLists.txt` u `lib` direktorijumu:
 ```
 add_library(
     string_lib
@@ -261,26 +260,32 @@ target_include_directories(string_lib PUBLIC "$(CMAKE_CURRENT_SOURCE_DIR)")
 [100%] Linking CXX executable myprogram
 [100%] Built target myprogram
 ```
-- Ako pokrenemo program, dobićemo očekivani rezultat.
+- Očekivani izlaz za pokrenut program:
+```
+Number of lines: 5
+Number of words: 22
+```
 
 Kod opcije `target_include_directories` koristili smo ključnu reč `PUBLIC`. Alternative su `PRIVATE` i `INTERFACE`. Kada `CMake` kompilira ciljnu izvršnu datoteku, on koristi `INCLUDE_DIRECTORIES`, `COMPILE_DEFINITIONS` i `COMPILE_OPTIONS` promenljive. Kada koristimo `PRIVATE` opciju, `CMake` dopunjuje ove promenljive. Slična priča je i za `INTERFACE`, samo sa prefiksom `INTERFACE_*`. Ključna reč `PUBLIC` je kombinacija `PRIVATE` i `INTERFACE`. Za detaljnije informacije pogledati sledeći [artikal](https://leimao.github.io/blog/CMake-Public-Private-Interface/) ili [dokumentaciju](https://cmake.org/cmake/help/latest/command/target_include_directories.html).
 
 ## Pisanje skriptova (04_script)
 
-Jezik `CMake` je jednostavan intepretirani jezik za skriptovanje koji nudi jednostavne funkcionalnost kao što su: promenljive, manipulacija niski, rad sa nizovima, funkcije i slično. 
+Jezik `CMake` je jednostavan intepretirani jezik za skriptovanje koji nudi jednostavne funkcionalnosti kao što su: promenljive, manipulacija niski, rad sa nizovima, funkcije i ostalo. 
 
 ### Sintaksa
 
 Oblik komandi u `CMake` je `command(<arg1> <arg2> ... <argK>)`. Komande se izvršavaju jedna za drugom.
 Pored komandi, možemo da pišemo i komentare, gde je sintaksa ista  kao u `Python`-u tj. komentar počinje sa `#`.
 
+**Napomena:** Pogledati `CMakeLists.txt` u `04_script` direktorijumu koji sadrži sve primere koji slede u nastavku.
+
 ### Promenljive i poruke
 
 Promenljive se mogu definisati komandom `set(<name> <value>)`. Vrednosti promenljivih se dobijaju dereferenciranjem: `${<name>}`.
 
-Poruke se pišu komandom `message([mode] <text1> <text2> ... <textK>)`, gde se vrši konkatenacija niza argumenata niski u jednu nisku i ispisuje na standardni izlaz. Pogledati modove [ovde](https://cmake.org/cmake/help/latest/command/message.html). `CMake` sve tritara kao niske. Ako želimo da dodelimo vrednost koja ima razmake, onda je potrebno stavi tu vrednost pod navodnike. Primer:
-    * Izlaz za `message(STATUS One Two Three)` je `OneTwoThree`
-    * Izlaz za `message(STATUS "One Two Three")` je `One Two Three`
+Poruke se pišu komandom `message([mode] <text1> <text2> ... <textK>)`, gde se vrši konkatenacija niza argumenata niski u jednu nisku i ispisuje na standardni izlaz. Za uvid u ostale modove, pogledati [ovde](https://cmake.org/cmake/help/latest/command/message.html). Važno je znati da `CMake` sve tritara kao niske. Ako želimo da dodelimo vrednost koja ima razmake, onda je potrebno da stavimo vrednost pod navodnike. Primer:
+    * Izlaz za `message(STATUS One Two Three)` je `OneTwoThree`.
+    * Izlaz za `message(STATUS "One Two Three")` je `One Two Three`.
 
 - Posmatrajmo sledeći kod:
 ```
@@ -291,7 +296,7 @@ message(STATUS "This is my variable \"${MY_VAR}\" and this is my project name \"
 ```
 This is my variable "[1, 2, 3, 4]" and this is my project name "MyProject"
 ```
-- Komanda `project` takođe definiše promenljivu `PROJECT_NAME` koja sadrži ime projekta.
+- Komanda `project` takođe definiše promenljivu `PROJECT_NAME` koja sadrži ime projekta. Ovo važi i za mnoge druge komande u `CMake`-u.
 
 ### Kontrola toka
 
@@ -306,17 +311,17 @@ else()              # optional block
 endif()
 ```
 - Vrednost izraza `<condition>` je tačna ako nije netačna.
-- Vrednost izraza `<condition>` je netačna ako se nalazi na [list](https://cmake.org/cmake/help/latest/command/if.html) netačnih vrednost u dokumentaciji. Primer `FALSE` ima netačnu vrednost.
+- Vrednost izraza `<condition>` je netačna ako se nalazi na [listi](https://cmake.org/cmake/help/latest/command/if.html) netačnih vrednost u dokumentaciji. Primer `FALSE` ima netačnu vrednost.
 - Operator `STREQUAL` služi za poređenje niski:
     * `<lhs> STREQUAL <rhs>`
 - Postoje operatori `NOT`, `AND` i `OR` i imaju očekivano ponašanje:
     * `NOT <condition>`
     * `<lhs> AND <rhs>`
     * `<lhs> OR <rhs>`
-- Postoji operator `MATCH` za proveri da li se neka niska poklapa sa nekim regularnim izrazom:
+- Postoji operator `MATCH` za proveru da li se neka niska poklapa sa nekim regularnim izrazom:
     * `<lhs> MATCHES <rhs>`
 
-Primeri:
+U sledećim primerima su demonstrirani prethodno spomenuti operatiro:
 ```
 if("TRUE")
     message("Example A - Case 1")
@@ -350,12 +355,13 @@ while(<condition>)
 endwhile()
 ```
 
-- Za vežbu možemo napisati kod koji ispisuje neku poruku 10 puta. Brojač možemo da definišemo kao promenljivu koja ima početnu vrednost 0 i petlja se izvršava dok se vrednost brojača manja od 10. Ovde nam nedostaju logički operatori i aritmetički operatori za ažuriranje promenljive brojača.
-- Logički operator `LESS` i `GREATER` koji vraćaju tačnu ili netačnu vrednost:
+- Za vežbu možemo napisati kod koji ispisuje neku poruku 10 puta. Brojač možemo da definišemo kao promenljivu koja ima početnu vrednost 0 i petlja se izvršava dok je vrednost brojača manja od 10. Ovde nam nedostaju logički operatori za proveru uslova petlji i aritmetički operatori za ažuriranje promenljive brojača.
+- Logički operatori `LESS`, `GREATER` i `EQUAL` vraćaju tačnu ili netačnu vrednost i imaju očekivano ponašanje:
     * `<lhs> LESS <rhs>`
     * `<lhs> GREATER <rhs>`
-- Komanda `math` tj. `math(EXPR <name> <expression>)` dodeljuje vrednost izraza nekoj promenljivoj.
-- Primer:
+    * `<lhs> EQUAL <rhs>`
+- Komanda `math` tj. `math(EXPR <name> <expression>)` dodeljuje vrednost izraza `<expression>` promenljivoj `<name>`.
+- Sada imamo sve što nam je potrebno da završimo ovu vežbu:
 ```
 set(cnt 0)
 while(cnt LESS 10)
@@ -363,7 +369,7 @@ while(cnt LESS 10)
     math(EXPR cnt "${cnt} + 1")
 endwhile()
 ```
-- Izlaz:
+- Očekivani izlaz:
 ```
 Counter value is 0!
 Counter value is 1!
@@ -377,38 +383,38 @@ Counter value is 8!
 Counter value is 9!
 ```
 
-Postoje i `foreach` petlje. Primer(foreach) 1:
+Postoje i `foreach` petlje i ovde možemo videti primer jednog korišćenja `foreach` petlje:
 ```
 foreach(item IN ITEMS apple orange peach banana)
     message(STATUS "Look at this ${item}!")
 endforeach()
 ```
-- Izlaz:
+- Očekivani izlaz:
 ```
 Look at this apple!
 Look at this orange!
 Look at this peach!
 Look at this banana!
 ```
-- Primer(foreach):
+- Još jedan primer `foreach` petlje sa `RANGE` operatorom koji ima dva oblika:
+    * `RANGE N` su vrednosti od 0 do N.
+    * `RANGE A B` su vrednosti od A do B.
 ```
-# Foreach iz opsega
-foreach(idx RANGE 100) # 
+foreach(idx RANGE 100) 
     message(STATUS "idx = ${idx}")
 endforeach()
 ```
-- Može i: `foreach(idx RANGE 50 100)` tj. dva argumenta umesto jednog.
 
 ### Funkcije
 
-Sintaksa za pisanje funkcije:
+Sintaksa za pisanje funkcija je sledeća:
 ```
 function(<name> [<arg1> ...])
   <commands>
 endfunction()
 ```
-
-Primer:
+- Primetimo da ne postoji povratna vrednost. To se može prevazići i to ćemo videti u nastavku.
+- Primer jedne jednostavne funkcije:
 ```
 function(show_name my_name)
     message(STATUS "My name is ${my_name}!")
@@ -418,20 +424,29 @@ show_name("Robotmurlock")
 show_name("Banana" "Ignore This")
 ```
 
-- Ako u funkciju prosledimo više parametara nego što ona ima argumenata, onda funkcija ignoriše višak. 
+- Ako u funkciju prosledimo više parametara nego što ona ima argumenata, onda funkcija ignoriše taj višak parametara. 
 - Ako u funkciju prosledimo manje parametara nego što ona ima argumenata, onda dobijamo poruku o grešci.
-- Ukoliko želimo da implementiramo funkciju koja može da prima proizvoljan broj parametara, onda to možemo uraditi korišćenjem specijalne promenljive `ARGV` (lista):
+- Ukoliko želimo da implementiramo funkciju koja može da primi proizvoljan broj parametara, onda to možemo uraditi korišćenjem specijalne promenljive `ARGV` (lista):
 ```
 function(show_words)
     foreach(arg IN LISTS ARGV)
-        message(${arg})
+        message(STATUS ${arg})
     endforeach()
 endfunction()
 
 show_words(1 Two 3 Three 5)
 ```
-- Funkcije ne mogu direktno da vraćaju povratne vrednost. Umesto toga, moramo da se igramo sa opsezima. Komandu `set` ima opciju `PARENT_SCOPRE` gde naglašavamo da se vrši izmena na promenljivoj koja se nalazi u roditeljskom opsegu funkcije (opseg programa u našem slučaju). Ako ne koristimo ovu opciju, onda će se promeniti vrednost promenljive lokalno opsega i nakon završetka funkcija, sve promenljive dobijaju svoje stare vrednosti. 
-- Želimo da implementiramo funkciju koja inkrementira vrednost neke promenljive. Da bi to uradili, potrebno je da prosledimo ime promenljive (na taj način imamo i vrednost ako dereferenciramo):
+- Očekivani izlaz za ovaj kod je:
+```
+1
+Two
+3
+Three
+5
+```
+- Funkcije ne mogu direktno da vraćaju povratne vrednost. Umesto toga, moramo da se igramo sa opsezima. Komanda `set` ima opciju `PARENT_SCOPRE` gde naglašavamo da se vrši izmena na promenljivoj koja se nalazi u roditeljskom opsegu funkcije (opseg programa u našem slučaju). Ako ne koristimo ovu opciju, onda će se promeniti vrednost promenljive lokalnog opsega i nakon završetka funkcije sve promenljive dobijaju svoje stare vrednosti. 
+
+Želimo da implementiramo funkciju koja inkrementira vrednost neke promenljive. Da bismo to uradili, potrebno je da prosledimo ime promenljive (na taj način imamo i vrednost ako dereferenciramo promenljivu tj. njeno ime):
 ```
 function(increment var)
     math(EXPR new_value "${${var}} + 1")
@@ -442,9 +457,16 @@ set(value 10)
 increment(value)
 message("Result is ${value}!")
 ```
+- Očekivani izlaz: `Result is 11!`.
 - Potrebno je da razgraničimo neke stvari:
     * `var` ima vrednost `"var"` tj. ovo je niska.
     * `${var}` ima vrednost `"value"` tj. ime promenljive koju smo prosledili.
     * `${${var}}` ima vrednost `"10"` tj. vrednost promenljive koju smo prosledili.
 
-### 
+## Reference i dodatni materijali
+
+[How to CMake Good](https://www.youtube.com/watch?v=_yFPO1ofyF0&list=PLK6MXr8gasrGmIiSuVQXpfFuE1uPT615s&index=1&ab_channel=vector-of-bool)
+
+[More Modern CMake - Deniz Bahadir](https://www.youtube.com/watch?v=y7ndUhdQuU8)
+
+[Oh no! More Modern CMake - Deniz Bahadir](https://www.youtube.com/watch?v=y9kSr5enrSk&ab_channel=MeetingCpp)

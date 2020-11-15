@@ -57,7 +57,7 @@ show_name("Banana" "Ignore This")
 # Funkcija sa proizvoljnim brojem argumenata
 function(show_words)
     foreach(arg IN LISTS ARGV)
-        message(${arg})
+        message(STATUS ${arg})
     endforeach()
 endfunction()
 
@@ -71,4 +71,4 @@ endfunction()
 
 set(value 10)
 increment(value)
-message("Result is ${value}!")
+message(STATUS "Result is ${value}!")
