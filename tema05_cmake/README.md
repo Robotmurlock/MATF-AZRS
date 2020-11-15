@@ -107,4 +107,72 @@ The following are some of the valid targets for this Makefile:
     * `code CMakeFiles/hello.dir/main.cpp.s`
 - Naravno, komandom `make` (ili `make hello`) dobijamo izvršnu datoteku koju možemo da pokrenemo.
 
+## Drugi primer (02_library)
 
+Želimo da napravimo biblioteku za rad sa niskama u `C++`-u. Standardna biblioteka nam već nudi `string` 
+klasu sa funkcijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okvir standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
+po tom specijalnom karakteru. Primer:
+    * `split("Ahoy there matey!", ' ') = ["Ahoy", "there", "matey"]`
+    * `split("123,456,789", ',') = ["123", "456", "789"]`
+
+- Želimo da implementiramo ovu funkciju u našoj biblioteci i da je testiramo. Za testiranje pišemo odvojen kod `test.cpp`, a kompilaciju celog koda želimo da apstrahujemo preko `cmake`.
+- Za testiranje biblioteke koristimo [Arange-Act-Assert](https://wiki.c2.com/?ArrangeActAssert) obrazac bez nekog naprednog `framework`-a za testiranje, već samo `assert` funkciju.
+- Potrebno je da se pogleda kod za datoteke `string_lib.cpp` `string_lib.hpp` i `test.cpp` u `02_library`
+direktorijumu.
+- Potrebno je da se napravi izvršna datoteka na osnovu prethodno navedenog izvornog koda:
+    * `code CMakeLists.txt`
+- Već znamo da napišemo osnovne elemente `cmake` datoteke:
+```
+cmake_minimum_required(VERSION 3.16)
+project(SplitLibrary VERSION 1.0.0)
+
+add_executable(run_test test.cpp)
+```
+- U odnosu na prethodni primer, potrebne su nam dve stvari: Dodavanje biblioteka i linkovanje biblioteka sa objektnim kodom.
+- Za dodavanje biblioteka za prevođenje se koristi `add_library`:
+```
+add_library(
+    string_library
+    string_lib.hpp
+    string_lib.cpp
+)
+```
+- Prvo se navodi ime biblioteke, pa onda redom potrebne datoteke:
+```
+add_library(
+    <name>
+    [source1]
+    [source2]
+    ...
+    [sourceK]
+)
+```
+- Nakon toga je potrebno da se definiše linkovanje preko `target_link_libraries`:
+    * `target_link_libraries(run_test PRIVATE string_library)`
+- Prvo se navodi ime ciljne izvršne datoteke, pa ime biblioteke:
+    * `target_link_libraries(<name> ... <lib_name> ...)`
+- Konačan oblik `CMakeLists.txt` datoteke:
+```
+cmake_minimum_required(VERSION 3.16)
+project(SplitLibrary VERSION 1.0.0)
+
+add_library(
+    string_library
+    string_lib.hpp
+    string_lib.cpp
+)
+
+add_executable(run_test test.cpp)
+
+target_link_libraries(run_test PRIVATE string_library)
+```
+- Sada možemo da napravimo `build` direktorijum i da pokrenemo `cmake`:
+    * `mkdir build`
+    * `cd build`
+    * `cmake -G "Unix Makefiles" ..`
+- Možemo da iskoristimo generisan `Makefile` da dobijemo izvršnu datoteku:
+    * `make`
+- Pokrećemo testove:
+    * `./run_test`
+- Očekivani izlaz: `Tests passed!`
+- **Napomena:** Ako promenimo kod, ne moramo opet da pokrećemo `cmake`, već će to biti urađeno kada pokrenemo komandu `make` (ne moramo da se brinemo o konfiguraciji projekta).
