@@ -176,3 +176,25 @@ target_link_libraries(run_test PRIVATE string_library)
     * `./run_test`
 - Očekivani izlaz: `Tests passed!`
 - **Napomena:** Ako promenimo kod, ne moramo opet da pokrećemo `cmake`, već će to biti urađeno kada pokrenemo komandu `make` (ne moramo da se brinemo o konfiguraciji projekta).
+
+
+
+- Kada koristimo `add_library`, podrazumevan tip biblioteke je `STATIC`. Alternativni tipovi su `SHARED` i `MODULE`. Tip se navodi nakon imena (ako se navede):
+```
+add_library(
+    <name>
+    [STATIC|SHARED|MODULE]
+    [source1]
+    [source2]
+    ...
+    [sourceK]
+)
+```
+- Tip `MODULE` se koristi da se označi da biblioteka predstavlja neki `plugin` i ne treba da se linkuje.
+- Razlike između `STATIC` i `SHARED`:
+    * Ako je biblioteka `STATIC`, onda se kod biblioteke direktno povezuje sa programom za vreme kompilacije. Program kopira kod biblioteke koji dodaje na svoj kod.
+    * Ako je biblioteka `SHARED`, onda se kod biblioteke referencira od strane programa za vreme izvršavanja. 
+    * Biblioteke tipa `STATIC` zauzimaju više mesta (veće binarne datoteke). Kod je već tu, pa ne postoji
+    dodatan trošak referenciranja.
+    * Biblioteke tipa `SHARED` zauzimaju manje mesta, ali je odvojena, zauzima manje mesta i ima dodatni trošak. Prednost je u tome što se biblioteka može zameniti sa sličnom bibliotekom koja možda ima 
+    bolje performanse u nekim slučajevima, ali ne mora da se opet prevodi kod.
