@@ -198,3 +198,69 @@ add_library(
     dodatan trošak referenciranja.
     * Biblioteke tipa `SHARED` zauzimaju manje mesta, ali je odvojena, zauzima manje mesta i ima dodatni trošak. Prednost je u tome što se biblioteka može zameniti sa sličnom bibliotekom koja možda ima 
     bolje performanse u nekim slučajevima, ali ne mora da se opet prevodi kod.
+
+## Treći primer (03_project)
+
+- Želimo da iskoristimo biblioteku prethodnog iz prethodnog primera da implementiramo program koji vraća broj linija i broj reči ulazne datoteke. Demonstracija:
+```
+This is first line
+This line has 5 words
+This line does not have 5 words
+This is just another line
+Savvy
+```
+- Ako pokrenemo program, očekivani izlaz je:
+```
+Number of lines: 5
+Number of words: 22
+```
+- Sada već imamo malo komplikovaniji projekat i želimo da ga organizujemo u poddirektorijume:
+    * `lib` direktorijum koji sadrži prethodno napisanu biblioteku sa testovima.
+    * `src` direktorijum koji sadrži kod programa.
+    * `root` direktorijum tj. roditeljski direktorijum.
+- Pravimo `CMakeLists.txt` za `lib` i `root` direktorijume.
+- Dodatno pravimo `build` direktorijum.
+- Već imamo stari `CMakeLists.txt` za `lib` direktorijum. Potrebno je izvršiti modifikacije.
+- Korenski `CMakeLists.txt`:
+```
+cmake_minimum_required(VERSION 3.16)
+project(MyProgram VERSION 1.0.0)
+
+add_subdirectory(string_lib)
+
+add_executable(myprogram src/main.cpp)
+
+target_link_libraries(myprogram PRIVATE string_lib)
+```
+- Imamo novu ključna opcija `add_subdirectory` koju koristimo kada želimo da dodamo neki poddirektorijum, što u ovom slučaju želimo da uradimo za `lib`. Dobijamo slično funkcionalnost kao kad bi kopirali kod iz `CMakeLists.txt` iz poddirektorijuma i ažurirali relativne putanje. Datoteka `CMakeLists.txt` u `lib` direktorijumu:
+```
+add_library(
+    string_lib
+    string_lib.hpp
+    string_lib.cpp
+)
+
+target_include_directories(string_lib PUBLIC "$(CMAKE_CURRENT_SOURCE_DIR)")
+```
+- Još jedna opcija kojom definišemo `include` putanju do biblioteke, što nam omogućava da ne razmišljamo o relativnim putanjama. Umesto `#include "../string_lib/string.lib.hpp"` možemo da napišemo sad `#include <string_lib.hpp>`.
+- Sada možemo da konfigurišemo projekat u `build`-u sa `cmake -G "Unix Makefiles" ..`
+- Očekivani oblik izlaza:
+```
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/mokoyo/Desktop/ALATI/MATF-AZRS/tema05_cmake/03_project/build
+```
+- Sada možemo da pokrenemo generisani `Makefile`:
+    * `make`
+- Očekivani oblik izlaza:
+```
+[ 25%] Building CXX object string_lib/CMakeFiles/string_lib.dir/string_lib.cpp.o
+[ 50%] Linking CXX static library libstring_lib.a
+[ 50%] Built target string_lib
+[ 75%] Building CXX object CMakeFiles/myprogram.dir/src/main.cpp.o
+[100%] Linking CXX executable myprogram
+[100%] Built target myprogram
+```
+- Ako pokrenemo program, dobićemo očekivani rezultat.
+
+Kod opcije `target_include_directories` koristili smo ključnu reč `PUBLIC`. Alternative su `PRIVATE` i `INTERFACE`. Kada `CMake` kompilira ciljnu izvršnu datoteku, on koristi `INCLUDE_DIRECTORIES`, `COMPILE_DEFINITIONS` i `COMPILE_OPTIONS` promenljive. Kada koristimo `PRIVATE` opciju, `CMake` dopunjuje ove promenljive. Slična priča je i za `INTERFACE`, samo sa prefiksom `INTERFACE_*`. Ključna reč `PUBLIC` je kombinacija `PRIVATE` i `INTERFACE`. Za detaljnije informacije pogledati sledeći [artikal](https://leimao.github.io/blog/CMake-Public-Private-Interface/) ili [dokumentaciju](https://cmake.org/cmake/help/latest/command/target_include_directories.html).
