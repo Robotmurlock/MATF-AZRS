@@ -45,3 +45,30 @@ endforeach()
 foreach(idx RANGE 100) # Moze i: foreach(idx RANGE 50 100)
     message(STATUS "idx = ${idx}")
 endforeach()
+
+# Funkcija
+function(show_name my_name)
+    message(STATUS "My name is ${my_name}!")
+endfunction()
+
+show_name("Robotmurlock")
+show_name("Banana" "Ignore This")
+
+# Funkcija sa proizvoljnim brojem argumenata
+function(show_words)
+    foreach(arg IN LISTS ARGV)
+        message(${arg})
+    endforeach()
+endfunction()
+
+show_words(1 Two 3 Three 5)
+
+# Funkcija sa "povratnom vrednošću"
+function(increment var)
+    math(EXPR new_value "${${var}} + 1")
+    set(${var} "${new_value}" PARENT_SCOPE)
+endfunction()
+
+set(value 10)
+increment(value)
+message("Result is ${value}!")

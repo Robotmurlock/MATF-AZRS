@@ -377,7 +377,7 @@ Counter value is 8!
 Counter value is 9!
 ```
 
-Postoje i `foreach` petlje. Primer:
+Postoje i `foreach` petlje. Primer(foreach) 1:
 ```
 foreach(item IN ITEMS apple orange peach banana)
     message(STATUS "Look at this ${item}!")
@@ -390,7 +390,7 @@ Look at this orange!
 Look at this peach!
 Look at this banana!
 ```
-- Primer:
+- Primer(foreach):
 ```
 # Foreach iz opsega
 foreach(idx RANGE 100) # 
@@ -398,3 +398,53 @@ foreach(idx RANGE 100) #
 endforeach()
 ```
 - Može i: `foreach(idx RANGE 50 100)` tj. dva argumenta umesto jednog.
+
+### Funkcije
+
+Sintaksa za pisanje funkcije:
+```
+function(<name> [<arg1> ...])
+  <commands>
+endfunction()
+```
+
+Primer:
+```
+function(show_name my_name)
+    message(STATUS "My name is ${my_name}!")
+endfunction()
+
+show_name("Robotmurlock")
+show_name("Banana" "Ignore This")
+```
+
+- Ako u funkciju prosledimo više parametara nego što ona ima argumenata, onda funkcija ignoriše višak. 
+- Ako u funkciju prosledimo manje parametara nego što ona ima argumenata, onda dobijamo poruku o grešci.
+- Ukoliko želimo da implementiramo funkciju koja može da prima proizvoljan broj parametara, onda to možemo uraditi korišćenjem specijalne promenljive `ARGV` (lista):
+```
+function(show_words)
+    foreach(arg IN LISTS ARGV)
+        message(${arg})
+    endforeach()
+endfunction()
+
+show_words(1 Two 3 Three 5)
+```
+- Funkcije ne mogu direktno da vraćaju povratne vrednost. Umesto toga, moramo da se igramo sa opsezima. Komandu `set` ima opciju `PARENT_SCOPRE` gde naglašavamo da se vrši izmena na promenljivoj koja se nalazi u roditeljskom opsegu funkcije (opseg programa u našem slučaju). Ako ne koristimo ovu opciju, onda će se promeniti vrednost promenljive lokalno opsega i nakon završetka funkcija, sve promenljive dobijaju svoje stare vrednosti. 
+- Želimo da implementiramo funkciju koja inkrementira vrednost neke promenljive. Da bi to uradili, potrebno je da prosledimo ime promenljive (na taj način imamo i vrednost ako dereferenciramo):
+```
+function(increment var)
+    math(EXPR new_value "${${var}} + 1")
+    set(${var} "${new_value}" PARENT_SCOPE)
+endfunction()
+
+set(value 10)
+increment(value)
+message("Result is ${value}!")
+```
+- Potrebno je da razgraničimo neke stvari:
+    * `var` ima vrednost `"var"` tj. ovo je niska.
+    * `${var}` ima vrednost `"value"` tj. ime promenljive koju smo prosledili.
+    * `${${var}}` ima vrednost `"10"` tj. vrednost promenljive koju smo prosledili.
+
+### 
