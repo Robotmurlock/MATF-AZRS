@@ -19,7 +19,7 @@ na platformu na kojoj se projekat prevodi. Autor `CMake`-a je [kitware](https://
 
 [Windows installer](https://cmake.org/download/)
 
-## Prvi primer (01_hello)
+## Uvod u CMake (01_hello)
 
 - Želimo prvo da vidimo kako funkcioniše `cmake` na jednostavnom `hello world` programu. Nakon toga možemo da vidimo šta tu može da se poboljša.
 - Pravimo direktorijum za novi projekat: `mkdir 01_hello`, `cd 01_hello`
@@ -107,7 +107,7 @@ The following are some of the valid targets for this Makefile:
     * `code CMakeFiles/hello.dir/main.cpp.s`
 - Naravno, komandom `make` (ili `make hello`) dobijamo izvršnu datoteku koju možemo da pokrenemo.
 
-## Drugi primer (02_library)
+## Biblioteka (02_library)
 
 Želimo da napravimo biblioteku za rad sa niskama u `C++`-u. Standardna biblioteka nam već nudi `string` 
 klasu sa funkcijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okvir standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
@@ -199,7 +199,7 @@ add_library(
     * Biblioteke tipa `SHARED` zauzimaju manje mesta, ali je odvojena, zauzima manje mesta i ima dodatni trošak. Prednost je u tome što se biblioteka može zameniti sa sličnom bibliotekom koja možda ima 
     bolje performanse u nekim slučajevima, ali ne mora da se opet prevodi kod.
 
-## Treći primer (03_project)
+## Projekat (03_project)
 
 - Želimo da iskoristimo biblioteku prethodnog iz prethodnog primera da implementiramo program koji vraća broj linija i broj reči ulazne datoteke. Demonstracija:
 ```
@@ -264,3 +264,137 @@ target_include_directories(string_lib PUBLIC "$(CMAKE_CURRENT_SOURCE_DIR)")
 - Ako pokrenemo program, dobićemo očekivani rezultat.
 
 Kod opcije `target_include_directories` koristili smo ključnu reč `PUBLIC`. Alternative su `PRIVATE` i `INTERFACE`. Kada `CMake` kompilira ciljnu izvršnu datoteku, on koristi `INCLUDE_DIRECTORIES`, `COMPILE_DEFINITIONS` i `COMPILE_OPTIONS` promenljive. Kada koristimo `PRIVATE` opciju, `CMake` dopunjuje ove promenljive. Slična priča je i za `INTERFACE`, samo sa prefiksom `INTERFACE_*`. Ključna reč `PUBLIC` je kombinacija `PRIVATE` i `INTERFACE`. Za detaljnije informacije pogledati sledeći [artikal](https://leimao.github.io/blog/CMake-Public-Private-Interface/) ili [dokumentaciju](https://cmake.org/cmake/help/latest/command/target_include_directories.html).
+
+## Pisanje skriptova (04_script)
+
+Jezik `CMake` je jednostavan intepretirani jezik za skriptovanje koji nudi jednostavne funkcionalnost kao što su: promenljive, manipulacija niski, rad sa nizovima, funkcije i slično. 
+
+### Sintaksa
+
+Oblik komandi u `CMake` je `command(<arg1> <arg2> ... <argK>)`. Komande se izvršavaju jedna za drugom.
+Pored komandi, možemo da pišemo i komentare, gde je sintaksa ista  kao u `Python`-u tj. komentar počinje sa `#`.
+
+### Promenljive i poruke
+
+Promenljive se mogu definisati komandom `set(<name> <value>)`. Vrednosti promenljivih se dobijaju dereferenciranjem: `${<name>}`.
+
+Poruke se pišu komandom `message([mode] <text1> <text2> ... <textK>)`, gde se vrši konkatenacija niza argumenata niski u jednu nisku i ispisuje na standardni izlaz. Pogledati modove [ovde](https://cmake.org/cmake/help/latest/command/message.html). `CMake` sve tritara kao niske. Ako želimo da dodelimo vrednost koja ima razmake, onda je potrebno stavi tu vrednost pod navodnike. Primer:
+    * Izlaz za `message(STATUS One Two Three)` je `OneTwoThree`
+    * Izlaz za `message(STATUS "One Two Three")` je `One Two Three`
+
+- Posmatrajmo sledeći kod:
+```
+set(MY_VAR "[1, 2, 3, 4]")
+message(STATUS "This is my variable \"${MY_VAR}\" and this is my project name \"${PROJECT_NAME}\"")
+```
+- Očekivani izlaz je:
+```
+This is my variable "[1, 2, 3, 4]" and this is my project name "MyProject"
+```
+- Komanda `project` takođe definiše promenljivu `PROJECT_NAME` koja sadrži ime projekta.
+
+### Kontrola toka
+
+Sintaksa za `if-else`:
+```
+if(<condition>)
+  <commands>
+elseif(<condition>) # optional block, can be repeated
+  <commands>
+else()              # optional block
+  <commands>
+endif()
+```
+- Vrednost izraza `<condition>` je tačna ako nije netačna.
+- Vrednost izraza `<condition>` je netačna ako se nalazi na [list](https://cmake.org/cmake/help/latest/command/if.html) netačnih vrednost u dokumentaciji. Primer `FALSE` ima netačnu vrednost.
+- Operator `STREQUAL` služi za poređenje niski:
+    * `<lhs> STREQUAL <rhs>`
+- Postoje operatori `NOT`, `AND` i `OR` i imaju očekivano ponašanje:
+    * `NOT <condition>`
+    * `<lhs> AND <rhs>`
+    * `<lhs> OR <rhs>`
+- Postoji operator `MATCH` za proveri da li se neka niska poklapa sa nekim regularnim izrazom:
+    * `<lhs> MATCHES <rhs>`
+
+Primeri:
+```
+if("TRUE")
+    message("Example A - Case 1")
+else()
+    message("Example A - Case 2")
+endif()
+
+if("FALSE")
+    message("Example B - Case 1")
+else()
+    message("Example B - Case 2")
+endif()
+
+If("This is an array [1, 2, 3, 4, 5]" MATCHES ".*[\[]([0-9]|,|[ ])+[\]].*")
+    message("Example C - String contains an array!")
+else()
+    message("Example C - String doesn't contain an array!")
+endif()
+```
+- Očekivani izlaz:
+```
+Example A - Case 1
+Example B - Case 2
+Example C - String contains an array!
+```
+
+Takođe, možemo koristiti petlje tj. `while` sa sledećom sintaksom:
+```
+while(<condition>)
+  <commands>
+endwhile()
+```
+
+- Za vežbu možemo napisati kod koji ispisuje neku poruku 10 puta. Brojač možemo da definišemo kao promenljivu koja ima početnu vrednost 0 i petlja se izvršava dok se vrednost brojača manja od 10. Ovde nam nedostaju logički operatori i aritmetički operatori za ažuriranje promenljive brojača.
+- Logički operator `LESS` i `GREATER` koji vraćaju tačnu ili netačnu vrednost:
+    * `<lhs> LESS <rhs>`
+    * `<lhs> GREATER <rhs>`
+- Komanda `math` tj. `math(EXPR <name> <expression>)` dodeljuje vrednost izraza nekoj promenljivoj.
+- Primer:
+```
+set(cnt 0)
+while(cnt LESS 10)
+    message(STATUS "Counter value is ${cnt}!")
+    math(EXPR cnt "${cnt} + 1")
+endwhile()
+```
+- Izlaz:
+```
+Counter value is 0!
+Counter value is 1!
+Counter value is 2!
+Counter value is 3!
+Counter value is 4!
+Counter value is 5!
+Counter value is 6!
+Counter value is 7!
+Counter value is 8!
+Counter value is 9!
+```
+
+Postoje i `foreach` petlje. Primer:
+```
+foreach(item IN ITEMS apple orange peach banana)
+    message(STATUS "Look at this ${item}!")
+endforeach()
+```
+- Izlaz:
+```
+Look at this apple!
+Look at this orange!
+Look at this peach!
+Look at this banana!
+```
+- Primer:
+```
+# Foreach iz opsega
+foreach(idx RANGE 100) # 
+    message(STATUS "idx = ${idx}")
+endforeach()
+```
+- Može i: `foreach(idx RANGE 50 100)` tj. dva argumenta umesto jednog.
