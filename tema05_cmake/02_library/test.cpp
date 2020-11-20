@@ -13,21 +13,28 @@ int main()
     const char del2 = ',';
     const char del3 = '#';
 
-    // Arrange
-    const std::vector<std::string> expected_result1{"hello", "darkness,", "my", "old", "friend!"};
-    const std::vector<std::string> expected_result2{"hello darkness", " my old friend!"};
-    const std::vector<std::string> expected_result3{"hello darkness, my old friend!"};
-    const std::vector<std::string> expected_result4{};
-    const std::vector<std::string> expected_result5{};
-    const std::vector<std::string> expected_result6{"hello darkness", " my old friend!"};
+    // Act
+    const std::vector<std::string> result1 = split(data, del1);;
+    const std::vector<std::string> result2 = split(data, del2); ;
+    const std::vector<std::string> result3 = split(data, del3);
+    const std::vector<std::string> result4 = split(empty, del2);
+    const std::vector<std::string> result5 = split(all_dels, del3);
+    const std::vector<std::string> result6 = split(mlt_dels, del2);
 
     // Assert
-    assert(split(data, del1) == expected_result1);
-    assert(split(data, del2) == expected_result2);
-    assert(split(data, del3) == expected_result3);
-    assert(split(empty, del2) == expected_result4);
-    assert(split(all_dels, del3) == expected_result5);
-    assert(split(mlt_dels, del2) == expected_result6);
+    const std::vector<std::string> expected_result1 = std::vector<std::string>{"hello", "darkness,", "my", "old", "friend!"};
+    const std::vector<std::string> expected_result2 = std::vector<std::string>{"hello darkness", " my old friend!"};
+    const std::vector<std::string> expected_result3 = split(data, del3);
+    const std::vector<std::string> expected_result4 = split(empty, del2);
+    const std::vector<std::string> expected_result5 = split(all_dels, del3);
+    const std::vector<std::string> expected_result6 = split(mlt_dels, del2);
+
+    assert(result1 == expected_result1);
+    assert(result2 == expected_result2);
+    assert(result3 == std::vector<std::string>{"hello darkness, my old friend!"});
+    assert(result4 == std::vector<std::string>{});
+    assert(result5 == std::vector<std::string>{});
+    assert(result6 == std::vector<std::string>{"hello darkness", " my old friend!"});
 
     std::cout << "Tests passed!" << std::endl;
 
