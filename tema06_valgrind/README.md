@@ -9,7 +9,7 @@
 `sudo apt install valgrind` (Ubuntu, Debian, etc.)
 `sudo yum install valgrind` (RHEL, CentOS, Fedora, etc.)
 
-## 01_malloc
+## Uvod u Valgrind (01_malloc)
 
 Najbolje da prvo testiramo `Valgrind` na nekom jednostavnom primeru:
 ```
@@ -100,6 +100,85 @@ ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 - Ovo je idealan slučaj: `All heap blocks were freed -- no leaks are possible`.
 - **Napomena:** `Valgrind` nam govori koji blok je alociran, a nije oslobođen i na to nam je i pokazao u kodu.
 
+## Primer izgubljene reference (02_function_local_pointer)
+
+Imamo sledeći kod:
+```
+#include <stdlib.h>
+#include <stdint.h>
+
+struct _List {
+    int32_t* data;
+    int32_t length;
+};
+typedef struct _List List;
+
+List* resizeArray(List* array) {
+    int32_t* dPtr = array->data;
+    dPtr = realloc(dPtr, 15 * sizeof(int32_t)); //doesn't update array->data
+    return array;
+}
+
+int main() {
+    List* array = calloc(1, sizeof(List));
+    array->data = calloc(10, sizeof(int32_t));
+    array = resizeArray(array);
+
+    free(array->data);
+    free(array);
+    return 0;
+}
+```
+- Ovo je slična greška koja se pojavljuje u jednom primeru za `gdb` alat. Međutim, ovaj program ima `nevidljiv` bag u smislu da ako pokrenemo program, on će raditi bez problema. Ovaj bag utiče samo na performanse (koristi više memorije). Ako pokrenemo program, možemo čak da pomislimo da sve radi kako treba. Uvek možemo `za svaki slučaj` da pokrenemo `valgrind`:
+```
+valgrind --leak-check=full \
+         --show-leak-kinds=all \
+         --track-origins=yes \
+         --log-file=log.txt \
+         ./main.out
+```
+- Očekivani oblik izlaza:
+```
+Invalid free() / delete / delete[] / realloc()
+   at 0x483CA3F: free (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+   by 0x109215: main (main.c:21)
+ Address 0x4a61090 is 0 bytes inside a block of size 40 free'd
+   at 0x483DFAF: realloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+   by 0x1091B4: resizeArray (main.c:12)
+   by 0x109202: main (main.c:19)
+ Block was alloc'd at
+   at 0x483DD99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+   by 0x1091EC: main (main.c:18)
+```
+- Možemo da primetimo sledeće iz prvog dela analize:
+    * Imamo jedno neuspešno oslobadjanje (npr. oslobadjanje pogrešno bloka).
+    * Blok od 40 bajtova tj. `calloc(10, sizeof(int32_t))` blok je oslobođen u f-ji `realloc` na `12.` liniji, što je i očekivano ponašanje. 
+    * Blok od 60 bajtova tj. `realloc(dPtr, 15 * sizeof(int32_t))` blok nije oslobođen i procureo je.
+```
+ HEAP SUMMARY:
+     in use at exit: 60 bytes in 1 blocks
+   total heap usage: 3 allocs, 3 frees, 116 bytes allocated
+ 
+ 60 bytes in 1 blocks are definitely lost in loss record 1 of 1
+    at 0x483DFAF: realloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+    by 0x1091B4: resizeArray (main.c:12)
+    by 0x109202: main (main.c:19)
+ 
+ LEAK SUMMARY:
+    definitely lost: 60 bytes in 1 blocks
+    indirectly lost: 0 bytes in 0 blocks
+      possibly lost: 0 bytes in 0 blocks
+    still reachable: 0 bytes in 0 blocks
+         suppressed: 0 bytes in 0 blocks
+ 
+ For lists of detected and suppressed errors, rerun with: -s
+ ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
+```
+- Ovde vidimo da postoje 3 alokacije i 3 dealokacije. Pošto je jedna dealokacije neuspešna, ostaje nam jedan procureo blok.
+- Razlog zašto je blok iz f-je `resizeArray` procureo je zbog toga štoa `array->data` nije ažuriran. Ako se doda linija `array->data = dPtr` pre `return` naredbe, problem je rešen.
+- **Problem:** izgubljena referenca na blok memorije.
+
+ 
 ## Reference
 
 
