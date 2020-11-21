@@ -1,6 +1,6 @@
 # Valgrind
 
-[Valgrind](https://valgrind.org/) je `framework` za alate za dinamički analizu programa. Koristi se kao pomoć u otklanjanju bagova sa memorijom i nitima. Dakle, `Valgrind` je debager, jer predstavlja alat za debagovanje. Ovaj alat se pretežno koristi za `C/C++`.
+[Valgrind](https://valgrind.org/) je `framework` za alate za dinamičku analizu programa. Koristi se kao pomoć u otklanjanju bagova sa memorijom i nitima. Dakle, `Valgrind` je debager, jer predstavlja alat za debagovanje. Ovaj alat se pretežno koristi za `C/C++`.
 
 ## Instalacija
 
@@ -10,7 +10,7 @@
 
 `sudo yum install valgrind` (RHEL, CentOS, Fedora, etc.)
 
-## Uvod u Valgrind (01_malloc)
+## Memcheck (01_malloc)
 
 Najbolje da prvo testiramo `Valgrind` tj. `memcheck` na nekom jednostavnom primeru:
 ```
