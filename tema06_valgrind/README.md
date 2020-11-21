@@ -286,9 +286,65 @@ int main()
 }
 ```
 
-### 05_threads
+### 05_helgrind
 
-- Možemo da uradimo jedan klasičan zadatak za demonstraciju rada sa nitima u `C++`-u. Želimo da sumiramo jedan veliki vektor tako što ga podelimo na 10 približno jednakih celina, gde svaka nit sumira tu jednu celinu. 
+- Sada možemo da demonstriramo rad alata `helgrind` nad sledećim jednostanim primerom:
+```
+#include <iostream>
+#include <thread>
+
+int global_value = 0;
+
+void inc_value()
+{
+    global_value++;
+}
+
+int main()
+{
+    std::thread thread(inc_value);
+    global_value++;
+    thread.join();
+
+    return 0;
+}
+```
+- Imamo neku globalnu promenljivu koju ažuriraju glavni program i napravljena nit. Da li je ovo problematično? Ako nismo sigurni, možemo da pitamo `helgrind`-a:
+  * `g++ -g -o main.out main.cpp -lpthread`
+  * `valgrind --tool=helgrind --log-file=log.txt ./main.out`
+- Ako pogledamo `log.txt`, vidimo da svašta tu piše. Ovde izdvajamo interesatne stvari:
+```
+Thread #1 is the program's root thread
+```
+- Alat `helgrind` indeksira glavni program (glavnu nit) sa `#1`
+```
+---Thread-Announcement------------------------------------------
+
+Thread #2 was created
+   at 0x4BB3282: clone (clone.S:71)
+   by 0x487A2EB: create_thread (createthread.c:101)
+   ....
+   by 0x1092B1: main (main.cpp:13)
+```
+- Takođe nam govori kojim su se redosledom koje niti napravile i gde. Zbog preglednosti su obrisani delovi koji nam nisu interesatni. Ovde nam je rečeno da je nit `#2` napravljena u `main` f-ji na liniji `13` (što i jeste tačno ako pogledamo kod).
+```
+Possible data race during read of size 4 at 0x10C01C by thread #1
+Locks held: none
+   at 0x1092B2: main (main.cpp:14)
+
+This conflicts with a previous write of size 4 by thread #2
+Locks held: none
+   at 0x10927A: inc_value() (main.cpp:8)
+```
+- Postoji opasnost od [trke za resurse (data race)](https://docs.oracle.com/cd/E19205-01/820-0619/geojs/index.html#:~:text=A%20data%20race%20occurs%20when,their%20accesses%20to%20that%20memory.). Trka za resurse nastaje kada dve niti u okviru jednog procesa:     
+  * pristupaju istom resursu (promenljivoj)
+  * barem jedna nit piše (menja vrednost)
+  * ne postoji međusobno isključivanje (mutex)
+- Alat nam kaže da postoji konflikt između niti `#1` na liniji `14` i niti `#2` na liniji `8`. Tu vidimo da je promenljiva tj. resurs `global_value` kritičan i da mora da se napravi eksluzivan pristup (muteks).
+
+### 06_helgrind
+
+- Možemo da uradimo jedan klasičan zadatak za demonstraciju rada sa nitima i alata `helgrind`. Želimo da sumiramo jedan veliki vektor tako što ga podelimo na 10 približno jednakih celina, gde svaka nit sumira tu jednu celinu. 
 - U `input.txt` datoteci se nalazi 10000 brojeva od 1 do 10000 (bez ponavljanja). Rešenje možemo da izračunamo gausovom formulom: `50005000`. 
 
 #### broken.cpp
@@ -308,11 +364,8 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
     std::cout << "[Thread " << id << "] Finished!" << std::endl;
 }
 ```
-- **Napomena:** Linija `std::this_thread::sleep_for (std::chrono::milliseconds(1));` je samo tu da poveća šansu da se izračuna pogrešan rezultat. Pošto zadatak nije toliko zahtevan po jednoj niti, može da svaka nit završi svoj posao pre nego što se napravi sledeća i tako dobije tačan rezultat.
-- Ako pokrenemo kod, onda verovatno nećemo dobiti tačan rezultat zbog [trke resursa (data race)](https://docs.oracle.com/cd/E19205-01/820-0619/geojs/index.html#:~:text=A%20data%20race%20occurs%20when,their%20accesses%20to%20that%20memory.). Trka za resurse nastaje kada dve niti u okviru jednog procesa:     
-  * pristupaju istom resursu (promenljivoj)
-  * barem jedna nit piše (menja vrednost)
-  * ne postoji međusobno isključivanje (mutex)
+- **Napomena:** Linija `std::this_thread::sleep_for (std::chrono::milliseconds(1));` je samo tu da poveća šansu da se izračuna pogrešan rezultat. Pošto zadatak nije toliko zahtevan po jednoj niti, može da svaka nit završi svoj posao pre nego što se napravi sledeća i da se tako dobije tačan rezultat.
+- Ako pokrenemo kod, onda verovatno nećemo dobiti tačan rezultat zbog `trke za resurse`.
 - U tom slučaju je potrebno izvršiti sihronizaciju niti. 
 - Možemo da iskoristimo `helgrind` da vidimo u čemu je problem: 
   * `valgrind --tool=helgrind --log-file=log.txt ./broken.out < input.txt`:
@@ -321,8 +374,8 @@ ERROR SUMMARY: 20461 errors from 18 contexts (suppressed: 582 from 65)
 ```
 - Ovo ne izgleda dobro, ali nam `helgrind` daje dosta informacija:
   * Redosled kreiranih niti (ovo zavisi od `OS`-a)
-  * Potencijalne trke resursa
-- Ako pogledamo ispis za trke resursa, vidimo nešto što nije mnogo čitljivo. To je zato što `helgrind` ispisuje ceo stek (sve što `C++` radi u "pozadini"), a nas interesuje samo `vsum` funkcija. Dovoljno je da ignorišemo sve posle `vsum` funkcije. Takođe možemo da obrišemo "ružan" deo. Rezultat je nešto ovako:
+  * Potencijalne trke za resursa
+- Ako pogledamo ispis za trke za resursa, vidimo nešto što nije mnogo čitljivo. To je zato što `helgrind` ispisuje ceo stek (sve što `C++` radi u "pozadini"), a nas interesuje samo `vsum` funkcija. Dovoljno je da ignorišemo sve posle `vsum` funkcije. Takođe možemo da obrišemo "ružan" deo. Rezultat izgleda nešto ovako:
 ```
 Possible data race during read of size 8 at 0x114058 by thread #3
 Locks held: none
