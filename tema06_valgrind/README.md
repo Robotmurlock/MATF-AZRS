@@ -7,11 +7,12 @@
 ### Linux
 
 `sudo apt install valgrind` (Ubuntu, Debian, etc.)
+
 `sudo yum install valgrind` (RHEL, CentOS, Fedora, etc.)
 
 ## Uvod u Valgrind (01_malloc)
 
-Najbolje da prvo testiramo `Valgrind` na nekom jednostavnom primeru:
+Najbolje da prvo testiramo `Valgrind` tj. `memcheck` na nekom jednostavnom primeru:
 ```
 #include <stdlib.h>
 
@@ -21,8 +22,8 @@ int main() {
 }
 ```
 - Unapred znamo da dolazi do curenja memorije koju ne oslobađamo nakon što pozovemo `malloc`.
-- Postoje `man` strane za `Valgrind` dokumentaciju: `man valgrind`.
-- Analizu započinjemo komandom `valgrind [options] [exe_file]` na izvršnom datotekom.
+- Postoje `man` strane za `Valgrind` dokumentaciju: `man valgrind`
+- Analizu započinjemo komandom `valgrind [options] [exe_file]` nad izvršnom datotekom.
 
 Opcije:
 - `--leak-check=full`: Ispisuje u detalje svako curenje memerije;
@@ -45,7 +46,7 @@ Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
 ```
 - Informacije o licenci i verziji `Valgrind`-a. Ovaj deo nam nije toliko interesantan trenutno.
-- Prefiks svake linije je izbačen zbog vidljivosti.
+- Prefiks svake linije je izbačen kako bi izlaz bio čitljiji.
 ```
 Command: ./main.out
 Parent PID: 4994
@@ -98,7 +99,7 @@ For lists of detected and suppressed errors, rerun with: -s
 ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 ```
 - Ovo je idealan slučaj: `All heap blocks were freed -- no leaks are possible`.
-- **Napomena:** `Valgrind` nam govori koji blok je alociran, a nije oslobođen i na to nam je i pokazao u kodu.
+- **Napomena:** `Valgrind` nam govori koji blok je alociran, a nije oslobođen.
 
 ## Primer izgubljene reference (02_function_local_pointer)
 
@@ -151,9 +152,9 @@ Invalid free() / delete / delete[] / realloc()
    by 0x1091EC: main (main.c:18)
 ```
 - Možemo da primetimo sledeće iz prvog dela analize:
-    * Imamo jedno neuspešno oslobadjanje (npr. oslobadjanje pogrešno bloka).
-    * Blok od 40 bajtova tj. `calloc(10, sizeof(int32_t))` blok je oslobođen u f-ji `realloc` na `12.` liniji, što je i očekivano ponašanje. 
-    * Blok od 60 bajtova tj. `realloc(dPtr, 15 * sizeof(int32_t))` blok nije oslobođen i procureo je.
+    * Imamo jedno neuspešno oslobadjanje (npr. oslobadjanje pogrešno bloka);
+    * Blok od 40 bajtova tj. `calloc(10, sizeof(int32_t))` blok je oslobođen u f-ji `realloc` na `12`-toj liniji, što je i očekivano ponašanje;
+    * Blok od 60 bajtova tj. `realloc(dPtr, 15 * sizeof(int32_t))` blok nije oslobođen (procureo je).
 ```
  HEAP SUMMARY:
      in use at exit: 60 bytes in 1 blocks
@@ -175,12 +176,12 @@ Invalid free() / delete / delete[] / realloc()
  ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
 ```
 - Ovde vidimo da postoje 3 alokacije i 3 dealokacije. Pošto je jedna dealokacije neuspešna, ostaje nam jedan procureo blok.
-- Razlog zašto je blok iz f-je `resizeArray` procureo je zbog toga štoa `array->data` nije ažuriran. Ako se doda linija `array->data = dPtr` pre `return` naredbe, problem je rešen.
+- Razlog zašto je blok iz f-je `resizeArray` procureo je zbog toga što `array->data` nije ažuriran. Ako se doda linija `array->data = dPtr` pre `return` naredbe, problem je rešen.
 - **Problem:** izgubljena referenca na blok memorije.
 
 ## RAII (03_raii)
 
-- Zadatak nam je da učitamo uzorak iz `input.txt` datoteke i izračunamo sredinu i standardnu devijaciju tog uzorka koristeći dinamičke nizove u c-u:
+- Zadatak nam je da učitamo uzorak iz `input.txt` datoteke, i izračunamo sredinu i standardnu devijaciju tog uzorka koristeći dinamičke nizove u c-u:
 
 ![mean](https://latex.codecogs.com/svg.latex?mean(x)%20=%20\frac{\sum_{i=1}^{n}x_i}{n})
 
@@ -191,10 +192,10 @@ Invalid free() / delete / delete[] / realloc()
   * Alokacija memorije za niz (potrebno je osloboditi memoriju);
 - U sledećim situacijama je potrebno prekinuti program:
   * Ako datoteka ne postoji (ovo nije problematično, jer se datoteka ne otvara i niz se ne alocira);
-  * Ako je `n<0`, gde je `n` prvi veličina uzorka (čita se iz datoteke);
-  * Ako je `n=1`;
-  * Ako je neki broj u nizu jednak `666`.
-- Ono što je posebno problematično u ovom slučaju je to što curenje memorije ne nastaje uvek. Nema curenja memorije u slučaju ispravnog ulaza. Ovde je korisno da se prave `unit` testovi za specijalne slučajeve (`za domaći`).
+  * Ako je `n<0`, gde je `n` veličina uzorka (prvi broj koji se čita iz datoteke);
+  * Ako je `n=1` (zbog `std` formule);
+  * Ako je neki broj u nizu jednak `666` (neprihvatljiv broj).
+- Ono što je posebno problematično u ovom slučaju je to što curenje memorije ne nastaje uvek. Nema curenja memorije u slučaju ispravnog ulaza. Ovde je korisno da se prave `unit` testovi za specijalne slučajeve (`za domaći`). **Napomena:** Ne pravimo `unit` testove zato što smo našli grešku, nego da bismo mogli da uočimo ovakav tip grešaka i proverimo da li su greške uklonjene nakon odgovarajućih promena.
 
 ### main_v1.c
 
@@ -203,7 +204,7 @@ Invalid free() / delete / delete[] / realloc()
 5
 1 2 3 4 5
 ```
-- Za ovaj ulaz nam `valgrind ./main.out` daje sledeći izlaz:
+- Za ovaj ulaz nam komanda `valgrind ./main.out` daje sledeći izlaz:
 ```
 HEAP SUMMARY:
     in use at exit: 0 bytes in 0 blocks
@@ -238,32 +239,78 @@ LEAK SUMMARY:
 ### main_v3.c
 
 - Bolje rešenje je da imamo jednu promenljivu `status` u kojoj čuvamo status funkcije:
-  * `OKAY       0`
-  * `NEGATIVE_N 1`
-  * `SMALL_N    2`
-  * `EVIL       4`
-- Funkcija se "uvek" izvršava do kraja. Na kraju funkcije se oslobađaju resursi i proverava se status funkcije. U ovom slučaju je to `check_status` funkcija. Na ovaj način manje razmišljamo o oslobađanju memorije u svakom specijalno slučaju. Jedini nezgodan slučaj koji ostaje je neuspešna alokacija niza, jer tada tada ne smemo da koristimo taj resurs (taj slučaj rešavamo na isti način). Takođe ovo rešenje nam omogućava da ispišemo sve greške koje su se desile ako nam je to od koristi. Potrebno je samo da koristimo stepeni dvojke za makroe ili enume i posmatramo celobrojnu promenljivu kao registar sa zastavicama. Ako je vrednost bita `1`, onda je došlo do te greške, a u suprotnom nije došlo do te greške. Ako je vrednost tog registra `0` svuda, onda nije došlo do greške.
+  * ```OKAY       0``` (Ako nije došlo do greške)
+  * ```NEGATIVE_N 1``` (Ako `n<0`)
+  * ```SMALL_N    2``` (Ako je `n==1`)
+  * ```EVIL       4``` (Ako je `xs[i]==666`)
+- Funkcija se "uvek" izvršava do kraja. Na kraju funkcije se oslobađaju resursi i proverava se status funkcije. U ovom slučaju `check_status` funkcija proverava `status`. Na ovaj način manje razmišljamo o oslobađanju memorije u svakom specijalno slučaju. Jedini nezgodan slučaj koji ostaje je neuspešna alokacija niza, jer tada tada ne smemo da koristimo taj resurs (taj slučaj rešavamo kao u prethodnom rešenju). Takođe ovo rešenje nam omogućava da ispišemo sve greške koje su se desile ako nam je to od koristi. Potrebno je samo da koristimo stepene dvojke za makroe ili enume i posmatramo celobrojnu promenljivu kao registar sa zastavicama. Ako je vrednost bita `1`, onda je došlo do te greške, a u suprotnom nije došlo do te greške. Ako je vrednost tog registra `0` za svaki bit, onda nije došlo do greške. Primer: Ako je `status==3`, onda je `n<0` i `n==1` (ovo nije moguće ako program ima normalno ponašanje).
 - Ovo predstavlja bolju praksu za programiranje u C-u, ali i dalje moramo da vodimo računa da ne koristimo resurse koji su "pokvareni".
 
 ### main_v4.cpp
 
 - Ako radimo u `C++`-u, postoji mnogo lakše rešenje: `RAII (Resource Acquisition Is Initialization)`. Ideja je jednostavna: Želimo da spojimo životni vek resursa sa životnim vekom objekta:
   * Pravimo `raii` strukturu za rad sa datotekama (ne koristimo klase i enkapsulaciju, jer želimo da nam kod što više liči na početni).
-  * Pravimo `raii` struktura za rad sa dinamičkim nizovima.
+  * Pravimo `raii` strukturu za rad sa dinamičkim nizovima.
 - Ovi objekti funkcionišu na sledeći način:
   * Konstruktor zauzima resurse;
   * Destruktor oslobađa resurse.
 - **Dobitak:** Gde god da prekinemo funkciju, poziva se destruktor objekta i oslobađa se memorija. 
 
+Struktura `raii_file`:
+```
+struct raii_file{
+    FILE* m_file;
+
+    raii_file(const char* file_name)
+    {
+        m_file = fopen(file_name, "r");
+        if(m_file == NULL)
+        {
+            printf("Error: File \"input.m_file.txt\" is missing!\n");
+            exit(-1);
+        }
+    }
+    ~raii_file()
+    {
+        free(m_file);
+    }
+};
+```
+- U konstruktoru se vrši provera da li je datoteka uspešno otvorena. Ako nije, program se prekida. 
+- Alternativa je da kontruktor izbaci izuzetak (bolje rešenje).
+
+Struktura `raii_array`:
+```
+struct raii_array{
+    double* m_arr;
+
+    raii_array(int n)
+    {
+        m_arr = (double*)malloc(n*sizeof(double));
+        if(m_arr == NULL)
+        {
+            printf("Errof: Failed to allocate!");
+            exit(-1);
+        }
+    }
+    ~raii_array()
+    {
+        free(m_arr);
+    }
+};
+```
+- U konstruktoru se vrši provera da li je niz uspešno alociran. Ako nije, program se prekida. 
+- Alternativa je da kontruktor izbaci izuzetak (bolje rešenje).
+
 ### main_v5.cpp
 
 - Još bolje rešenje je da koristimo strukture (klase) koje već postoje u `C++`-u:
-  * Vektor je `raii` dinamički niz;
-  * Strimovi mogu da zamene rad sa datotekama.
+  * Vektor je `raii` dinamički niz: `std::vector<type_t>`
+  * Strimovi mogu da zamene rad sa datotekama: `std::ifstream`
 
 ## Niti u C++-u
 
-`Valgrind` nam nudi alat `helgrind` koji služi da pronalaženje grešaka i predikciju potencijalnih grešaka pri radi sa nitima u `C++`-u. Prvo treba da naučimo (obnovimo) osnove sintakse za `C++` niti. Ovde se podrazumeva da znamo šta je `nit (thread)` i šta je `muteks (mutex)`.
+`Valgrind` nam nudi alat `helgrind` koji služi da pronalaženje grešaka i predikciju potencijalnih grešaka pri radu sa nitima u `C++`-u. Prvo treba da naučimo (obnovimo) osnove sintakse za `C++` niti. Ovde se podrazumeva da znamo šta je `nit (thread)` i šta je `muteks (mutex)`.
 
 ### 04_threads
 
@@ -284,6 +331,10 @@ int main()
     helloThread.join();
     return 0;
 }
+```
+- Očekivani rezultat programa:
+```
+Hello World!
 ```
 
 ### 05_helgrind
@@ -309,7 +360,7 @@ int main()
     return 0;
 }
 ```
-- Imamo neku globalnu promenljivu koju ažuriraju glavni program i napravljena nit. Da li je ovo problematično? Ako nismo sigurni, možemo da pitamo `helgrind`-a:
+- Imamo neku globalnu promenljivu koju ažuriraju glavna nit i napravljena nit. Da li je ovo problematično? Ako nismo sigurni, možemo da proverimo preko `helgrind` alata:
   * `g++ -g -o main.out main.cpp -lpthread`
   * `valgrind --tool=helgrind --log-file=log.txt ./main.out`
 - Ako pogledamo `log.txt`, vidimo da svašta tu piše. Ovde izdvajamo interesatne stvari:
@@ -345,7 +396,7 @@ Locks held: none
 ### 06_helgrind
 
 - Možemo da uradimo jedan klasičan zadatak za demonstraciju rada sa nitima i alata `helgrind`. Želimo da sumiramo jedan veliki vektor tako što ga podelimo na 10 približno jednakih celina, gde svaka nit sumira tu jednu celinu. 
-- U `input.txt` datoteci se nalazi 10000 brojeva od 1 do 10000 (bez ponavljanja). Rešenje možemo da izračunamo gausovom formulom: `50005000`. 
+- U `input.txt` datoteci se nalazi 10000 brojeva od 1 do 10000 (bez ponavljanja). Rešenje možemo da izračunamo [gausovom formulom](https://mathbitsnotebook.com/Algebra2/Sequences/SSGauss.html): `50005000`. 
 
 #### broken.cpp
 
@@ -374,8 +425,8 @@ ERROR SUMMARY: 20461 errors from 18 contexts (suppressed: 582 from 65)
 ```
 - Ovo ne izgleda dobro, ali nam `helgrind` daje dosta informacija:
   * Redosled kreiranih niti (ovo zavisi od `OS`-a)
-  * Potencijalne trke za resursa
-- Ako pogledamo ispis za trke za resursa, vidimo nešto što nije mnogo čitljivo. To je zato što `helgrind` ispisuje ceo stek (sve što `C++` radi u "pozadini"), a nas interesuje samo `vsum` funkcija. Dovoljno je da ignorišemo sve posle `vsum` funkcije. Takođe možemo da obrišemo "ružan" deo. Rezultat izgleda nešto ovako:
+  * Potencijalne trke za resurse
+- Ako pogledamo ispis za trke za resurse, vidimo nešto što nije mnogo čitljivo. To je zato što `helgrind` ispisuje ceo stek (sve što `C++` radi u "pozadini"), a nas interesuje samo `vsum` funkcija. Dovoljno je da ignorišemo sve posle `vsum` funkcije. Takođe možemo da obrišemo "ružan" deo. Rezultat izgleda nešto ovako:
 ```
 Possible data race during read of size 8 at 0x114058 by thread #3
 Locks held: none
@@ -389,12 +440,12 @@ Locks held: none
    by 0x49C8D5B: std::basic_ostream
    by 0x10A447: vsum(int, std::vector<int, std::allocator<int> > const&, int, int, int*) (broken.cpp:11)
 ```
-- Sada imamo nešto što je za čoveka čitljivo! Imamo konflitke strimove između niti `#3` i `#2` u funkciji `vsum`. Čak nam `helgrind` govori i da se radi o `11`-toj liniji:
+- Sada imamo nešto što je za čoveka čitljivo! Imamo konflitke strimova između niti `#3` i `#2` u funkciji `vsum`. Čak nam `helgrind` govori i da se radi o `11`-toj liniji:
 ```
 std::cout << "[Thread " << id << "] Started!" << std::endl;
 ```
 - Problem je u tome što obe niti koriste strim za standardni izlaz kao zajednički resurs. Potrebno je da napravimo `mutex` i zaključamo ovu liniju (tačnije resurs). Analogno je i za drugi ispis na `19`-toj liniji. 
-- Možemo da ispravimo ovo i pokrenemo opet `helgrind` kako bi videli da li smo ispravili sve greške.
+- Možemo da ispravimo ovo i pokrenemo opet `helgrind` kako bismo videli da li smo ispravili sve greške.
 - Postoji još jedna greška koja je možda očiglednija:
 ```
 Possible data race during read of size 4 at 0x1FFEFFF968 by thread #3
@@ -410,9 +461,10 @@ Locks held: none
 
 #### bad_fix.cpp
 
-- Najjednostavniji način da rešimo prethodni problem je da zaključamo celu f-ju `vsum`. Možemo da napravimo katanac na početku f-ji koji traje koliko i životni vek tog katanca (u ovom slučaju do kraja funkcije `vsum`):
+- Najjednostavniji način da rešimo prethodni problem je da zaključamo celu f-ju `vsum`. Možemo da napravimo katanac na početku f-je koji zauzima globalni muteks i traje koliko i životni vek tog objekta (u ovom slučaju do kraja funkcije `vsum`):
   * `const std::lock_guard<std::mutex> lock(mutex);`
 - Ovo je analogno sinhronizovanim blokovima i funkcijama u `Java`-i.
+- Opcija `lock_guard` je solidno rešenje ako funkcija ima više `return`-ova. Umesto da vodimo računa da otključamo zaključani muteks, možemo samo da napravimo katanac koji otključava svoj muteks pri pozivanju destruktora (slična priča kao RAII primer).
 ```
 std::mutex mutex;
 
@@ -459,7 +511,7 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
 
 #### better_fix.cpp
 
-- Prethodno rešenje rešava problem, ali možemo vrlo jednostavno povećati stepen paralelnosti. Pošto smo već podelili vektor na celine, ima smisla da za svaku celinu prvo izračunamo sumu u posebnoj promenljivoj `sum`, pa tek onda da zaključamo `result` i ažuriramo vrednost:
+- Prethodna rešenja rešavaju problem, ali možemo vrlo jednostavno povećati stepen paralelnosti. Pošto smo već podelili vektor na celine, ima smisla da za svaku celinu prvo izračunamo sumu u posebnoj promenljivoj `sum` (koja je lokalna za svaku nit), pa tek onda da zaključamo `result` i ažuriramo vrednost:
 ```
 std::mutex mutex;
 
@@ -513,6 +565,33 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
     mutex_stdout.unlock();
 }
 ```
+
+#### best_fix_with_atomic.cpp
+
+- Ovo rešenje je slično kao prethodno, ali umesto muteksa za zaključavanje `result` promenljive se koristi `atomička promenljiva (atomic_value)`. Ovo je kao da smo spojili `mutex_result` i `result` u jedan objekat i potencijalno ubrzali program, jer atomičke promenljive koriste mutekse nižeg nivoa (ovu činjenicu uzeti sa rezervom):
+```
+void vsum(int id, const std::vector<int>& vec, int start, int end, std::atomic<int> *result)
+{
+    mutex_stdout.lock();
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+    mutex_stdout.unlock();
+
+    int sum = 0;
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        sum += vec[i];
+    }
+
+    result->fetch_add(sum);
+
+    mutex_stdout.lock();
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+    mutex_stdout.unlock();
+}
+```
+
+**Napomena:** Ovde je predstavljeno više rešenja, ali na ispitu je dovoljno znati `helgrind` i barem jedan način za rešavanje datog problema. Uglavnom se svaki problem može rešiti preko muteksa.
 
 ## Reference
 

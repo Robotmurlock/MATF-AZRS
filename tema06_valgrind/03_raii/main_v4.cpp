@@ -8,6 +8,11 @@ struct raii_file{
     raii_file(const char* file_name)
     {
         m_file = fopen(file_name, "r");
+        if(m_file == NULL)
+        {
+            printf("Error: File \"input.m_file.txt\" is missing!\n");
+            exit(-1);
+        }
     }
     ~raii_file()
     {
@@ -21,6 +26,11 @@ struct raii_array{
     raii_array(int n)
     {
         m_arr = (double*)malloc(n*sizeof(double));
+        if(m_arr == NULL)
+        {
+            printf("Errof: Failed to allocate!");
+            exit(-1);
+        }
     }
     ~raii_array()
     {
@@ -31,11 +41,6 @@ struct raii_array{
 int main()
 {
     raii_file input("input.txt");
-    if(input.m_file == NULL)
-    {
-        printf("Error: File \"input.m_file.txt\" is missing!\n");
-        return -1;
-    }
     int n;
     fscanf(input.m_file, "%d", &n);
     if(n < 0)
