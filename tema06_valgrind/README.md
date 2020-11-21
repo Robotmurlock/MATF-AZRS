@@ -178,7 +178,89 @@ Invalid free() / delete / delete[] / realloc()
 - Razlog zašto je blok iz f-je `resizeArray` procureo je zbog toga štoa `array->data` nije ažuriran. Ako se doda linija `array->data = dPtr` pre `return` naredbe, problem je rešen.
 - **Problem:** izgubljena referenca na blok memorije.
 
- 
+## RAII (03_raii)
+
+- Zadatak nam je da učitamo uzorak iz `input.txt` datoteke i izračunamo sredinu i standardnu devijaciju tog uzorka koristeći dinamičke nizove u c-u:
+
+![mean](https://latex.codecogs.com/svg.latex?mean(x)%20=%20\frac{\sum_{i=1}^{n}x_i}{n})
+
+![std](https://latex.codecogs.com/svg.latex?std(x)%20=%20\sqrt{\frac{\sum_{i=1}^{n}(\overline{x}-x_i)^2}{n-1}})
+
+- Imamo dve problematične operacije ovde:
+  * Otvaranje datoteke `input.txt` (potrebno ju je zatvoriti);
+  * Alokacija memorije za niz (potrebno je osloboditi memoriju);
+- U sledećim situacijama je potrebno prekinuti program:
+  * Ako datoteka ne postoji (ovo nije problematično, jer se datoteka ne otvara i niz se ne alocira);
+  * Ako je `n<0`, gde je `n` prvi veličina uzorka (čita se iz datoteke);
+  * Ako je `n=1`;
+  * Ako je neki broj u nizu jednak `666`.
+- Ono što je posebno problematično u ovom slučaju je to što curenje memorije ne nastaje uvek. Nema curenja memorije u slučaju ispravnog ulaza. Ovde je korisno da se prave `unit` testovi za specijalne slučajeve (`za domaći`).
+
+### main_v1.c
+
+- Pogledajmo sledeći ulaz:
+```
+5
+1 2 3 4 5
+```
+- Za ovaj ulaz nam `valgrind ./main.out` daje sledeći izlaz:
+```
+HEAP SUMMARY:
+    in use at exit: 0 bytes in 0 blocks
+  total heap usage: 4 allocs, 4 frees, 5,632 bytes allocated
+
+All heap blocks were freed -- no leaks are possible
+```
+- Pogledajmo sledeći ulaz:
+```
+5
+1 2 666 4 5
+```
+- Za ovaj ulaz nam `valgrind ./main.out` daje sledeći izlaz:
+```
+HEAP SUMMARY:
+    in use at exit: 512 bytes in 2 blocks
+  total heap usage: 4 allocs, 2 frees, 5,632 bytes allocated
+
+LEAK SUMMARY:
+   definitely lost: 40 bytes in 1 blocks
+   indirectly lost: 0 bytes in 0 blocks
+     possibly lost: 0 bytes in 0 blocks
+   still reachable: 472 bytes in 1 blocks
+        suppressed: 0 bytes in 0 blocks
+```
+
+### main_v2.c
+
+- Možemo da vodimo računa da u svakom trenutku oslobodimo sve resurse pre nego što prekinemo funkciju. 
+- Problem kod ovog rešenja je što previše puta pišemo sličan kod za oslobađanje resursa, a velike su šanse da nam nešto promakne u nekom slučaju.
+
+### main_v3.c
+
+- Bolje rešenje je da imamo jednu promenljivu `status` u kojoj čuvamo status funkcije:
+  * `OKAY       0`
+  * `NEGATIVE_N 1`
+  * `SMALL_N    2`
+  * `EVIL       4`
+- Funkcija se "uvek" izvršava do kraja. Na kraju funkcije se oslobađaju resursi i proverava se status funkcije. U ovom slučaju je to `check_status` funkcija. Na ovaj način manje razmišljamo o oslobađanju memorije u svakom specijalno slučaju. Jedini nezgodan slučaj koji ostaje je neuspešna alokacija niza, jer tada tada ne smemo da koristimo taj resurs (taj slučaj rešavamo na isti način). Takođe ovo rešenje nam omogućava da ispišemo sve greške koje su se desile ako nam je to od koristi. Potrebno je samo da koristimo stepeni dvojke za makroe ili enume i posmatramo celobrojnu promenljivu kao registar sa zastavicama. Ako je vrednost bita `1`, onda je došlo do te greške, a u suprotnom nije došlo do te greške. Ako je vrednost tog registra `0` svuda, onda nije došlo do greške.
+- Ovo predstavlja bolju praksu za programiranje u C-u, ali i dalje moramo da vodimo računa da ne koristimo resurse koji su "pokvareni".
+
+### main_v4.cpp
+
+- Ako radimo u `C++`-u, postoji mnogo lakše rešenje: `RAII (Resource Acquisition Is Initialization)`. Ideja je jednostavna: Želimo da spojimo životni vek resursa sa životnim vekom objekta:
+  * Pravimo `raii` strukturu za rad sa datotekama (ne koristimo klase i enkapsulaciju, jer želimo da nam kod što više liči na početni).
+  * Pravimo `raii` struktura za rad sa dinamičkim nizovima.
+- Ovi objekti funkcionišu na sledeći način:
+  * Konstruktor zauzima resurse;
+  * Destruktor oslobađa resurse.
+- **Dobitak:** Gde god da prekinemo funkciju, poziva se destruktor objekta i oslobađa se memorija. 
+
+### main_v5.cpp
+
+- Još bolje rešenje je da koristimo strukture (klase) koje već postoje u `C++`-u:
+  * Vektor je `raii` dinamički niz;
+  * Strimovi mogu da zamene rad sa datotekama.
+
 ## Reference
 
 

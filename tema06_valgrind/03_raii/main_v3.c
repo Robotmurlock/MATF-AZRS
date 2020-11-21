@@ -46,6 +46,12 @@ int main()
 
     double sum = 0.0;
     double* xs = malloc(n*sizeof(double));
+    if(xs == NULL)
+    {
+        fclose(input);
+        printf("Errof: Failed to allocate!");
+        return -1;
+    }
     for(int i=0; i<n; i++)
     {
         double num;
@@ -65,7 +71,6 @@ int main()
 
     free(xs);
     fclose(input);
-
     check_status(status);
 
     printf("mean=%lf\n", mean);
