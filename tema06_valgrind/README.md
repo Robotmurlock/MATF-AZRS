@@ -261,9 +261,209 @@ LEAK SUMMARY:
   * Vektor je `raii` dinamički niz;
   * Strimovi mogu da zamene rad sa datotekama.
 
+## Niti u C++-u
+
+`Valgrind` nam nudi alat `helgrind` koji služi da pronalaženje grešaka i predikciju potencijalnih grešaka pri radi sa nitima u `C++`-u. Prvo treba da naučimo (obnovimo) osnove sintakse za `C++` niti. Ovde se podrazumeva da znamo šta je `nit (thread)` i šta je `muteks (mutex)`.
+
+### 04_threads
+
+Sinktaksa za pravljenje niti je sledeća: `std::thread threadName(func, arg1, arg2, ...)`. Kada se napravi objekat `thread`, on odmah poziva funkciju `func` i izvršava je. Ne postoji `.start()`  tj `.run()` metod kao u `Java`-i:
+```
+#include <iostream>
+#include <thread>
+
+void hello()
+{
+    std::cout << "Hello World!" << std::endl;
+}
+
+int main()
+{
+    // Pravi se objekat niti koji odmah zapocinje rad f-je hello()
+    std::thread helloThread(hello);
+    helloThread.join();
+    return 0;
+}
+```
+
+### 05_threads
+
+- Možemo da uradimo jedan klasičan zadatak za demonstraciju rada sa nitima u `C++`-u. Želimo da sumiramo jedan veliki vektor tako što ga podelimo na 10 približno jednakih celina, gde svaka nit sumira tu jednu celinu. 
+- U `input.txt` datoteci se nalazi 10000 brojeva od 1 do 10000 (bez ponavljanja). Rešenje možemo da izračunamo gausovom formulom: `50005000`. 
+
+#### broken.cpp
+
+- U suštini nam je samo interesantna funkcija `vsum`:
+```
+void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
+{
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        *result += vec[i];
+    }
+
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+}
+```
+- **Napomena:** Linija `std::this_thread::sleep_for (std::chrono::milliseconds(1));` je samo tu da poveća šansu da se izračuna pogrešan rezultat. Pošto zadatak nije toliko zahtevan po jednoj niti, može da svaka nit završi svoj posao pre nego što se napravi sledeća i tako dobije tačan rezultat.
+- Ako pokrenemo kod, onda verovatno nećemo dobiti tačan rezultat zbog [trke resursa (data race)](https://docs.oracle.com/cd/E19205-01/820-0619/geojs/index.html#:~:text=A%20data%20race%20occurs%20when,their%20accesses%20to%20that%20memory.). Trka za resurse nastaje kada dve niti u okviru jednog procesa:     
+  * pristupaju istom resursu (promenljivoj)
+  * barem jedna nit piše (menja vrednost)
+  * ne postoji međusobno isključivanje (mutex)
+- U tom slučaju je potrebno izvršiti sihronizaciju niti. 
+- Možemo da iskoristimo `helgrind` da vidimo u čemu je problem: 
+  * `valgrind --tool=helgrind --log-file=log.txt ./broken.out < input.txt`:
+```
+ERROR SUMMARY: 20461 errors from 18 contexts (suppressed: 582 from 65)
+```
+- Ovo ne izgleda dobro, ali nam `helgrind` daje dosta informacija:
+  * Redosled kreiranih niti (ovo zavisi od `OS`-a)
+  * Potencijalne trke resursa
+- Ako pogledamo ispis za trke resursa, vidimo nešto što nije mnogo čitljivo. To je zato što `helgrind` ispisuje ceo stek (sve što `C++` radi u "pozadini"), a nas interesuje samo `vsum` funkcija. Dovoljno je da ignorišemo sve posle `vsum` funkcije. Takođe možemo da obrišemo "ružan" deo. Rezultat je nešto ovako:
+```
+Possible data race during read of size 8 at 0x114058 by thread #3
+Locks held: none
+   at 0x49C88B3: std::basic_ostream
+   by 0x49C8D5B: std::basic_ostream
+   by 0x10A447: vsum(int, std::vector<int, std::allocator<int> > const&, int, int, int*) (broken.cpp:11)
+
+This conflicts with a previous write of size 8 by thread #2
+Locks held: none
+   at 0x49C8965: std::basic_ostream
+   by 0x49C8D5B: std::basic_ostream
+   by 0x10A447: vsum(int, std::vector<int, std::allocator<int> > const&, int, int, int*) (broken.cpp:11)
+```
+- Sada imamo nešto što je za čoveka čitljivo! Imamo konflitke strimove između niti `#3` i `#2` u funkciji `vsum`. Čak nam `helgrind` govori i da se radi o `11`-toj liniji:
+```
+std::cout << "[Thread " << id << "] Started!" << std::endl;
+```
+- Problem je u tome što obe niti koriste strim za standardni izlaz kao zajednički resurs. Potrebno je da napravimo `mutex` i zaključamo ovu liniju (tačnije resurs). Analogno je i za drugi ispis na `19`-toj liniji. 
+- Možemo da ispravimo ovo i pokrenemo opet `helgrind` kako bi videli da li smo ispravili sve greške.
+- Postoji još jedna greška koja je možda očiglednija:
+```
+Possible data race during read of size 4 at 0x1FFEFFF968 by thread #3
+Locks held: none
+   at 0x10A4CB: vsum(int, std::vector<int, std::allocator<int> > const&, int, int, int*) (broken.cpp:16)
+
+This conflicts with a previous write of size 4 by thread #2
+Locks held: none
+   at 0x10A4D3: vsum(int, std::vector<int, std::allocator<int> > const&, int, int, int*) (broken.cpp:16)
+```
+- Problematična linija je: `*result += vec[i];`
+- Potrebno je da zaključamo i ovaj resurs.
+
+#### bad_fix.cpp
+
+- Najjednostavniji način da rešimo prethodni problem je da zaključamo celu f-ju `vsum`. Možemo da napravimo katanac na početku f-ji koji traje koliko i životni vek tog katanca (u ovom slučaju do kraja funkcije `vsum`):
+  * `const std::lock_guard<std::mutex> lock(mutex);`
+- Ovo je analogno sinhronizovanim blokovima i funkcijama u `Java`-i.
+```
+std::mutex mutex;
+
+void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
+{
+    const std::lock_guard<std::mutex> lock(mutex);
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        *result += vec[i];
+    }
+
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+}
+```
+
+#### another_bad_fix.cpp
+
+- Možemo i zaključamo sve kritiče delove koda na osnovu `helgrind` analize:
+```
+std::mutex mutex;
+
+void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
+{
+    mutex.lock();
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+    mutex.unlock();
+
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        mutex.lock();
+        *result += vec[i];
+        mutex.unlock();
+    }
+
+    mutex.lock();
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+    mutex.unlock();
+}
+```
+
+#### better_fix.cpp
+
+- Prethodno rešenje rešava problem, ali možemo vrlo jednostavno povećati stepen paralelnosti. Pošto smo već podelili vektor na celine, ima smisla da za svaku celinu prvo izračunamo sumu u posebnoj promenljivoj `sum`, pa tek onda da zaključamo `result` i ažuriramo vrednost:
+```
+std::mutex mutex;
+
+void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
+{
+    mutex.lock();
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+    mutex.unlock();
+
+    int sum = 0;
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        sum += vec[i];
+    }
+
+    mutex.lock();
+    *result += sum;
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+    mutex.unlock();
+}
+```
+- Sada se `result` zaključava samo `10` puta (jednom za svaku nit) i jos bitnije, procenat vremena tokom kojeg je ovaj resurs zaključan je značajno manji. 
+
+#### best_fix.cpp
+
+- Poslednja optimizacija se odnosi na činjenicu da je skoro uvek bolje imati više specijalizovanih muteksa nego jedan opšti. Nema potrebe da zaključavamo `result` promenljivu ako je potrebno da pišemo nešto na standardni izlaz! Zamenjujemo `mutex` sa `mutex_result` i `mutex_stdout`.
+```
+std::mutex mutex_stdout;
+std::mutex mutex_result;
+
+void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
+{
+    mutex_stdout.lock();
+    std::cout << "[Thread " << id << "] Started!" << std::endl;
+    mutex_stdout.unlock();
+
+    int sum = 0;
+    for(int i=start; i<end; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        sum += vec[i];
+    }
+
+    mutex_result.lock();
+    *result += sum;
+    mutex_result.unlock();
+
+    mutex_stdout.lock();
+    std::cout << "[Thread " << id << "] Finished!" << std::endl;
+    mutex_stdout.unlock();
+}
+```
+
 ## Reference
 
-
+[Helgrind](https://www.valgrind.org/docs/manual/hg-manual.html)
 
 [Valgrind](https://valgrind.org/)
 
