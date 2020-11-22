@@ -1,6 +1,6 @@
 # Valgrind
 
-[Valgrind](https://valgrind.org/) je `framework` za alate za dinamičku analizu programa. Koristi se kao pomoć u otklanjanju bagova sa memorijom i nitima. Dakle, `Valgrind` je debager, jer predstavlja alat za debagovanje. Ovaj alat se pretežno koristi za `C/C++`.
+[Valgrind](https://valgrind.org/) je `framework` za alate za dinamičku analizu programa. Koristi se kao pomoć u otklanjanju bagova sa memorijom i nitima. Dakle, `Valgrind` je profajler i debager, jer predstavlja alat za debagovanje. Ovaj alat se pretežno koristi za `C/C++`.
 
 ## Instalacija
 
@@ -593,9 +593,142 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, std::atomic<i
 
 **Napomena:** Ovde je predstavljeno više rešenja, ali na ispitu je dovoljno znati `helgrind` i barem jedan način za rešavanje datog problema. Uglavnom se svaki problem može rešiti preko muteksa.
 
+## Callgrind
+
+`Callgrind` je alat za profajliranje koji čuva istoriju poziva funkcija u programu kao graf poziva. Informacije koje nam pruža za dati program su:
+  * broj izvršenih instrukcija
+  * odnosi izvršenih instrukcija sa odgovarajućim linijama koda
+  * `caller/callee` odnos između funkcija (sa frekvencijama)
+  * informacije o keširanju (promašaji, pogađaji, ...)
+  * itd...
+
+Ideja profajlera je da koji delovi koda (npr. funkcije) najviše utiču na performanse programa (vreme, memorija, ...). Ako se 60% izvršavanja programa svede na jednu funkciju, onda je to dobro mesto za optimizaciju. 
+
+`KCachegrind` je pomoćni alata za vizuelizaciju podataka dobijenih iz `callgrind` analize.
+
+![kcachegrind](http://kcachegrind.sourceforge.net/html/pics/KcgShot3.gif)
+
+### Uvod u Callgrind (07_callgrind)
+
+- Pogledajmo sledeći program:
+```
+#include <stdio.h>
+
+int global_value = 0;
+
+void f() {
+    for(int i=0; i<1000; i++)
+        global_value++;
+}
+
+void g() {
+    for(int i=0; i<2000; i++)
+        global_value++;
+}
+
+void a() {
+    f();
+}
+
+void b() {
+    f(); f();
+}
+
+void c() {
+    f(); g();
+}
+
+int main() {
+    a(); a(); a(); b(); a(); c();
+    return 0;
+}
+```
+- Ovde možemo ručno da izračunamo koliko će koja f-ja procentualno da se izvršava tako što prebrojimo "instrukcije":
+  * Jedan poziv f-je `f()` vredi `1000`
+  * Jedan poziv f-je `g()` vredi `2000`
+  * `a()`: Poziva se `4` puta u `main`-u i poziva `1` `f()` => vredi `4*1*1000=4000`
+  * `b()`: Poziva se `1` puta u `main`-u i poziva `2` `f()` => vredi `1*2*1000=2000`
+  * `c()`: Poziva se `1` puta u `main`-u, poziva `1` `f()` i poziva `1` `g()` => vredi `1*1*1000 + 1*1*2000 = 3000`
+  * `f()`: Poziva se `4+2+1 = 7` puta i vredi `7*1000=7000`
+  * `g()`: Poziva se `1` puta i vredi `2000`
+  * `main()`: Na osnovu `a()`, `b()` i `c()` vidimo da vredi `4000+2000+3000=9000`
+- Primetimo da imamo tri nivoa poziva: `main` poziva `a`, `b` i `c`, a ove f-je pozivaju `f` i `g`. Ima smisla da izračunamo procentualno vreme izvršavanja za svaki nivo (nema smisla da mešamo `a` i `f`):
+  * `main()`: 9000 tj. 100%
+  * `a()`: 4000 tj. 44%; `b()`: 2000 tj. 22%; `c()`: 3000 tj. 33%.
+  * `f()`: 7000 tj. 77%; `g()`: 2000 tj. 22%.
+- Uz mnogo računa uspeli smo da izračunamo. Ovo je moguće na ovom jednostavnom primeru koji je poprilično deterministički. Ovo nije moguće raditi na malo kompikovanijim primerima. Umesto toga, potrebno je da koristimo profajlere!
+
+Proces (pret)profajliranja:
+  * `gcc -g -o main.out main.c`
+  * `valgrind --tool=callgrind [options] ./main.out`
+  * `kcachegrind [callgrind_output_file_name]`
+
+- Pošto je prethodni proces malo naporan, možemo da napišemo jednostavnu `bash` skriptu koja spaja ove tri komande (ili druge dve ako je proces kompilacije skup):
+```
+gcc -g -o main.out main.c
+valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./main.out
+kcachegrind callgrind.out`
+```
+- Možemo da pokrenemo skriptu `bash run.sh main.c` koja se već nalazi u `07_callgrind` direktorijumu.
+- Ako kliknemo na `main` sa leve strane, imamo sledeći očekivani rezultat:
+
+![callgrind1](images/callgrind1.png)
+
+- Ovde imamo oko 12.7% za `f()`, pa 6.4% za `g()`, pa 3.2% za `f()`, pa 6.4% za `f()`. Zapravo gledamo na neku vizuelizaciju `grafa poziva (call graph)`. Prvo imamo četiri poziva f-je `a()` u `main()` i to je ukupno 4 poziva `f()` odnosno 12.7% celog programa. Posle toga imamo `g()` i `f()` zajedno (odgovara f-ji `c()`) i na kraju imamo dva poziva f-je `f()` odnosno jedan poziv f-je `b()`. Nažalost, ne izvršavaju se samo ove f-je u programu (postoje neki implicitni pozivi) i zbog toga naš `main()` zauzima samo 29% programa. Ako skaliramo sve procente za `100/29` dobićemo sličan rezultat kao u prethodnom računu.
+- Možemo da biramo druge f-je sa leve strane i da vidimo informacije o njima:
+
+![callgrind2](images/callgrind2.png)
+
+- Takođe možemo da vidimo graf poziva, što je veoma korisna stvar. Potrebno je izabrati f-ju i kliknuti na `Call Graph` pri dnu. Nakon toga možemo da `izvozemo (export)` sliku tako što kliknemo desni klik na graf i idemo `Export Graph/As image...`:
+
+![callgrind3_export](images/callgrind3_export.png)
+
+- Ovde imamo potpun pregled ukupnog vremenskog zauzeća svake f-je.
+- Ako pri vrhu kliknemo na `Source Code`, možemo da vidimo i kod f-je, sa vremenskim zauzećem svake linije:
+
+![callgrind4](images/callgrind4.png)
+
+- Sa leve strane možemo da grupišemo funkcije po izvornim datotekama tako što izaberemo `Source File`
+
+![callgrind5](images/callgrind5.png)
+
+- Pri vrhu možemo da izaberemo opciju da gledamo procente relativne u odnosu na roditelja:
+
+![callgrind6](images/callgrind6.png)
+
+- Sada želimo da isključimo procente i da se igramo sa brojem instrukcija (crveni deo):
+
+![callgrind7](images/callgrind7.png)
+
+- Interpretacija plavog dela:
+  * `Incl.`: Broj instrukcija koje ova funkcija generiše po svakom `caller`-u. Moguće je da neki redovi imaju iste vrednosti ako imamo dubok stek. U ovom primeru svi roditelji `main()` f-je imaju istu vrednost kao i `main()` f-ja.
+  * `Distance`: Rastojanje između `caller`-a i `callee`-ja. U ovom slučaju je vrednost za `main()` 2, jer
+  se f-ja `f()` poziva indirektno iz `main()` preko `a()`, `b()` ili `c()`.
+  * `Called`: Ukupan broj poziva ove `callee` (trenutna f-ja) od strane `caller`-a. Ovo podrazumeva direktne i indirektne pozive.
+  * `Caller`: Ime `caller`-a.
+
+![callgrind8](images/callgrind8.png)
+
+- Pojmovi:
+  * `CEst`: `Cycle Estimation` (procenjeni ukupan broj ciklusa) 
+  * `Ir`: `Instruction Fetch` (procenjeni ukupan broj instrukcija)
+
+- Interpretacija:
+  * `CEst`: Ukupan broj ciklusa.
+  * `CEst per call`: Ukupan broj ciklusa po pozivu
+  * `Count`: Broj poziva.
+
 ## Reference
 
+[Memcheck](https://www.valgrind.org/docs/manual/mc-manual.html)
+
 [Helgrind](https://www.valgrind.org/docs/manual/hg-manual.html)
+
+[Callgrind](https://valgrind.org/docs/manual/cl-manual.html)
+
+[Callgrind-KCachegrind](http://kcachegrind.sourceforge.net/html/Home.html)
+
+[Valgrind-Ana-Vulovic](http://www.verifikacijasoftvera.matf.bg.ac.rs/vs/vezbe/05/vs_vezbe_05.pdf)
 
 [Valgrind](https://valgrind.org/)
 
