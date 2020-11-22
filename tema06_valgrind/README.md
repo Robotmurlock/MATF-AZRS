@@ -46,7 +46,7 @@ Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
 Using Valgrind-3.15.0 and LibVEX; rerun with -h for copyright info
 ```
 - Informacije o licenci i verziji `Valgrind`-a. Ovaj deo nam nije toliko interesantan trenutno.
-- Prefiks svake linije je izbačen kako bi izlaz bio čitljiji.
+- Prefiks svake linije je izbačen kako bi izlaz bio čitljviji.
 ```
 Command: ./main.out
 Parent PID: 4994
@@ -87,7 +87,7 @@ ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
    by 0x10915E: main (main.c:4)
 ```
 - Tačno znamo koji blok nije oslobođen sad!
-- Ako dodamo `free(string);` na na kraj `main` f-je dobijamo sledeći očekivani rezultat:
+- Ako dodamo `free(string);` na kraj `main` f-je dobijamo sledeći rezultat:
 ```
 HEAP SUMMARY:
     in use at exit: 0 bytes in 0 blocks
@@ -243,7 +243,7 @@ LEAK SUMMARY:
   * ```NEGATIVE_N 1``` (Ako `n<0`)
   * ```SMALL_N    2``` (Ako je `n==1`)
   * ```EVIL       4``` (Ako je `xs[i]==666`)
-- Funkcija se "uvek" izvršava do kraja. Na kraju funkcije se oslobađaju resursi i proverava se status funkcije. U ovom slučaju `check_status` funkcija proverava `status`. Na ovaj način manje razmišljamo o oslobađanju memorije u svakom specijalno slučaju. Jedini nezgodan slučaj koji ostaje je neuspešna alokacija niza, jer tada tada ne smemo da koristimo taj resurs (taj slučaj rešavamo kao u prethodnom rešenju). Takođe ovo rešenje nam omogućava da ispišemo sve greške koje su se desile ako nam je to od koristi. Potrebno je samo da koristimo stepene dvojke za makroe ili enume i posmatramo celobrojnu promenljivu kao registar sa zastavicama. Ako je vrednost bita `1`, onda je došlo do te greške, a u suprotnom nije došlo do te greške. Ako je vrednost tog registra `0` za svaki bit, onda nije došlo do greške. Primer: Ako je `status==3`, onda je `n<0` i `n==1` (ovo nije moguće ako program ima normalno ponašanje).
+- Funkcija se "uvek" izvršava do kraja. Na kraju funkcije se oslobađaju resursi i proverava se status funkcije. U ovom slučaju `check_status` funkcija proverava `status`. Na ovaj način manje razmišljamo o oslobađanju memorije u svakom specijalnom slučaju. Jedini nezgodan slučaj koji ostaje je neuspešna alokacija niza, jer tada tada ne smemo da koristimo taj resurs (taj slučaj rešavamo kao u prethodnom rešenju). Takođe ovo rešenje nam omogućava da ispišemo sve greške koje su se desile ako nam je to od koristi. Potrebno je samo da koristimo stepene dvojke za makroe ili enume i posmatramo celobrojnu promenljivu kao registar sa zastavicama. Ako je vrednost bita `1`, onda je došlo do te greške, a u suprotnom nije došlo do te greške. Ako je vrednost tog registra `0` za svaki bit, onda nije došlo do greške. Primer: Ako je `status==3`, onda je `n<0` i `n==1` (ovo nije moguće ako program ima normalno ponašanje).
 - Ovo predstavlja bolju praksu za programiranje u C-u, ali i dalje moramo da vodimo računa da ne koristimo resurse koji su "pokvareni".
 
 ### main_v4.cpp
@@ -339,7 +339,7 @@ Hello World!
 
 ### 05_helgrind
 
-- Sada možemo da demonstriramo rad alata `helgrind` nad sledećim jednostanim primerom:
+- Sada možemo da vidimo rad alata `helgrind` nad sledećim jednostanim primerom:
 ```
 #include <iostream>
 #include <thread>
@@ -367,7 +367,7 @@ int main()
 ```
 Thread #1 is the program's root thread
 ```
-- Alat `helgrind` indeksira glavni program (glavnu nit) sa `#1`
+- Alat `helgrind` indeksira glavnu (inicijalnu) nit sa `#1`
 ```
 ---Thread-Announcement------------------------------------------
 
