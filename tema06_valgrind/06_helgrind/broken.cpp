@@ -12,7 +12,7 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
 
     for(int i=start; i<end; i++)
     {
-        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
         *result += vec[i];
     }
 
@@ -30,6 +30,7 @@ int main()
     int batch_size = n/NUM_OF_THREADS;
 
     std::vector<std::pair<int, int> > batches(NUM_OF_THREADS);
+    // [0, 1000), [1000, 2000), ... [9000, 9500)
     for(int i=0; i<NUM_OF_THREADS; i++)
         batches[i] = std::make_pair(i*batch_size, std::min(n, (i+1)*batch_size));
 

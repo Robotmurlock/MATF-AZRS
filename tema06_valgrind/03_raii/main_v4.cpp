@@ -16,7 +16,7 @@ struct raii_file{
     }
     ~raii_file()
     {
-        free(m_file);
+        fclose(m_file);
     }
 };
 

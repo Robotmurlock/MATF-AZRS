@@ -17,7 +17,7 @@ void vsum(int id, const std::vector<int>& vec, int start, int end, int *result)
 
     for(int i=start; i<end; i++)
     {
-        std::this_thread::sleep_for (std::chrono::nanoseconds(1));
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
         mutex.lock();
         *result += vec[i];
         mutex.unlock();
