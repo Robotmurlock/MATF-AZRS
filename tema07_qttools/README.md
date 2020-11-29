@@ -122,6 +122,36 @@ Ovde možemo da vidimo informacije i konkretnim objektima kao što je na primer 
 
 ![gammaray11](images/gammaray11.png)
 
+### Gammaray - Dodatak
+
+Na sledećem [linku](https://doc.qt.io/GammaRay/index.html) se može pronaći detaljaljna dokumentacija za `gammaray` sa primerima.
+
+### Korišćenje Git alata preko QtCreator-a
+
+**Napomena:** Podrazumeva se da čitalac zna da napravi projekat za `qt` aplikaciju.
+
+#### Pravljenje repozitorijuma
+
+1. Napraviti [git](https://github.com/) repozitorijum:
+  * `git clone [URL] [DIRNAME]`
+  * `cd [DIRNAME]`
+2. Uključiti `qtcreator`.
+3. Napraviti nov projekat na kloniranom repozitorijumu. (Ako repozitorijum nije prazan i koristi `qmake` ili `cmake`, onda je dovoljno otvoriti taj projekat i konfigurisati ga).
+4. Konfigurisati `git` kao sistem za verzionisanje:
+  * Postaviti putanju za `git`
+  * Pomoć: `whereis git`
+
+![qtgit1](images/qtgit1.png)
+
+![qtgit2](images/qtgit2.png)
+
+5. Završiti kreiranje projekta.
+6. Proveriti da li `qtcreator` vidi `remote` repozitorijum: `Tools -> Git -> Remote Repository -> Manage Remotes`
+
+![qtgit3](images/qtgit3.png)
+
+Pod `Tools -> Git` imamo git opcije. Opcije bi trebalo da budu intuitivne ako je čitalac savladao `git` preko terminala.
+
 ## Reference
 
 [KDAB-GammaRay](https://www.kdab.com/development-resources/qt-tools/gammaray/#GammaRay_Tutorials)
