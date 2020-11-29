@@ -718,6 +718,254 @@ kcachegrind callgrind.out`
   * `CEst per call`: Ukupan broj ciklusa po pozivu
   * `Count`: Broj poziva.
 
+### Benchmark (08_primes)
+
+Na fakultetu smo do sada uglavnom govorili o složenosti programa i na osnovu toga upoređivali koja je implementacija bolja od koje. Ako su algoritmi bili iste složenosti, onda se svelo na neku diskusiju o konstanti. U nastavku imamo `5` implementacija za prebrojavanje prostih brojeva do `100000`. Na osnovu složenosti funkcije možemo da pretpostavimo otprilike koliko iteracija zahtevaju i tako da ih uporedimo.
+
+Prvi način da se prebroje svi prosti brojevi od `1` do `n` je da se za svaki broj `num` između `2` i `n` (1 nije prost broj) proveri da li on ima nekog delitelja između `2` i `num` (bez `num`) tj. da li ima `pravog delitelja`:
+```
+int bruteforce_check(int n)
+{
+    int cnt = 0;
+    for(int num=2; num<=n; num++)
+    {
+        int is_prime = 1;
+        for(int i=2; i<num; i++)
+            if(num % i == 0)
+            {
+                is_prime = 0;
+                break;
+            }
+        cnt += is_prime;
+    }
+    return cnt;
+}
+```
+- Složenost: `O(n^2)`
+- Očekivani broj iteracija: `(10^5)^2 = 10^10`
+
+Za svaki broj `num` važi da je najveći pravi delitelj manji od `num/2`. To možemo da iskoristimo da `duplo` povećamo efikasnost prethodnog programa:
+
+```
+int bruteforce_check_with_optimization(int n)
+{
+    int cnt = 0;
+    for(int num=2; num<=n; num++)
+    {
+        int is_prime = 1;
+        for(int i=2; 2*i<=num; i++)
+            if(num % i == 0)
+            {
+                is_prime = 0;
+                break;
+            }
+        cnt += is_prime;
+    }
+    return cnt;
+}
+```
+
+- **Napomena:** `2*i<=num` je efikasnije od `i<=num/2` (ovo takođe možemo testirati preko `callgrind`-a)
+- Složenost: `O(n^2)`
+- Očekivani broj iteracija: `(10^5)^2 / 2 = 5*10^9`
+
+Svi pravi deljitelji sem korena broja (ako broj ima pravi koren) idu u paru. Primer za broj `120`: `2 i 60`, `3 i 40`, `4 i 30`, `6 i 20`, `8 i 15`, `10 i 12`. Dovoljno je da tražimo deljitelje do `sqrt(num)`. To odgovara uslovu petlje `i<=sqrt(num)` koji možemo efikasije da zapišemo kao `i*i<=num`.
+
+```
+int bruteforce_check_with_better_optimization(int n)
+{
+    int cnt = 0;
+    for(int num=2; num<=n; num++)
+    {
+        int is_prime = 1;
+        for(int i=2; i*i<=num; i++)
+            if(num % i == 0)
+            {
+                is_prime = 0;
+                break;
+            }
+        cnt += is_prime;
+    }
+    return cnt;
+}
+```
+
+- Složenost `O(n*sqrt(n))`
+- Očekivani broj iteracija: `10^5*sqrt(10^5) = 3*10^7`
+
+Ako je broj `p > 3` prost broj, onda je on oblika `p = 6k-1` ili `p = 6k+1`. Na osnovu ovoga možemo da napravimo još efikasniji algoritam:
+
+```
+int smart_check(int n)
+{
+    int cnt = 0;
+    for(int num=2; num<=n; num++)
+    {
+        int is_prime = 1;
+        if(num > 3)
+        {
+            if((num%2 == 0) || (num%3 == 0))
+            {
+                is_prime = 0;
+            }
+            else
+            {
+                int i = 5;
+                while(i*i <= num)
+                {
+                    if((num%i == 0) || (num%(i+2) == 0))
+                    {
+                        is_prime = 0;
+                        break;
+                    }
+                    i += 6;
+                }
+            }
+        }
+        cnt += is_prime;
+    }
+    return cnt;
+}
+```
+
+- Za ovaj algoritam je već dosta teško da se pretpostavi broj iteracija.
+- Složenost `O(n*sqrt(n))`
+- Očekivani broj iteracija: `10^5/6*sqrt(10^5/6) = 2*10^6`
+
+Ne moramo za svaki broj posebno da proveramo da li je prost. Umesto toga možemo da iskoristimo algoritam `Erastostenovo sito` kao algoritam:
+
+```
+int sieve_of_eratosthenes(int n)
+{
+    std::vector<bool> inset(n+1, true);
+    inset[0] = false;
+    inset[1] = false;
+    for(int i=2; i<=n; i++)
+        if(inset[i])
+            for(int j=2*i; j<=n; j+=i)
+                inset[j] = false;
+
+    int cnt;
+    for(bool c: inset)
+        cnt += c;
+    return cnt;
+}
+```
+
+- Složenost `O(n*log(log(n)))` (gustina prostih brojeva je `log(log(n))`
+- Očekivani broj iteracija: `10^5*log(log(10^5)) = 4*10^5`
+
+Ako prevedemo program i pokrenemo `callgrind` za analizu, možemo da očekujemo sledeći rezultat:
+![callgrind9](images/callgrind9.png)
+
+- Alat nam pokazuje samo dve funkcije, jer u ostale implementacije imaju zanemarljive cene u odnosu na ove dve. Ovo je korisno ako radimo na velikom projektu gde imamo preko 100 funkcija.
+
+![callgrind10](images/callgrind10.png)
+![callgrind11](images/callgrind11.png)
+
+- Možemo da zaključimo sledeće:
+  * Modifikacija `2*i <= num` umesto `i <= num` stvarno jeste duplo ubrzala program;
+  * Erastostenovo sito ima gori rezultat od poslednje dve implementacije iako smo očekivali
+    da ima najbolji rezultat. To je zbog alokacije i korišćenja vektora. Ako pogledamo `Self` kolonu,
+    vidimo da stvarno ima najmanji broj iteracija. 
+  * Najbolji rezultat ima `smart_check` funkcija.
+  * Ako povećamo broj iteracija, možemo da očekujemo drugačije rezultate, jer Erastostenovo sito
+    ima veliku konstantu.
+
+### Vežbanje - callgrind (domaći)
+
+- Možemo uporediti rad različitih funkcija za sortiranje preko `callgrind`-a.
+- Algoritam `KMP` je algoritam linearne složenosti za pretragu uzorka u tekstu. Naivni algoritam je kvadratne složenosti, ali se ispostavlja da je efikasniji na realnim primerima. Ovo možemo testirati.
+
+### Vežbanje - hellgrind (09_deadlock)
+
+- Imamo program koji pravi 2 niti i pokreće ih. Jedna nit vrši funkciju `f()`:
+```
+void f(const std::string& name)
+{
+    tprint(name, "Started!");
+    for(int i=0; i<10000; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
+        tprint(name, "Locking r1!");
+        r1_lock.lock();
+        tprint(name, "Locking r2!");
+        r2_lock.lock();
+        tprint(name, "Doing my job...");
+        r1.use();
+        r2.use();
+        tprint(name, "Unlocking r1!");
+        r1_lock.unlock();
+        tprint(name, "Unlocking r2!");
+        r2_lock.unlock();
+    }
+    tprint(name, "Ended!");
+}
+```
+- Druga nit vrši sličnu funkciju (suprotan redosled zaključavanja niti):
+```
+void g(const std::string& name)
+{
+    tprint(name, "Started!");
+    for(int i=0; i<10000; i++)
+    {
+        std::this_thread::sleep_for (std::chrono::milliseconds(1));
+        tprint(name, "Locking r2!");
+        r2_lock.lock();
+        tprint(name, "Locking r1!");
+        r1_lock.lock();
+        tprint(name, "Doing my job...");
+        r1.use();
+        r2.use();
+        tprint(name, "Unlocking r2!");
+        r2_lock.unlock();
+        tprint(name, "Unlocking r1!");
+        r1_lock.unlock();
+    }
+    tprint(name, "Ended!");
+}
+```
+- Imamo pomoćnu nit koja zaustavlja program posle nekog vremana (veštački primer u kome očekujemo `deadlock`):
+```
+void stop()
+{
+    std::this_thread::sleep_for (std::chrono::seconds(10));
+    exit(EXIT_FAILURE);
+}
+```
+- Možemo da vidimo kakve nam informacije daje `helgrind` za `deadlock` probleme:
+- `deadlock` je pojava gde jedna nit drži resurs `A` i potreban joj je resurs `B` da završi posao i oslobodi resurs `A`, a drug nit ima resurs `B` i potreban joj je resurs `A` da završi posao i oslobodi resurs `B`.
+- U ovom slučaju nam `helgrind` ispravlje neke redoslede zaključavanja (sređen izlaz):
+```
+Thread #3: lock order "0x111180 before 0x1111C0" violated
+
+Observed (incorrect) order is: acquisition of lock at 0x1111C0
+  at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
+  by 0x10B295: std::mutex::lock()
+  by 0x10ABAA: g(...) (main.cpp:51)
+
+followed by a later acquisition of lock at 0x111180
+  at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
+  by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*) 
+  by 0x10B295: std::mutex::lock() 
+  by 0x10AC04: g(...) (main.cpp:53)
+
+Required order was established by acquisition of lock at 0x111180
+   at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
+   by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*)
+   by 0x10B295: std::mutex::lock()
+   by 0x10A753: f(...) (main.cpp:30)
+
+followed by a later acquisition of lock at 0x1111C0
+   at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
+   by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*) 
+   by 0x10B295: std::mutex::lock() 
+   by 0x10A7AD: f(...) (main.cpp:32)
+```
+- Namešta da se redosled zaključavanja f-je `g()` poklapa sa redosledom zaključavanja f-je `f()`.
+
+
+
 ## Reference
 
 [Memcheck](https://www.valgrind.org/docs/manual/mc-manual.html)
