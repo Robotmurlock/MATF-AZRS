@@ -27,3 +27,4 @@ Informacije:
 Bonus teme:
 - `QML`
 - `LLDB`
+- `CMake sintaksa: kontrola toka i funkcije`

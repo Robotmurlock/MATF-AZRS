@@ -150,7 +150,7 @@ Na sledećem [linku](https://doc.qt.io/GammaRay/index.html) se može pronaći de
 
 ![qtgit3](images/qtgit3.png)
 
-Pod `Tools -> Git` imamo git opcije. Opcije bi trebalo da budu intuitivne ako je čitalac savladao `git` preko terminala.
+Pod `Tools -> Git` imamo git opcije. Slično je kao i preko terminala.
 
 ## Reference
 
