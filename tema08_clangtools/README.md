@@ -131,6 +131,54 @@ auto main() -> int
 }
 ```
 - Ako pokrenemo sada `clang-tidy` bez `--fix` opcija, onda bi trebalo da dobijemo prazan izlaz (nema sugestija).
+- **Napomena:** Ne ispravlja svaka provera sugestije (`modernize-*` provere isrpavljaju sugestije).
+
+Ako želimo da vidimo šta sve podrazumeva `modernize-*`, možemo da pokrenemo sledeću komandu:
+* `clang-tidy --list-checks -checks='*' | grep "modernize"`
+* `clang-tidy --list-checks -checks='*'` nam dohvata sve provere.
+* `grep "modernize"` filtrira provere koji nisu `modernize`
+
+### Cmake (02_cmake)
+
+- Šta ako imamo ceo projekat koji želimo da refaktorišemo? Ako koristimo `cmake`, onda je to lako. 
+- Imamo biblioteku `sorty` koja ima jednu apstraktnu klasu `AbstractSort` čiji konstruktor prima funkciju poređenja i čisto virtuelni metod `sort()` koji sortira dobijeni niz. Takođe postoje i dve nasleđenje klase `SelectionSort` i `QuickSort` koje implementiraju odgovarajuće algoritme. 
+- Glavna funkcija testira ove klase.
+- Želimo da izvršimo `clang-tidy` nad celim projektom.
+- Potrebno je da izgradimo naš projekat:
+    * `mkdir build`
+    * `cd build`
+    * `cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..`
+- Pokrenimo program radi testiranja:
+    * `make`
+    * `./run`
+- Očekivani izlaz:
+```
+1 2 3 4 5 
+5 4 3 2 1 
+```
+- Komanda `run-clang-tidy` pokreće `clang-tidy` na svim datotekama:
+    * `run-clang-tidy -checks='modernize-*' -fix`
+    * **Pažnja:** Opcija `-fix` menja kod. Možda želite backup.
+- Neke interesatne promene:
+- `BEFORE:`
+```
+void vprint(const std::vector<int>& vec)
+{
+    for(std::vector<int>::const_iterator it=vec.cbegin(); it!=vec.cend(); it++)
+        std::cout << *it << " ";
+    std::cout << std::endl;
+}
+```
+- `AFTER:`
+```
+void vprint(const std::vector<int>& vec)
+{
+    for(int it : vec)
+        std::cout << it << " ";
+    std::cout << std::endl;
+}
+```
+
 
 ## Reference
 
