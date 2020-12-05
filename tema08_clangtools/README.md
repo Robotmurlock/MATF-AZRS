@@ -208,6 +208,11 @@ IndentCaseLabels: false
 
 Već smo se upoznali sa [godbolt](https://godbolt.org/) na nekom od prethodnih časova. `Godbolt` ima padajući meni `Add tool` i tu postoje opcije `clang-tidy` i `clang-format`. Ovo je odličan alat za testiranje `clang` alata i `c++` kodova generalno. 
 
+## Qt i analiza koda
+
+Razvojno okruženje `qtcreator` ima opciju `Analyze` kao padajući meni i tu postoje opcije za `Clang-Tidy and Clazy...` analizu koda:
+* `sudo apt install clazy`
+
 ## Reference
 
 [clang-llvm](https://clang.llvm.org/)

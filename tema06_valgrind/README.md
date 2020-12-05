@@ -964,7 +964,9 @@ followed by a later acquisition of lock at 0x1111C0
 ```
 - Namešta da se redosled zaključavanja f-je `g()` poklapa sa redosledom zaključavanja f-je `f()`.
 
+## Qt i analiza koda
 
+Razvojno okruženje `qtcreator` ima opciju `Analyze` kao padajući meni i tu postoje opcije za `Valgrind Memory Analyzer` analizu koda. **Napomena:** Veoma spora operacija.
 
 ## Reference
 
