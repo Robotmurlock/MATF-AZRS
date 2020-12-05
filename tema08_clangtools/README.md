@@ -27,9 +27,11 @@ Upotrebljava se skoro identično kao i `gcc`:
     * `clang [OPTIONS] input.c` za `C` datoteke
     * `clang++ [OPTIONS] input.cpp` za `C++` datoteke
 
-## Clang-Tidy
+## ClangTidy
 
-Alat `Clang-tidy` je deo `Clang/LLVM` projekta koji dam automatski refaktoriše `C++` kod. Ova grupa alata se nazivaju `linteri (linter)`. Linteri su alati koji proveravaju kod i pronalaze stilske i programske greške.
+Alat `ClangTidy` je deo `Clang/LLVM` projekta koji dam automatski refaktoriše `C++` kod. Ova grupa alata se nazivaju `linteri (linter)`. Linteri su alati koji proveravaju kod i pronalaze stilske i programske greške.
+
+Dokumentacija: `man clang-tidy`
 
 ### Motivacija
 
@@ -179,9 +181,37 @@ void vprint(const std::vector<int>& vec)
 }
 ```
 
+## ClangFormat
+
+Alat `ClangFormat` može da formatira kod za nas. On nam nudi više različitih stilova formatiranja. 
+- Želimo sada da testiramo te stilove. Stilove biramo opcijom `--style=[STYLE]`. 
+- Možemo da vidimo listu stilova preko `man strana`: 
+    * `man clang-format`
+```
+LLVM, Google, Chromium, Mozilla, WebKit, Microsoft, GNU.
+```
+- Možemo da napravimo naš format ako želimo i on može da bude zasnovan na nekom već postojećem stilu. Taj format definišemo u okviru datoteke `.clang-format`, gde je svaka linija oblika `KEY: VALUE`:
+```
+BasedOnStyle: LLVM
+IndentWidth: 8
+UseTab: Always
+BreakBeforeBraces: Linux
+AllowShortIfStatementsOnASingleLine: false
+IndentCaseLabels: false
+```
+- Ako pokrenemo komandu `clang-format main.cpp` dobićemo kao izlaz formatiranu datoteku. Ako dodamo opciju `-i` formatiranje se vrši `u mestu (inplace)`. 
+- Ovde nemamo nešto nalik na `run-clang-tidy`, ali možemo da napišemo našu `bash` ili `python` skriptu koja rekurzivno prolazi kroz projekat i formatira datoteke.
+- Odlučio sam da napravim `run-clang-format.py` skriptu. Svi stilovi se generišu preko `elnino.sh` skripte.
+- Možete da izabere format koji vam se sviđa.
+
+## Godbolt i clang alati
+
+Već smo se upoznali sa [godbolt](https://godbolt.org/) na nekom od prethodnih časova. `Godbolt` ima padajući meni `Add tool` i tu postoje opcije `clang-tidy` i `clang-format`. Ovo je odličan alat za testiranje `clang` alata i `c++` kodova generalno. 
 
 ## Reference
 
 [clang-llvm](https://clang.llvm.org/)
 
 [kdab-clang-tidy](https://www.kdab.com/clang-tidy-part-1-modernize-source-code-using-c11c14/)
+
+[clang-format](https://clang.llvm.org/docs/ClangFormat.html)
