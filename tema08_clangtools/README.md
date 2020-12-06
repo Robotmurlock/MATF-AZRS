@@ -264,7 +264,7 @@ int main()
 }
 ```
 
-### Modernize
+### Modernize-using (05_modernize)
 
 Ključne reči `typedef` i `using` je manje-više isto u većini primera. Razlika je u tome što je `using` kompatabilan sa `template` programiranjem:
 ```
@@ -287,6 +287,26 @@ using MyPtrType = void (Class::*)() const;
 using R_t = struct { int a; };
 using R_p = R_t *;
 ```
+
+### Readibility-identifier-naming (06_readibility)
+
+**TODO!**
+
+### Readability-container-size-empty (07_readibility)
+
+**TODO!**
+
+### Performance-implicit-conversion-in-loop (08_performance)
+
+**TODO!**
+
+### Performance-inefficient-string-concatenation (09_performance)
+
+**TODO!**
+
+### llvm-namespace-comment (10_llvm)
+
+**TODO!**
 
 ## ClangFormat
 
