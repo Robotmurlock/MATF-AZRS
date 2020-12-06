@@ -181,6 +181,113 @@ void vprint(const std::vector<int>& vec)
 }
 ```
 
+### Modernize-nullptr (03_modernize)
+
+Sledećih par kratkih primera se odnose na refaktorisanje koda pisanog po starijem standardu. Koja je razlika između `NULL` i `nullptr`?
+- `#define NULL 0` (`NULL` je samo makro).
+- Ovo može da napravi probleme ako zaboravimo da je ovo samo broj.
+- Sa druge strane, `nullptr` je uvek pokazivač.
+
+- Pogledajmo sledeći kod:
+```
+#include <stdio.h>
+
+#define MY_NULL (void*)0
+
+void assignment() {
+  char *a = NULL;
+  char *b = 0;
+  char c = 0;
+}
+
+int *ret_ptr() {
+  return 0;
+}
+
+void test() {
+  void *p = MY_NULL;
+}
+
+int main()
+{
+    return 0;
+}
+```
+- Kada kažemo `return 0` za pokazivač, to je kao da smo rekli `return NULL`. Čitljivije je da se stavi `NULL`.
+- Primenjujemo `clang-tidy`:
+    * `clang-tidy new.cpp --checks=modernize-use-nullptr --fix -- --std=c++17`
+- Očekivani rezultat:
+```
+#define MY_NULL (void*)0
+
+void assignment() {
+  char *a = nullptr;
+  char *b = nullptr;
+  char c = 0;
+}
+
+int *ret_ptr() {
+  return nullptr;
+}
+
+void test() {
+  void *p = MY_NULL;
+}
+```
+- Primetimo da ispravljeno i `return 0` i `return NULL` u `return nullptr`, ali samo tamo gde se očekuje da rezultat pokazivač.
+- Po dokumentaciji bi trebalo da je zamenio i `MY_NULL` u `nullptr`, tako da to treba da uzimamo sa rezervom.
+
+### Modernize-auto (04_modernize)
+
+Ovde imamo sličan slučaj kao u jednom od prethodnih primera:
+```
+int main()
+{
+    std::vector<int> my_container;
+    std::vector<int>::iterator I = my_container.begin();
+    int val = 42;
+
+    return 0;
+}
+```
+- Po dokumentaciji, tip treba zameniti kada to povećava čitljivost. Ako zamenimo `int` sa `auto`, to ne povećava čitljivost. Ali ako zamenimo `std::vector<int>::iterator` sa `auto`, onda to povećava čitljivost:
+- Pokrenimo `ClangTidy`:
+    * `clang-tidy new.cpp --checks=modernize-use-auto --fix -- --std=c++17`
+```
+int main()
+{
+    std::vector<int> my_container;
+    auto I = my_container.begin();
+    int val = 42;
+
+    return 0;
+}
+```
+
+### Modernize
+
+Ključne reči `typedef` i `using` je manje-više isto u većini primera. Razlika je u tome što je `using` kompatabilan sa `template` programiranjem:
+```
+typedef int variable;
+
+class Class{};
+typedef void (Class::* MyPtrType)() const;
+
+typedef struct { int a; } R_t, *R_p;
+```
+- Pokrenimo `ClangTidy`:
+    * `clang-tidy new.cpp --checks=modernize-use-using --fix -- --std=c++17`
+- Očekivani izlaz:
+```
+using variable = int;
+
+class Class{};
+using MyPtrType = void (Class::*)() const;
+
+using R_t = struct { int a; };
+using R_p = R_t *;
+```
+
 ## ClangFormat
 
 Alat `ClangFormat` može da formatira kod za nas. On nam nudi više različitih stilova formatiranja. 
@@ -220,3 +327,11 @@ Razvojno okruženje `qtcreator` ima opciju `Analyze` kao padajući meni i tu pos
 [kdab-clang-tidy](https://www.kdab.com/clang-tidy-part-1-modernize-source-code-using-c11c14/)
 
 [clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+
+[clang-tidy-modernize-use-nullptr](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-nullptr.html)
+
+[clang-tidy-modernize-use-auto](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-auto.html)
+
+[clang-tidy-modernize-use-override](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-override.html)
+
+[clang-tidy-modernize-use-using](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-using.html)
