@@ -6,12 +6,12 @@
 
 void vprint(const std::vector<int>& vec)
 {
-    for(int it : vec)
-        std::cout << it << " ";
+    for(std::vector<int>::const_iterator it=vec.cbegin(); it!=vec.cend(); it++)
+        std::cout << *it << " ";
     std::cout << std::endl;
 }
 
-auto main() -> int
+int main()
 {
     std::vector<int> vec{5, 3, 1, 4, 2};
     auto vec_copy = vec;

@@ -4,8 +4,8 @@
 
 void SelectionSort::sort(std::vector<int>& vec)
 {
-    for(auto i = std::begin(vec); i!=vec.end()-1; i++)
-        for(auto j = i+1; j!=vec.end(); j++)
+    for(std::vector<int>::iterator i = std::begin(vec); i!=vec.end()-1; i++)
+        for(std::vector<int>::iterator j = i+1; j!=vec.end(); j++)
             if(!m_cmp(*i, *j))
                 std::swap(*i, *j);
 }

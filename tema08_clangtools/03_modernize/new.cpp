@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define MY_NULL (void*)0
+#define MY_NULL 0
 
 void assignment() {
   char *a = nullptr;

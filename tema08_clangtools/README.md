@@ -287,26 +287,33 @@ using MyPtrType = void (Class::*)() const;
 using R_t = struct { int a; };
 using R_p = R_t *;
 ```
+**Napomena:** Primer iz dokumentacije ne radi!
 
 ### Readibility-identifier-naming (06_readibility)
 
 **TODO!**
+[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html)
+- Otvoriti `.clang-tidy` datoteku.
 
 ### Readability-container-size-empty (07_readibility)
 
 **TODO!**
+[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/readability-container-size-empty.html)
 
 ### Performance-implicit-conversion-in-loop (08_performance)
 
 **TODO!**
+[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/performance-implicit-conversion-in-loop.html)
 
 ### Performance-inefficient-string-concatenation (09_performance)
 
 **TODO!**
+[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/performance-inefficient-string-concatenation.html)
 
 ### llvm-namespace-comment (10_llvm)
 
 **TODO!**
+[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/llvm-namespace-comment.html)
 
 ## ClangFormat
 
