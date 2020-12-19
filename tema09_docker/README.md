@@ -258,7 +258,7 @@ gcc                       latest              f39d9e39afdb        23 hours ago  
     * `docker rmi hello-world:latest`
     * `docker rmi robotmurlock/helloworld:1.0 -f`
 
-- Izgubili smo našu, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
+- Izgubili smo našu sliku, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
     * `docker pull robotmurlock/helloworld:1.0`
 
 - Očekivani oblik rezultata za `docker image ls`:
@@ -549,6 +549,20 @@ indeks: mi22177, ocena: 7
     `docker volume create data_volume`
 - Ovo skladište spajamo sa kontejnerom na sličan način:
     `docker run -v data_volume:/data database`
+
+## Vežbanje (05_practice)
+
+**Zadatak:** Pogledajte kod `main.py`. Potrebno je da se napravi slika za izvoz ove aplikacije.
+
+## Vežbanje (06_practice)
+
+**Zadatak:** Pogledajte kod za `server.py` i `client.py`. Potrebno je dokerizovati server tako da važi sledeće:
+- Server se pokreće na `host` portu `12345`. 
+- Server prihvata `GET` zahtev na sledećem url-u: `http://localhost:[PORT]/hello`
+- Server vraća odgovor sa prefiksom `PREFIX` koji predstavlja `env` promenljivu okruženja. Podrazumevana vrednost za prefiks je `hey`.
+- Server čuva `IP klijenta`, `vreme dobijanja zahteva` i `tekst zahteva` u bazu podataka koja se simulira kao `database.txt`
+- Postarati se da se `database.txt` očuvava kada se kontejner prekine. 
+- Nakon testiranja servera, podići sliku na `Docker Hub`.
 
 ## Reference
 
