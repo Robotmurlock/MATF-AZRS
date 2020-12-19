@@ -4,7 +4,7 @@
 
 `Docker` je projekat otvorenog koda koji nam omogućava `isporuku (deployment)` aplikacija unutar `kontejnera (container)` tako što nam daje dodatni nivo apstraktnosti i automatizacije [OS-level virtualization](https://en.wikipedia.org/wiki/OS-level_virtualization) za `Linux`.
 
-Ideja je da zapakujemo kod i sve zavisnosti u jednu standardizovani jedinicu koja se naziva `kontejner (container)`. To nam omogućava da brzo i pouzdano instairamo aplikaciju na više okruženja. 
+Ideja je da zapakujemo kod i sve zavisnosti u jednu standardizovani jedinicu koja se naziva `kontejner (container)`. To nam omogućava da brzo i pouzdano instaliramo aplikaciju na više okruženja. 
 
 `Docker slika kontejnera (container image)` je samostalan paket softvera koji sadrži:
 * kod
@@ -24,20 +24,21 @@ Slike definišemo (izgrađujemo) preko `Dockerfile` datoteke koja se sastoji iz 
 ![docker_vs_vm1](images/docker_vs_vm1.png)
 
 Virtuelne mašine i kontejneri daju slične benefite i sličnu izolaciju, ali funkcionišu drugačije. 
-Kontejneri:
+
+**Kontejneri:**
 - Apstrakcija na aplikacionom sloju koji spaja kod i zavisnosti u jedno.
 - Više kontejnera mogu da budu na jednom operativnog sistemu i da dele isto jezgro (kernel).
 - Obično su znatno manji od virtuelnih mašina: merna jedinica `MB`.
 - Brzo se pokreću.
 
-Virtuelne mašine:
+**Virtuelne mašine:**
 - Apstrakcija na fizičkom nivou. Više servera umesto jednog servera na istoj mašini.
 - `Hipervizor (Hypervisor)` omogućava da se više VM pokreće na jednoj mašini. 
 - Svaka VM ima svoju kopiju operativnog sistema, aplikaciju, datoteke... (sve nezavisno). Zbog toga
     zauzimaju više memorije: merna jedinica `GB`.
 - Sporo se pokreću. 
 
-Kad da koristimo šta?
+**Kad da koristimo kontejnere, a kad virtuelne mašine?**
 - Virtuelne mašine su bolje rešenje kada aplikacije zahtevaju sve resurse i funkcionalnosti operativnog sistema ili kada nam je potrebno da imamo više različitih operativnih sistema na raspolaganju.
 - Kontejneri su bolje rešenje kada želimo da maksimizujemo broj pokrenutih aplikacija na minimalnom broju servera.
 
@@ -79,12 +80,12 @@ RUN g++ -o hello-world main.cpp
 
 CMD ["./hello-world"]
 ```
-Analiza svake linije:
-- `FROM gcc:latest`: Dohvati već postojeću sliku za `gcc` kao `osnovni sloj` (detaljnije objašnjenje kasnije).
-- `COPY . /usr/src/hello-world`: Kopiraj trenutni direktorijum `.` u `Docker sliku` na putanju `/usr/src/hello-world`.
-- `WORKDIR /usr/src/hello-world`: Postavi putanju za radni direktorijum.
-- `RUN g++ -o hello-world main.cpp`: Izvrši komandu (u ovom slučaju kompiliraj c++ kod).
-- `CMD ["./hello-world"]`: Podrazumevana opcija za kontejner. Kontejner ovo izvšava kao "glavnu komandu". Ovo npr. može da bude pokretanje servera.
+- Analiza svake instrukcije:
+    * `FROM gcc:latest`: Dohvati već postojeću sliku za `gcc` kao `osnovni sloj` (detaljnije objašnjenje kasnije).
+    * `COPY . /usr/src/hello-world`: Kopiraj trenutni direktorijum `.` u `Docker sliku` na putanju `/usr/src/hello-world`.
+    * `WORKDIR /usr/src/hello-world`: Postavi putanju `/usr/src/hello-world` kao putanju za radni direktorijum.
+    * `RUN g++ -o hello-world main.cpp`: Izvrši komandu (u ovom slučaju kompiliraj c++ kod).
+    * `CMD ["./hello-world"]`: Podrazumevana opcija (komanda) za kontejner. Ovo npr. može da bude pokretanje servera.
 
 - Sada je potrebno da izgradimo našu novu sliku preko komande `docker build [PATH]`. **Napomena:** Za sve `docker` komande postoje `man` strane. Argument ove komande je putanja do direktorijuma gde se nalazi `Dockerfile`. U našem slučaju je to trenutni direktorijum `.`. Opcijom `-t` dajemo ime slici (inače je ime `none`):
     * `docker build -t hello-world .`
@@ -155,7 +156,7 @@ Removing intermediate container eb1235f928ee
 Successfully built e83e41d7d431
 Successfully tagged hello-world:latest
 ```
-- Proverimo da li se slika nalazi tu izlistavanjem:
+- Proverimo da li se slika nalazi na listu postojećih slika:
     * `docker image ls`
 - Očekivani rezultat:
 ```
@@ -209,9 +210,9 @@ CONTAINER ID        IMAGE                COMMAND             CREATED            
 - Idemo na [Docker repositories](https://hub.docker.com/repositories) i pravimo repozitorijum:
 
 ![dockerhub1](images/dockerhub1.png)
-- Potrebno je da ulogujemo na `Docker hub` preko terminala:
+- Potrebno je da se ulogujemo na `Docker hub` preko terminala:
     * `docker login --username=yourhubusername`
-- Nakon ove komande je potrebno da unesemo šifri. Očekivani oblik rezultata:
+- Nakon ove komande je potrebno da unesemo šifru. Očekivani oblik rezultata:
 ```
 Password: 
 WARNING! Your password will be stored unencrypted in SOME/PATH
@@ -257,7 +258,7 @@ gcc                       latest              f39d9e39afdb        23 hours ago  
     * `docker rmi hello-world:latest`
     * `docker rmi robotmurlock/helloworld:1.0 -f`
 
-- Izgubili smo našu dragu sliku, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
+- Izgubili smo našu, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
     * `docker pull robotmurlock/helloworld:1.0`
 
 - Očekivani oblik rezultata za `docker image ls`:
@@ -290,7 +291,7 @@ def hello_world():
     return render_template('index.html', color=color)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')
 ```
 - `index.html`:
 ```
@@ -335,8 +336,8 @@ color = os.environ.get('BACKGROUND_COLOR')
 
 ![flask2](images/flask2.png)
 
-- Zašto je ovo ovako komplikovano realizovana kad može u kodu da stoji `color = 'red'`? Ako želimo da dokerizujemo aplikaciju, a ova promenljive može potencijalno da se menja kasnije (kao i mnoge druge), onda
-je potrebno da opet izgradimo sliku za aplikaciju. Umesto toga možemo da stavimo `enviroment promenljivu` za boju pozadine. Ako je potrebno da se promeni pozadina, dovoljno je samo da opet pokrenemo sliku sa drugom vrednosću za tu promenljivu.
+- Zašto je ovo ovako komplikovano realizovano kad može u kodu da stoji `color = 'red'`? Ako želimo da dokerizujemo aplikaciju, a ova promenljiva može potencijalno da se menja kasnije (kao i mnoge druge), onda
+je potrebno da opet izgradimo sliku za aplikaciju nakon svake promene u kodu. Umesto toga možemo da stavimo `enviroment promenljivu` za boju pozadine. Ako je potrebno da se promeni pozadina, dovoljno je samo da opet pokrenemo sliku sa drugom vrednosću za tu promenljivu.
 
 - Želimo da dokerizujemo naš server kako bismo mogli da postavimo na unajmljeni server.
 - Neophodne stvari:
@@ -399,9 +400,15 @@ BACKGROUND_COLOR=pink
 - **Napomena:** Umesto `--network="host"` možemo da pišemo i `-p 5000:5000` i da otvorimo server preko `localhost:5000`:
     * `docker run --name pink -p 5000:5000 --env-file env.txt flaskserver:latest`
 - Svaki kontejner ima svoji `IP + PORT`. Možemo da preslikamo ovo na port na `localhost`-u preko opcije `-p` kao što smo i uradili u prethodnom slučaju. Ovo nam omogućava da pokrenemo više servera u isto vreme na različitim portovima.
+- Hoćemo da napravimo još jedan server sa belom pozadinom na portu `5005` (može u drugom terminalu):
+    * `docker run --name white -p 5005:5000 flaskserver:latest`
 - Očekivani rezultat:
     * `http://localhost:5005/` ima belu pozadinu.
     * `http://localhost:5000/` ima roze pozadinu.
+
+- **Napomena:** Ako želimo da pokrenemo kontejner, ali da nam ne ostane u terminalu, potrebno je da dodamo opciju `-d`.
+
+![flask3](images/flask3.png)
 
 ## ENTRYPOINT i CMD (03_anotherhello)
 
@@ -425,7 +432,7 @@ int main(int argc, char** argv)
     return 0;
 }
 ```
-- Sve što ovaj program radi je: Prima kao argument komandne linije neki broj `n` i ispisuje `n` puta `Hello World!`.
+- Sve što ovaj program radi je: Prima kao argument komandne linije broj `n` i ispisuje `n` puta `Hello World!`.
 - Imamo već napisan `Dockerfile` koji je veoma sličan onom iz `01_basic` zadataka:
 ```
 FROM gcc:latest
@@ -441,7 +448,7 @@ ENTRYPOINT ["./hello"]
 CMD ["5"]
 ```
 - **Koja je razlika između ENTRYPOINT i CMD?**
-    * `ENTRYPOINT` možemo da posmatramo kao "prefiks komande" tj. deo koji je "uvek" tu kao prefiks
+    * `ENTRYPOINT` možemo da posmatramo kao "prefiks komande" tj. deo koji je "uvek" tu kao prefiks.
     * `CMD` možemo da posmatramo kao podrazumevani "sufiks komande" tj. deo koji je "uvek" tu, ako se drugačije ne kaže.
 - Pravimo sliku:
     * `docker build -t hello .`
@@ -464,7 +471,7 @@ Hello World!
 Hello World!
 Hello World!
 ```
-- Ako pokrećemo kontejner kao `docker run [IMGNAME] [ARGS]`, poziva se komanda oblika `[ENTRYPOINT] [ARGS]` tj. zamenjuje se podrazumevani deo `[CMD]` sa `ARGS`.
+- Ako pokrećemo kontejner kao `docker run [IMGNAME] [ARGS]`, poziva se komanda oblika `[ENTRYPOINT] [ARGS]` tj. zamenjuje se podrazumevani deo `[CMD]` sa `[ARGS]`.
 - Možemo čak i da zamenimo `[ENTRYPOINT]` deo opcijom `--entrypoint [VALUE]`:
     * `docker run --entrypoint ls`
 - Očekivani rezultat:
