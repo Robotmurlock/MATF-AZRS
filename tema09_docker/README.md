@@ -481,6 +481,75 @@ hello
 main.cpp
 ```
  
+## Kontejneri i skladište (04_database)
+
+Pogledajmo kod `04_database/main.cpp`. Imamo program koji dodaje rezultate ispita u bazu podataka koju ovde simuliramo preko `database.txt` datoteke. Ako prevedemo program, očekivani sadržaj datoteke `database.txt` je:
+```
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+```
+
+- Želimo da dokerizujemo ovaj program:
+    * `docker build -t database .`
+- Pokrećemo kontejner:
+    * `docker run --name database_v1.0 database`
+- Očekivani rezultat:
+```
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+```
+- Problem: Pri završetku kontejnera se brišu sve izmene nastale u tom kontejneru (izmene su lokalizovane). Ovo je veoma nezgodno ako imamo bazu podataka na serveru i pukne nam server. U tom slučaju gubimo celu bazu podataka, jer se izmene na kontejnerima ne odražavaju na slike. 
+- Ako pokrenemo opet isti kontejner, dobićemo isti rezultat, a želimo da dobijemo nešto ovako (sa očuvanom memorijom):
+```
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+```
+
+![database1](images/database1.png)
+
+- Srećom postoji opcija da se podaci čuvaju nezavisno od kontejnera. Pravimo `stalnu memoriju/particiju (volume)` koja se deli između korisnika i kontejnera.
+- Kada pokrećemo novi `docker` kontejner, potrebno je da izvršimo povezivanje preko opcie `-v [VOLUME]:[PATH]`:
+    * `docker run -v ~/data_volume:/data database`
+- Očekivani rezultat za `cat ~/data_volume/database.txt`:
+```
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+```
+- Ako pokrenemo opet kontejner, očekivani rezultat je:
+```
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+indeks: mi22173, ocena: 7
+indeks: mi22174, ocena: 8
+indeks: mi22175, ocena: 9
+indeks: mi22176, ocena: 5
+indeks: mi22177, ocena: 7
+```
+- Alternativa je da napravimo posebno `docker` skladište:
+    `docker volume create data_volume`
+- Ovo skladište spajamo sa kontejnerom na sličan način:
+    `docker run -v data_volume:/data database`
+
 ## Reference
 
 [docker](https://www.docker.com/)
