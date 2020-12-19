@@ -102,3 +102,6 @@ _deps
 log.txt
 callgrind.out.*
 callgrind.out
+
+# Python
+__pycache__
