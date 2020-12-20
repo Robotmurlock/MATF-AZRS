@@ -564,6 +564,78 @@ indeks: mi22177, ocena: 7
 - Postarati se da se `database.txt` očuvava kada se kontejner prekine. 
 - Nakon testiranja servera, podići sliku na `Docker Hub`.
 
+# Docker - Advanced
+
+## Docker - mysql-server (07_mysql_server)
+
+Ako nam je potreban `mysql` baza podataka brzo i bez korišćenja mnogo resursa, možemo da napravimo `mysql` kontejner. Ovo je rešenja samo za manje aplikacije (u tom slučaju je solidno rešenje).
+
+Detaljno objašnjenje o postavlju `mysql` servera možemo naći na sledećem [linku](https://phoenixnap.com/kb/mysql-docker-container). Odavde je izvučena `setup-mysql-server-container.sh` skripta:
+```
+docker pull mysql/mysql-server:latest
+
+docker run --name=mysql-server-db -d mysql/mysql-server:latest
+
+apt-get install mysql-client
+
+docker exec -it mysql-server-db mysql -u root -p \
+| echo "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Root_12345';"
+
+mkdir -p /root/docker/mysql-server-db/conf.d
+echo '[mysqld]' >> /root/docker/mysql-server-db/conf.d/my-custom.cnf
+echo 'max_connections=250' >> /root/docker/mysql-server-db/conf.d/my-custom.cnf
+```
+- Prethodna skripta podrazumeva skidanje slike, ažuriranje naloga (root) i konfigurisanje `mysql`-a.
+- Za pokretanje `db-mysql-server` kontejnera služi `run-mysql-server.sh` skripta:
+```
+docker run \
+--detach \
+--name=mysql-server-db \
+--env="MYSQL_ROOT_PASSWORD=Root_12345" \
+--publish 6603:3306 \
+--volume=/root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d \
+mysql
+```
+- `--detach` ili `-d` opciju koristimo ako ne želimo da nam terminal ostane otvoren u kontejneru tj. želimo da se kontejner pokreće u "pozadini".
+- `--publish` je isto što i `-p`.
+- `--volume` je isto što i `-v`.
+
+- Testiranje da li sve radi kako treba preko skripte `test.sh`:
+```
+mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max_connections"';
+```
+- Opcije:
+    * `-u`: Ime korisnika. U ovom slučaju je ime korisnika `root`.
+    * `-p`: Šifra korisnika.
+    * `-h`: IP adresa. Dobijena na osnovu: `docker inspect mysql-server-db | grep IPAddress`.
+    * `-e`: komanda.
+    * `-P`: port.
+
+- Sada možemo da se konektujemo na kontejner i da izvršavamo komande za rad sa bazom podataka:
+```
+mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603
+```
+- **Napomena:** Pošto smo izdvojili skladište za kontejner. Kada se kontejner isključi, može opet da se pokrene i baza podataka će ostati očuvana. Uključivanje i isključivanje kontejnera:
+    * `docker start mysql-server-db`
+    * `docker stop mysql-server-db`
+- Primeri za testiranje:
+```
+create database practice;
+```
+```
+create table customer(name varchar(255), surname varchar(255));
+```
+```
+insert into customer (name, surname) valuse ("Hello", "World!");
+```
+```
+select * from customer;
+```
+
+- Za vežbu možemo da napravimo jednostavnu sliku kojda dodaje par klijenata u bazu podataka:
+    * `docker run --network="host" new-customers`
+
+
 ## Reference
 
 [docker](https://www.docker.com/)
@@ -575,3 +647,5 @@ indeks: mi22177, ocena: 7
 [free-code-camp-docker](https://www.youtube.com/watch?v=fqMOX6JJhGo&t=5897s&ab_channel=freeCodeCamp.org)
 
 [c++-docker-container](https://devblogs.microsoft.com/cppblog/c-development-with-docker-containers-in-visual-studio-code/)
+
+[mysql-server](https://phoenixnap.com/kb/mysql-docker-container)

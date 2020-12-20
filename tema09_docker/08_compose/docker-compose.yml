@@ -1,0 +1,15 @@
+version: '3'
+services: 
+    mysql-server-db:
+        image: mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=Root_12345
+        ports:
+            - 10001:3306
+        volumes:
+            - /root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d
+
+    flask-server:
+        build: ./server
+        network_mode: host
+        restart: on-failure

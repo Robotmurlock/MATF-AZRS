@@ -1,0 +1,1 @@
+docker run --net example new-customers
