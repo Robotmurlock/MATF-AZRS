@@ -566,34 +566,34 @@ indeks: mi22177, ocena: 7
 
 # Docker - Advanced
 
-## Docker - mysql-server (07_mysql_server)
+## Docker - MySQL (07_mysql_server)
 
-Ako nam je potreban `mysql` baza podataka brzo i bez korišćenja mnogo resursa, možemo da napravimo `mysql` kontejner. Ovo je rešenja samo za manje aplikacije (u tom slučaju je solidno rešenje).
+Ako nam je potrebna `mysql` baza podataka brzo i bez korišćenja mnogo resursa, možemo da napravimo `mysql` kontejner. Ovo je rešenje za manje aplikacije (u tom slučaju je čak i solidno rešenje).
 
-Detaljno objašnjenje o postavlju `mysql` servera možemo naći na sledećem [linku](https://phoenixnap.com/kb/mysql-docker-container). Odavde je izvučena `setup-mysql-server-container.sh` skripta:
+Detaljno objašnjenje o postavljanju `mysql` servera možemo da pronađemo na sledećem [linku](https://phoenixnap.com/kb/mysql-docker-container). Odavde je izvučena `mysql/setup-mysql-server-container.sh` skripta:
 ```
 docker pull mysql/mysql-server:latest
 
-docker run --name=mysql-server-db -d mysql/mysql-server:latest
+docker run --name=simple-mysql-server-db -d mysql/mysql-server:latest
 
 apt-get install mysql-client
 
-docker exec -it mysql-server-db mysql -u root -p \
+docker exec -it simple-mysql-server-db mysql -u root -p \
 | echo "ALTER USER 'root'@'localhost' IDENTIFIED BY 'Root_12345';"
 
-mkdir -p /root/docker/mysql-server-db/conf.d
-echo '[mysqld]' >> /root/docker/mysql-server-db/conf.d/my-custom.cnf
-echo 'max_connections=250' >> /root/docker/mysql-server-db/conf.d/my-custom.cnf
+mkdir -p /root/docker/simple-mysql-server-db/conf.d
+echo '[mysqld]' >> /root/docker/simple-mysql-server-db/conf.d/my-custom.cnf
+echo 'max_connections=250' >> /root/docker/simple-mysql-server-db/conf.d/my-custom.cnf
 ```
 - Prethodna skripta podrazumeva skidanje slike, ažuriranje naloga (root) i konfigurisanje `mysql`-a.
-- Za pokretanje `db-mysql-server` kontejnera služi `run-mysql-server.sh` skripta:
+- Za pokretanje `simple-mysql-server-db` kontejnera koristimo `mysql/run-mysql-server.sh` skriptu:
 ```
 docker run \
 --detach \
---name=mysql-server-db \
+--name=simple-mysql-server-db \
 --env="MYSQL_ROOT_PASSWORD=Root_12345" \
 --publish 6603:3306 \
---volume=/root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d \
+--volume=/root/docker/simple-mysql-server-db/conf.d:/etc/mysql/conf.d \
 mysql
 ```
 - `--detach` ili `-d` opciju koristimo ako ne želimo da nam terminal ostane otvoren u kontejneru tj. želimo da se kontejner pokreće u "pozadini".
@@ -607,17 +607,21 @@ mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max
 - Opcije:
     * `-u`: Ime korisnika. U ovom slučaju je ime korisnika `root`.
     * `-p`: Šifra korisnika.
-    * `-h`: IP adresa. Dobijena na osnovu: `docker inspect mysql-server-db | grep IPAddress`.
+    * `-h`: IP adresa. Dobijena na osnovu: `docker inspect simple-mysql-server-db | grep IPAddress`.
     * `-e`: komanda.
     * `-P`: port.
-
-- Sada možemo da se konektujemo na kontejner i da izvršavamo komande za rad sa bazom podataka:
+- Šta smo ovime dobili za sada? Imamo kontejner koji koristimo kao `mysql-server` i kojem možemo da pristupimo preko odgovarajuće adrese (IP + port). Za testiranje kontejnera postoje dve skripte:
+    * `mysql/test.sh`
+    * `mysql/connect.sh`
+- Ovo su komande koje možemo ručno ivršiti u terminalu (skripte predstavljaju jednu komandu koja nije toliko dugačka), ali poznavanje `mysql` komandi nam nije trenutno neophodno toliko.
+- Prva skripta treba da da kao rezultat `250`. Ova skripta samo testira da li `mysql-server` radi kako treba.
+```
+mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max_connections"';
+```
+- Preko druge skripte mogu da se testiraju upiti:
 ```
 mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603
 ```
-- **Napomena:** Pošto smo izdvojili skladište za kontejner. Kada se kontejner isključi, može opet da se pokrene i baza podataka će ostati očuvana. Uključivanje i isključivanje kontejnera:
-    * `docker start mysql-server-db`
-    * `docker stop mysql-server-db`
 - Primeri za testiranje:
 ```
 create database practice;
@@ -632,9 +636,70 @@ insert into customer (name, surname) valuse ("Hello", "World!");
 select * from customer;
 ```
 
-- Za vežbu možemo da napravimo jednostavnu sliku kojda dodaje par klijenata u bazu podataka:
+- **Napomena:** Pošto smo izdvojili skladište za kontejner. Kada se kontejner isključi, može opet da se pokrene i baza podataka će ostati očuvana. Uključivanje i isključivanje kontejnera:
+    * `docker start simple-mysql-server-db`
+    * `docker stop simple-mysql-server-db`
+
+- Za vežbu možemo da napravimo jednostavnu sliku kojda dodaje par klijenata u bazu podataka. Kontejner pokrećemo na sledeći način:
     * `docker run --network="host" new-customers`
 
+- Ovde se podrazumeva komunikacije između dva kontejnera. To može direktno preko `bridge` mreže, ali zbog jednostavnosti, ovde mreža novog kontejnera nije izolovana od `host`-a (nas). To znači da možemo bez problema da pristupamo `http://localhost:[PORT]` adresama `host`-a. Setimo se da je adresa za `mysql-server` sledeća: 
+    * `http://localhost:6603`
+- Kako ovo znamo? Pa ako opet pogledamo `mysql/run-mysql-server.sh`, vidimo da je izvšeno mapiranje porta u `6603:3306`. **Napomena:** `localhost` je `alias` za `127.0.0.1`.
+
+- Pogledajmo `sql` skriptu `mysql-test-image/input.sql` koju treba da dokerizujemo:
+```
+create database if not exists practice;
+use practice;
+
+create table if not exists customer(
+    name varchar(255),
+    surname varchar(255)
+);
+
+insert into 
+    customer (name, surname)
+values 
+    ('Jeff', 'Mynameis'),
+    ('Robot', 'Murlock'),
+    ('Hell', 'boy');
+```
+- Upiti redom:
+    * Pravi se baza `practice` (ako ne postoji);
+    * Postavlja `practice` bazu kao podrazumevanu u narednim upitima;
+    * Pravi se tabela `customer` (ako ne postoji);
+    * Dodaju se redovi u `customer` tabelu u `practice` bazi.
+- Možemo da iskoristimo `mysql` sliku kao osnovu za našu sliku. To čini naš posao poprilično jednostavnim. U suštini, sve što je potrebno da uradimo je da pokrenemo `input.sql` skriptu preko `mysql` servera na odgovarajućoj adresi:
+```
+FROM mysql:latest
+
+COPY . /usr/src/database
+
+WORKDIR /usr/src/database
+
+CMD mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 < input.sql
+```
+- Ovo je nalik na `mysql/connect.sh`, samo što `input.sql` zamenjuje ulaz preko terminala.
+- Sada možemo da napravimo sliku:
+    * `docker build -t mysql-test-image .`
+- Preko nove slike možemo da pravimo kontejnere koji izvršavaju `input.sql` skriptu:
+    * `docker run --network=host mysql-test-image`
+- Treba da testiramo da li je pokretanje kontejnera uspešno tj. da li je pokrenuta operacija ispravno izvršena. Za to možemo opet da iskoristimo `connect.sh` tj. `mysql-test-image/connect.sh`:
+    * `bash connect.sh`
+- Testiranje:
+    * `use practice;`
+    * `select * from customer;`
+- Očekivani rezultat:
+```
++-------+----------+
+| name  | surname  |
++-------+----------+
+| Jeff  | Mynameis |
+| Robot | Murlock  |
+| Hell  | boy      |
++-------+----------+
+3 rows in set (0.00 sec)
+```
 
 ## Reference
 
