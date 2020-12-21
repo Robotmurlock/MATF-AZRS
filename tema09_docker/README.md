@@ -701,6 +701,180 @@ CMD mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 < input.sql
 3 rows in set (0.00 sec)
 ```
 
+## Docker Compose (08_compose)
+
+![docker_compose1](images/docker_compose1.jpg)
+
+Prethodni zadatak je bio uvod za `Docker Compose` alat. Tada smo koristili dva kontejnera koji su komunicirali međusobno kako bi izvršili neku operaciju. Imali smo dva kontejnera:
+    * `simple-mysql-server-db` tj. baza podataka.
+    * `mysql-test-image` čiji je zadatak samo da testira drugi kontejner.
+
+- U normalnom slučaju nema smisla da pravimo `mysql-test-image` kontejner, jer njega može da zameni jedna komanda u terminalu. Realniji slučaj je da umesto ove slike koristimo `flaskserver` (što ćemo i da radimo u ovom primeru):
+
+![docker_compose1](images/docker_compose2.png)
+
+### Projekat
+- Napravljen je `flaskserver` koji je implementiran u `server/app.py` i nudi sledeće usluge klijentima.
+- Server se pokreće na portu `5000`.
+- Server nudi sledeće usluge:
+    * `GET http://localhost:5000/` vraća broj iz uniforme raspodele `U[0, 1]` tj. realan broj između `0` i `1`;
+    * `GET http://localhost:5000/range?start=X&end=Y` vraća broj iz diskretne ravnomerne raspodele tj.
+    vraća ceo broj između `X` i `Y`;
+    * `GET http://localhost:5000/sequence?size=X` vraća X brojeva iz `U[0, 1]`.
+- Server čuva sledeće informacije u bazi podataka za svaki zahtev:
+    * `type`: Tip zahteve. Moguće vrednosti su `basic`, `range`, `sequence`.
+    * `result`: Odgovor servera.
+    * `client_ip`: IP klijenta koji je poslao zahtev.
+    * `time`: Datum i vreme kada je dobijen zahtev.
+
+- Skripta `client.py` služi za testiranje servera.
+- Skripta `connect.sh` služi za testiranje baze podataka.
+- Šifra za `root` nalog za bazu podataka je najverovatnije `MYSQL_ROOT_PASSWORD=Root_12345`, ako je `mysql` instaliran preko skripte iz prethodnog zadatka.
+
+### Analiza zahteva
+1. Potrebno je da se dokerizuje aplikacija. 
+2. Napraviti posebnu sliku za `mysql-server` i posebnu sliku za `flaskserver`
+3. Server baze podataka se pokreće na portu `10001` na `host`-u.
+4. Server aplikacije se pokreće na portu `5000`.
+5. Postarati se da se podaci iz baze podataka ne brišu u slučaju prekida rada.
+6. Server aplikacije ne može da radi bez baze podataka, pa je potrebno naći rešenje kad ovaj slučaj nije ispunjen.
+
+### Yaml datoteke
+
+Pre nego što pređemo na priču o `docker-compose`, potrebno je da naučimo da pišemo i čitamo `yaml` datoteke. Ideja ovog jezika je da se pišu struktuirani podaci za konfiguraciju i da bude veoma čitljiv. Sličan je `json`-u. Ekstenzija za ove datoteke je `.yml`
+
+- Ovo je primer `yaml` datoteke:
+```
+quiz: 
+  description: >
+    "This Quiz is to learn YAML."
+  questions:
+    - ["How many planets are there in the solar system?", "Name the non-planet"]
+    - "Who is found more on the web?"
+    - "What is the value of pi?"
+    - "Is pluto related to platonic relationships?"
+    - "How many maximum members can play TT?"
+    - "Which value is no value?"
+    - "Don't you know that the Universe is ever-expanding?"
+ 
+  answers:
+    - [8, "pluto"]
+    - cats
+    - 3.141592653589793
+    - true
+    - 4
+    - null
+    - no
+# explicit data conversion and reusing data blocks
+extra:
+  refer: &id011 # give a reference to data
+    x: !!float 5 # explicit conversion to data type float
+    y: 8
+  num1: !!int "123" # conversion to integer
+  str1: !!str 120 # conversion to string
+  again: *id011 # call data by giving the reference
+```
+
+### docker-compose.yml
+
+Alat `docker-compose` služi za definisanje i pokretanje `Docker` aplikacija sa više kontejnera. Konfigurisanje se definiše u `docker-compose.yml` datoteci (1). 
+- Postoji više verzija `docker-compose` i to je prva stavka koja se definiše:
+    * `version '3'`
+- Nove verzije imaju nove funkcionalnosti.
+- Sledeća stavka su servici tj. `services`. Ovde nabrajamo slike i unutar svake od tih slika definišemo njihove konfiguracije. Naše slike su (2):
+    * `mysql-server-db`
+    * `flask-server`
+- Ideja je da sve slike koje treba da `build`-ujemo čuvamo u poddirektorijumima. To znači da naš glavni direktorijum treba da izgleda ovako:
+
+```
+08_compose:
+    docker-compose.yml
+    server:
+        app.py
+        Dockerfile
+        requirements.txt
+```
+
+#### Konfiguracija za `mysql-server-db`
+
+-  Nije potrebno da se `build`-uje nova slika tj, koristi se već postojeća. Potrebno je da se to naglasi opcijom `image: mysql`. Ovim se traži odgovarajuća slika preko koje se pokreće neophodan kontejner.
+-  Definisanje promenljivih okruženja: 
+```
+environment:
+    - MYSQL_ROOT_PASSWORD=Root_12345
+```
+- Mapiranje portova (3):
+```
+ports:
+    - 10001:3306
+```
+- Podešavanje skladišta (5):
+```
+volumes:
+    - /root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d
+```
+- Konačna konfiguracija za `mysql-server`:
+```
+mysql-server-db:
+    image: mysql
+    environment:
+        - MYSQL_ROOT_PASSWORD=Root_12345
+    ports:
+        - 10001:3306
+    volumes:
+        - /root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d
+```
+
+#### Konfiguracija za `flask-server`
+
+- Potrebno je prvo da napravimo `Dockerfile` za naš `flaskserver`. Ovo smo već radili u prethodnim zadacima:
+```
+FROM python:latest
+
+COPY . /usr/src/flaskserver
+
+WORKDIR /usr/src/flaskserver
+
+RUN pip install -r requirements.txt
+
+RUN pip install mysql-connector-python
+
+CMD ["python", "app.py"]
+```
+- Sve potrebno za `build`-ovanje ovog kontejnera poddirektorijumu `server`. Zbog toga je prva stvar za konfiguraciju ove slike `build: ./server`, gde je `./server` putanja do `flaskserver` direktorijuma gde se nalazi `Dockerfile`.
+- Ne vršimo izolaciju od `host` mreže: `network_mode: host`. To znači da će server da se pokreće na portu `5000` tj. onako kako je specifikovano u `app.py` (4).
+- Server može da se prekine ako se počne sa radom pre nego što se baza podataka pripremi, a baza podataka se sporije pokreće od servera. Naivno rešenje je `restart: on-failure`. Svaki put kada server pukne (jer nije mogao da se poveže sa bazom podataka), on se opet pokreće.
+- Konačna konfiguracija za `flask-server`:
+```
+flask-server:
+    build: ./server
+    network_mode: host
+    restart: on-failure
+```
+
+#### Konačno rešenje:
+
+```
+version: '3'
+services: 
+    mysql-server-db:
+        image: mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=Root_12345
+        ports:
+            - 10001:3306
+        volumes:
+            - /root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d
+
+    flask-server:
+        build: ./server
+        network_mode: host
+        restart: on-failure
+```
+
+- Sada server pokrećemo sa `docker-compose up` ili `docker-compose up --build`, ako je potrebno da se opet `build`-uju slike.
+
+
 ## Reference
 
 [docker](https://www.docker.com/)
@@ -714,3 +888,5 @@ CMD mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 < input.sql
 [c++-docker-container](https://devblogs.microsoft.com/cppblog/c-development-with-docker-containers-in-visual-studio-code/)
 
 [mysql-server](https://phoenixnap.com/kb/mysql-docker-container)
+
+[yaml-tutorial](https://www.softwaretestinghelp.com/yaml-tutorial/)
