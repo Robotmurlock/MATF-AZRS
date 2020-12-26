@@ -1,5 +1,0 @@
-This is first line
-This line has 5 words
-This line does not have 5 words
-This is just another line
-Savvy
