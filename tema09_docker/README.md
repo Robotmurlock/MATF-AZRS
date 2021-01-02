@@ -874,6 +874,23 @@ services:
 
 - Sada server pokrećemo sa `docker-compose up` ili `docker-compose up --build`, ako je potrebno da se opet `build`-uju slike.
 
+### Docker cmake (09_cmake) 
+
+**Napomena:** Ovo je bonus primer.
+
+Ako se pozicioniramo u direktorijum `09_cmake` možemo da prevedemo `cmake` projekat tako što koristimo `docker`. Novije verzije `ubuntu` bi navodno trebalo da imaju `cmake` instaliran odmah. Ideja je da se
+ovaj primer proširi da mogu da se prevedu `qt` aplikacije. 
+
+```
+version: '3'
+services:
+  app:
+    build: ./code
+    volumes:
+      - ./build:/usr/workdir/result
+```
+
+- Pokrenuti sa `docker-compose up`.
 
 ## Reference
 
