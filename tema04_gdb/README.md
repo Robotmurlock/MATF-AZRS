@@ -7,7 +7,7 @@
 Tehnike debagovanja koje znamo:
 - Posmatranje i analiza koda;
 - Menjanje koda i ponovno pokretanje;
-- Dodavanje privremog koda koji služi samo za debagovanje (print);
+- Dodavanje privremenog koda koji služi samo za debagovanje (print);
 - ...
 
 ## Debageri
@@ -46,7 +46,7 @@ Jedan od najčešćih razloga za teške bagove je upravo rastojanje od izvora gr
 GDB je veoma dominantan na Unix sistemima, ali ima podršku i za Microsoft Windows i Mac OS.
 U praksi neki drugi debageri (LLDB za Mac OS, VSD za Windows) se više koriste na drugim sistemima zbog bolje podrške.
 
-## Uvod u GBD 
+## Uvod u GDB 
 
 Ako želimo da koristimo `gdb` na izvršnoj datoteci, potrebno je da prilikom kompilacije dodamo opciju `-g`, čime kažemo kompilatoru da sačuva tabelu simbola sa odgovarajućim informacijama. To podrazumeva (pored ostalog):
 - Imena promenljivih
