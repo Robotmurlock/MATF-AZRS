@@ -2,7 +2,7 @@
 
 ## Snimci vežbi
 
-Na ovom [linku](https://www.youtube.com/playlist?list=PLr6PFLAj4aAEWiiY9E3w8hw1rezBTIR4M) možete pogledati snimke vežbi.
+Na ovom [linku](https://www.youtube.com/playlist?list=PLr6PFLAj4aAEWiiY9E3w8hw1rezBTIR4M) se mogu pronaći snimci vežbi iz 2020. godine.
 
 ## Predavanja
 
@@ -23,8 +23,3 @@ Informacije:
 - Ispit nosi 70 poena.
 - Praktični i teorijski deo se rade zajedno.
 - Bonus teme ne dolaze na ispit.
-
-Bonus teme:
-- `QML`
-- `LLDB`
-- `CMake sintaksa: kontrola toka i funkcije`
