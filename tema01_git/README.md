@@ -39,6 +39,8 @@ Github nalog može da se napravi na [zvaničnoj github stranici](https://github.
 
 ![](./slike/CVCS-vs-DVCS.png)
 
+**Pitanje:** Kada treba da koristimo `CVCS` a kada `DVCS`?
+
 # Uvod u Git
 
 ## Instalacija (linux)
@@ -249,28 +251,125 @@ Postoji opcija da se vratimo na određeni komit. To znači da se sve promene koj
 
 Takođe je moguće stavljati tagove verzija na bitne komitove. Na te komitove možemo da skočimo na sledeći način: `git checkout [TAG]`. Ako postavimo tag, onda ne moramo da pamtimo heš indeks tog bitnog komita.
 
-Primer:
+**Primer**.
+
 - `git tag v1`, postavlja se tag `v1` na trenutni komit;
 - `git checkout HEAD~`, skače se na prethodni komit;
 - `git tag v1-prior`, postavlja se tag `v1-prior` na trenutni komit;
 - `git checkout v1`, skače se na komit sa `v1` tagom.
 
+**Pitanje:** Koje komitove želimo da označimo?
+
 ## Invertovanje poslednjeg komita
 
 Šta ako smo izvršili komit i shvatili da su to zapravo loše promene i da ih treba odbaciti. Sledećom komandom se pravi novi komit koji invertuje promene poslednjeg komita. Ako je komit koji se briše imao poruku `[PORUKA]`, onda će novi komit imati poruku `Revert "[PORUKA]"`.
 
-Primer:
-- Pravimo novu praznu datoteku: `git touch 3.txt`
-- Dodajemo `3.txt` na `staging area`: `git add 3.txt`
-- Komitujemo izmene: `git commit -m "Dodat je 3.txt"`
-- Očekivani oblik rezultata za `git hist --all`:
+**Primer**. Treba nam funkcija koja obrće redosled elemenata u vektoru. Implementacija:
+
 ```
-* 47c4988 2020-10-20 | Dodat 3.txt (HEAD -> master) [Robotmurlock]
-* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
-* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+void reverse(std::vector<int>& v)
+{
+	unsigned n = v.size();
+	for(unsigned i=0; i<n/2; i++)
+		std::swap(v[i], v[n-1-i]);
+}
 ```
-- Sledeća komanda otvara interfejs, gde možemo da biramo ime za komit koji briše poslednji komit (komit pre ovog): `git revert HEAD`. Neka se komit zove `Ipak ne bih...`.
-- Očekivani oblik rezultata za `git hist --all`:
+
+- Dodatno inicijalizujemo vektor sa elementima `{1, 2, 3, 4 5}`
+
+```
+std::vector<int> v{1, 2, 3, 4, 5};
+```
+
+- Pregled cele `main.cpp` datoteke:
+
+```
+#include <iostream>
+#include <vector>
+
+void reverse(std::vector<int>& v)
+{
+    unsigned n = v.size();
+    for(unsigned i=0; i<n/2; i++)
+        std::swap(v[i], v[n-1-i]);
+}
+
+int main()
+{
+    std::vector<int> v{1, 2, 3, 4, 5};
+    reverse(v);
+    for(auto value: v)
+        std::cout << value << " ";
+    std::cout << std::endl;
+    return 0;
+}
+```
+
+- Dodajemo `main.cpp` na `staging area`: `git add main.cpp`
+- Komitujemo izmene: `git commit -m "Implementirana je funkcionalnost obrtanja"`
+```
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja (HEAD -> master) [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
+```
+- **Problem:** Nakon daljeg istraživanja smo saznali da ova funkcionalnost već postoji u standardnoj biblioteci kao `std::reverse`. Nema potrebe da implementiramo stvari koje već postoje.
+- Sledeća komanda otvara interfejs, gde možemo da biramo ime za komit koji briše poslednji komit (komit pre ovog): `git revert HEAD`. Sadržaj komita:
+
+```
+Restauracija: Implementirana je funkcionalnost obrtanja
+
+Nakon daljeg istraživanja smo saznali da ova funkcionalnost već postoji u standardnoj biblioteci kao `std::reverse`. 
+Nema potrebe da implementiramo stvari koje već postoje.
+
+sha: e8712f8
+```
+
+- Kada završimo sa izmenama, neophodno je da se sačuva sadržaj i isključi interfejs (editor). 
+
+- **Napomena:** Isti interfejs se otvara i kada izvršimo `git commit` bez `-m` opcije. Interfejs je zapravo podrazumevani editor. Možemo da podesimo podrazumevani editor sledećom komandom: `git config --global core.editor kate` (umesto kate može bilo koji editor).
+- Očekivani sadržaj za `main.cpp`:
+
+```
+#include <iostream>
+#include <vector>
+
+int main()
+{
+	return 0;
+}
+
+```
+
+- Očekivani oblik rezultata za `git hist`:
+```
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja (HEAD -> master) [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
+```
+
+- Ovaj niz komandi ne menja datoteke, ali u istoriji ostaje obrisan komit, posle kojeg ide komit koji je taj prethodni komit "obrisao". To znači da se git drvo ne ažurira (u smislu da stari komit ostaje). Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]` (ovaj pristup nije preporučen). 
+- Ako kasnije shvatimo da nam je ipak ta funkcionalnost bila neophodna, onda možemo da da se vratimo na taj komit `checkout` komandom.
+
+**Primer**. Sada ćemo da napravimo praznu datoteku `bad.txt`, da je komitujemo, a onda da obrišemo taj komit komandom `git reset --hard [KOMIT]`.
+
+- `touch bad.txt`
+- `git add bad.txt`
+- `git commit -m "Dodata je losa datoteka bad.txt"`. Očekivani oblik izlaza:
+
+```
+HEAD is now at a76882e Restauracija: Implementirana je funkcionalnost obrtanja
+```
+
+- Očekivani oblik rezultata za `git hist:
+```
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja (HEAD -> master) [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
+```
+- `git reset --hard HEAD~` (resetujemo na stanje pretposlednjeg komita)
+- Očekivani oblik rezultata za `git hist`:
 ```
 * f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
 * 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
@@ -278,46 +377,45 @@ Primer:
 * 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
 ```
 
-Ovaj niz komandi ne menja datoteke, ali u istoriji ostaje obrisan komit, posle
-kojeg ide komit koji je taj prethodni komit obrisao. To znači da se git drvo ne ažurira (u smislu da stari komit ostaje). Ako je potrebno da se promeni i git drvo, onda koristimo komandu `git reset --hard [KOMIT]`
+- Vidimo da se poslednji komit sada obrisan, kao da se ništa nije desilo. Očekivani izlaz za komandu `ls -a`:
 
-Primer. Isti primer kao prethodni:
-- `touch 3.txt`
-- `git add 3.txt`
-- `git commit -m "Opet dodat 3.txt"`
-- Očekivani oblik rezultata za `git hist --all`:
 ```
-* bdab846 2020-10-20 | Opet dodat 3.txt (HEAD -> master) [Robotmurlock]
-* f0d061d 2020-10-20 | Ipak ne bih... [Robotmurlock]
-* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
-* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
-* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
-```
-- `git reset --hard HEAD~`
-- Očekivani oblik rezultata za `git hist --all`:
-```
-* f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
-* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
-* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
-* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+input.txt  main.cpp
 ```
 
-Ovde vidimo da se poslednji komit sada obrisan, kao da se ništa nije desilo. **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne promene koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard`
-se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama.
+- **Napomena:** Ova komanda briše komit u istoriji i briše promene u radnom direktorijumu. **Veoma opasno** i mogu se obrisati bitne promene koje su dodate prethodnim komitom ili slično. Umesto opcije `--hard` se može koristiti opcija `--soft` koja ne briše lokalne promena nad datotekama, ali briše na repozitorijumu.
+
+  
+
+- To što smo obrisali poslednji komit ne znači da je on potpuno obrisan. Ako relativno brzo reagujemo, možemo da povratimo obrisane izmene pomoću komande `git reflog`. Očekivani oblik izlaza:
+
+```
+a76882e (HEAD -> master) HEAD@{0}: reset: moving to HEAD~
+7b1440b HEAD@{1}: reset: moving to 7b1440b
+7b1440b HEAD@{2}: commit: Dodata je losa datoteka bad.txt
+a76882e (HEAD -> master) HEAD@{3}: revert: Restauracija: Implementirana je funkcionalnost obrtanja
+e8712f8 HEAD@{4}: commit: Implementirana je funkcionalnost obrtanja
+f7d0d1d HEAD@{5}: checkout: moving from 4fabb0111b8330dc45fd6cda7a3ae3b8134326ee to master
+4fabb01 HEAD@{6}: checkout: moving from master to 4fabb0111b8330dc45fd6cda7a3ae3b8134326ee
+f7d0d1d HEAD@{7}: commit: Implementiran je skelet koda
+4fabb01 HEAD@{8}: commit (initial): Inicijalni komit
+```
+
+- Komandom `git checkout 7b1440b` se vraćamo na obrisani komit gde su sve izmene tog komita sačuvane.
 
 ## Izmena poslednjeg komita
 
-Recimo da smo ažurirali `README.md` datoteku i primetili smo da ima dve stamparske greške. Jedan način da se ovo reši je da se komituju ispravke kao novi komit. Alternativa je da se koristi `--amend`, gde se stari komit zamenjuje sa novim.
+Recimo da smo ažurirali `README.md` datoteku i primetili smo da ima stamparske greške. Jedan način da se ovo reši je da se komituju ispravke kao novi komit. Alternativa je da se koristi `--amend`, gde se stari komit zamenjuje sa novim.
 
-Primer:
-- `code README.md` (izmeniti datoteku, može i `kate` ili bilo koji drug editor umesto `code`);
-- `git add README.md`;
-- `git commit -m "Azurirao README.md"`;
-- Ako je `remote` repozitorijum: `git push`
-- ovde je primećena greška!
-- `code README.md` (ispraviti greške);
+**Primer**:
+
+- `vim README.md` (izmeniti datoteku, može i `kate` ili bilo koji drug editor umesto `vim`-a). Neka je sadržaj `# VetcorExtension`.
 - `git add README.md`
-- `git commit -m "Azurirao README.md"`;
+- `git commit -m "Dodat je README.md"`
+- Možemo naknadno da izmenimo poslednji komit.
+- `vim README.md` (popraviti greške);
+- `git add README.md`
+- `git commit --amend -m "Dodat je README.md"`;
 - Ako je `remote` repozitorijum: `git push --force`.
 
 **Napomena:** Opciju `--amend` koristiti samo za komitove koji nisu deljeni sa ostalim članovima tima.
