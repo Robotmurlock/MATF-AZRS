@@ -996,7 +996,7 @@ U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komi
 
 Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a nije bitno da znamo sve komitove u unutar te implementacije. Time se dobija čitljivija istorija komitova.
 
-**Primer upotrebe za Rebase komandu**: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama).
+**Primer upotrebe za Rebase komandu**: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene šalju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama).
 
 ### git interactive rebase tool
 
@@ -1404,50 +1404,74 @@ fatal: this operation must be run in a work tree
 
 ## Bare repozitorijum
 
-Razlog zašto u prethodnom nije radila komanda `git pull` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` na kojoj je neko aktivan (`checkout`-ovan), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivan (`checkout`) i
-ne treba vršiti izmene na ovom repozitorijumu. Ovaj repozitorijum možemo posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
+Razlog zašto u prethodnom nije radila komanda `git pull` je skroz logičan. Nema smisla da gurnemo izmene na neku granu na `remote` repozitorijumu na kojoj je neko aktivan (`checkout`-ovan), jer bi to obrisalo njegove lokalne nekomitovane izmene. Repozitorijum koji je `bare` nema nijednu granu koja je aktivna (`checkout`) i ne treba da se vrše izmene na ovom repozitorijumu. Ovaj repozitorijum možemo posmatrati kao repozitorijum koji ima samo `.git` sadržaj. Možda deluje beskoristan, ali ovaj tip repozitorijuma je neophodan i služi kao posrednik u komunikaciji između više `non-bare` repozitorijuma. 
 
 - Možemo napraviti još jedan klonirani repozitorijum:
-    * `git clone hello hello_another_cloned`
-    * `cd hello_another_cloned`
-    * `git pull origin master`
-- U okviru ovog repozitorijuma možemo vršiti promene i gurati ih na `remote` repozitorijum i 
-onda te izmene se mogu lako povući na `hello_cloned` i obrnuto:
+    * `git clone 01_VectorExtension 01_VectorExtensionClonedOnceMore`
+    * `cd 01_VectorExtensionClonedOnceMore`
+- U okviru ovog repozitorijuma možemo da vršimo promene i da ih šaljemo na `remote` repozitorijum. Onda se te izmene mogu lako povući na `01_VectorExtensionClone` i obrnuto:
 
-- Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `hello_cloned` i `hello_another_cloned` repozitorijuma:
-    * `cd hello_another_cloned`
-    * `code main.cpp` (izmeniti bye() funkciju)
-    * `git add main.cpp`
-    * `git commit -m "Izmenjena bye() funkcija"`
-    * `git push`
+- Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `01_VectorExtensionClone` i `01_VectorExtensionClonedOnceMore` repozitorijuma:
+    - `cd 01_VectorExtensionClonedOnceMore`
+    - `vim main.cpp` (implementiramo `transfer` funkciju)
 ```
-void bye()
+inline void transfer(std::istream& input, std::ostream& output)
 {
-    std::cout << "Cya later alligator! <3" << std::endl;
+    store(load(input), output);
 }
 ```
-- Pređimo u `hello_cloned`:
-    * `cd ../hello_cloned`
+- Funkcija `transfer` nam omogućava da preusmerimo ulaz iz nekog toka podataka u izlaz nekog drugog toka podataka. Dodajemo i deo za testiranje u `main` funkciju:
+
+```
+int main()
+{
+    // test load
+    std::ifstream input("input.txt");
+	auto v = load(input);
+
+    std::cout << "duplicates(" << nduplicates(v) << ") + uniques(" << nunique(v) << ") == " << v.size() << std::endl;
+    v = drop_duplicates(v);
+
+    // test store
+    std::ofstream output("output.txt");
+    store(v, output);
+
+    // test transfer
+    std::ifstream another_input("input.txt");
+    std::ofstream another_output("transfered.txt");
+    transfer(another_input, another_output);
+    return 0;    
+}
+```
+
+- Nastavak:
+    - `git add main.cpp`
+    - `git commit -m "Implementirana je transfer() funkcija"`
+    - `git push`
+- Pređimo u `01_VectorExtensionClone`:
+    * `cd ../01_VectorExtensionClone`
     * `git pull`
 - Rezultat:
 ```
-remote: Counting objects: 3, done.
-remote: Compressing objects: 100% (2/2), done.
-remote: Total 3 (delta 1), reused 0 (delta 0)
-Unpacking objects: 100% (3/3), done.
-From /home/mokoyo/Desktop/ALATI/cas2/klon/hello
-   7f5285d..2db08ca  master     -> origin/master
-Updating 7f5285d..2db08ca
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 2), reused 0 (delta 0)
+Unpacking objects: 100% (3/3), 447 bytes | 447.00 KiB/s, done.
+From /home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension
+   ea25aa9..3e4127e  master     -> origin/master
+Updating ea25aa9..3e4127e
 Fast-forward
- main.cpp | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ main.cpp | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
 ```
 
 ![](./slike/bare.png)
 
-Repozitorijumi koji su `bare` se koriste za deljenje. Ako radimo u timu i potrebna je saradnja, onda je potrebno mesto za čuvanje promena repozitorijuma. U tom slučaju je potreban `bare` repozitorijum u centralizovanom smislu, gde svi korisnici mogu da guraju svoje promene i vuku tuđe promene. Pošto se samo čuvaju promene, onda `radni direktorijum (working tree)` nije potreban.
+Repozitorijumi koji su `bare` se koriste za deljenje. Ako radimo u timu i potrebna je saradnja, onda je potrebno mesto za čuvanje promena repozitorijuma. U tom slučaju je potreban `bare` repozitorijum u centralizovanom smislu, gde svi korisnici mogu da šalju svoje promene i preuzimaju tuđe promene. Pošto se samo čuvaju promene, onda `radni direktorijum (working tree)` nije potreban.
 
-Primer. Dovoljno je da `remote` repozitorijum bude `bare` za komunikaciju između ostalih `non-bare` repozitorijuma:
+**Primer**. Dovoljno je da `remote` repozitorijum bude `bare` za komunikaciju između ostalih `non-bare` repozitorijuma:
+
 - Pravimo `bare` repozitorijum:
     * `mkdir github`
     * `cd github`
@@ -1456,22 +1480,22 @@ Primer. Dovoljno je da `remote` repozitorijum bude `bare` za komunikaciju izmeđ
 - Prvo kloniranje:
     * `clone github klon1`
     * `cd klon1`
-- Implementacija funkcionalnosti "f1" u okviru klon1:
+- Implementacija funkcionalnosti `f1` u okviru klon1:
     * `touch main.txt`
     * `echo "f1" >> main.txt`
     * `git add .`
-    * `git commit -m "Implementirao f1"`
+    * `git commit -m "Implementina funkcionalnost f1"`
     * `git push`
 - Drugo kloniranje:
     * `clone github klon2`
     * `cd klon2`
 - Ako pokrenemo komandu `cat main.txt` rezultat je `f1`. To je zato što smo klonirali ažuriran `remote` (ažuriran je kada smo uradili `git push` iz `klon1`). 
-- Implementacija funkcionalnost "f2" u okviru klon2:
+- Implementacija funkcionalnost `f2` u okviru klon2:
     * `echo "f2" >> main.txt`
     * `git add main.txt`
-    * `git commit -m "Implementirao f2"`
+    * `git commit -m "Implementirana funkcionalnost f2"`
     * `git push`
-- Implementacija funkcionalnost "f3" u okviru klon1:
+- Implementacija funkcionalnost `f3` u okviru klon1:
     * `cd ../klon1`
     * `git pull` (moramo da povučemo izmene sa `remote`)
     * `echo "f3" >> main.txt`
@@ -1491,9 +1515,10 @@ Pogledati sledeći [video](https://www.youtube.com/watch?v=3a2x1iJFJWc&ab_channe
 
 ## Gitignore
 
-Često želimo da komitujemo izmene sa više datoteka. Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objektne datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka morali bismo da vršimo dodavanje na `staging area` jedan po jedan. Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama. Zbog toga postoji opcija da dodamo `.gitignore` datoteku na naš repozitorijum u okviru koje se definišu pravila za ignorisanje datoteka.
+Često želimo da komitujemo izmene sa više datoteka. Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objektne datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka morali bismo da vršimo dodavanje na `staging area` jedan po jedan (ili da dodamo sve pa da ih brišemo sa `staging area` preko `git reset`). Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama (spam). Zbog toga postoji opcija da dodamo `.gitignore` datoteku na naš repozitorijum u okviru koje se definišu pravila za ignorisanje datoteka.
 
-Primer. Posmatrajmo `helloClass` primer:
+**Primer**. Posmatrajmo `helloClass` primer:
+
 - Neka to bude novi git repozitorjum:
     `git init`
 - Inicijalni komit:
@@ -1504,7 +1529,7 @@ Primer. Posmatrajmo `helloClass` primer:
     * `qmake -o Makefile hello.pro` (ova komanda generiše Makefile)
     * `make` (ovo generiše objekte i izvršne datoteke)
 - Sada imamo sledeće dodatne datoteke: `helloworld` `hello.o` `main.o` `Makefile`
-- Ako obrišemo ove datoteke, možemo ih generisati na isti način. Ne želimo da dodajemo datoteke koje se uvek mogu generisati, a dodatno mogu praviti neke konflitke koje možemo izbeći.
+- Ako obrišemo ove datoteke, možemo da ih generišemo na isti način. Ne želimo da dodajemo datoteke koje se uvek mogu generisati, a dodatno mogu praviti neke konflitke koje možemo izbeći.
 - Dodatno ako pokrenemo komandu `git status` očekivani izlaz je:
 ```
 On branch master
@@ -1568,13 +1593,13 @@ Pravila:
 - Notacija za opseg: `[a-zA-Z]`.
 - Celu dokumentaciju pogledati na sledećoj [stranici](https://git-scm.com/docs/gitignore).
 
-## Kako pisati komitove?
+## Kako se pišu komitovi?
 
 Pisanje komitova kroz komandu:
     * `git commit -m "title" -m "description"`
 
 Postavljanje podrazumevanog editora za `git commit` komandu:
-    * `git config --global core.editor "code --wait"`
+    * `git config --global core.editor "vim --wait"`
 
 ### Zašto je bitno pisati dobre komitove?
 
