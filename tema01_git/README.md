@@ -946,7 +946,7 @@ int main()
 ```
 - Izvšene su sledeće komande:
     * `git checkout master`
-    * `code input.txt`, unesen je prethodni sadržaj
+    * `vim input.txt`, unesen je prethodni sadržaj
     * `git add input.txt`
     * `git commit -m "Dodat je primer unosa za buduću mnogo dobru funkcionalnost"`
 - Očekivani oblik rezultata za `git hist --all`:
@@ -1039,138 +1039,194 @@ Uraditi zadatake na sledećoj [stranici](https://learngitbranching.js.org/).
 
 ## Kloniranje repozitorijuma
 
-Kloniranje repozitorijuma se vrši komandom: \
-`git clone [LOKACIJA REPOZITORIJUMA] [IME NOVOG DIREKTORIJUMA]`, \
-gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili URL Github stranice repozitorijuma koji se klonira. 
+Kloniranje repozitorijuma se vrši komandom`git clone [LOKACIJA REPOZITORIJUMA] [IME NOVOG DIREKTORIJUMA]`,  gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili URL Github stranice repozitorijuma koji se klonira. 
 
-**Primer**: 
-- Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
-    * `mkdir hello`
-    * `cd hello`
-    * `git init`
-    * `code main.cpp` (ovde umetnuti naredni kod)
+**Primer**. Već imamo repozitorijum `VectorExtension` (ako nemamo onda možemo da ga dohvatimo iz `kontrolni_punkti/VectorExtensionPartOne.zip` i raspakujemo. Kloniranje repozitorijuma je jednostavno:
+
+- `git clone 01_VectorExtension 01_VectorExtensionClone`
 ```
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-void hello()
-{
-    std::cout << "Hello World!" << std::endl;
-}
-
-void nPlusHello(int n)
-{
-    while(n >= 0)
-    {
-        hello();
-        n--;
-    }
-}
-
-int main()
-{
-    int n;
-    std::cin >> n;
-    nPlusHello(n);
-    return 0;
-}
-```
-- Postavljamo inicijalni komit:
-    * `git add .`
-    * `git commit -m "Inicijalni komit"`
-- Pravimo klon repozitorijuma: `git clone hello hello_cloned`
-```
-Cloning into 'hello_cloned'...
+Cloning into '01_VectorExtensionClone'...
 done.
 ```
-- Ako pogledamo sadržaj novog `hello_cloned` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke.
-- Ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
+- Ako pogledamo sadržaj novog `01_VectorExtensionClone` direktorijuma, videćemo da on takođe sadrži skriveni `.git` direktorijum i da sadrži identične datoteke. Takođe, ako pogledamo istoriju koristeći komandu `git hist`, rezultat je isti kao u originalnom repozitorijumu.
 
 ## Remote repozitorijum
 
-Komandom `git remote` dobijamo listu svih `remote`-ova. Ovde `remote` predstavlja git repozitorijum (skup verzija projekta) koji se uglavnom nalazi na internetu (npr. Github-u). Timski rad podrazuvema korišćenje `remote` repozitorijuma.
-- Podrazumevano ime za `remote` repozitorijum je `origin`, što i jeste rezultat prethodne komande u ovom slučaju. 
-- Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova.
+Komandom `git remote` dobijamo listu svih `remote`-ova:
+
+- `git remote` u `01_VectorExtension` daje praznu listu, a `git remote` u `01_VectorExtensionClone` daje `origin`, što je podrazumevano ime za `remote`. 
+- `remote` predstavlja git repozitorijum (skup verzija projekta) koji se uglavnom nalazi na nekoj platformi (npr. Github-u). Timski rad podrazuvema korišćenje `remote` repozitorijuma.
+
+- Pozicionirajmo se u `01_VectorExtensionClone`. Komandom `git remote -v` dobijamo listu svih `remote`-ova i njihovih URL-ova.
 ```
-origin  /home/mokoyo/Desktop/ALATI/cas2/hello (fetch)
-origin  /home/mokoyo/Desktop/ALATI/cas2/hello (push)
+origin	/home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension (fetch)
+origin	/home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension (push)
 ```
-Postoji skup komandi oblika `git remote [OPCIJA]` koja služi za rad sa `remote` repozitorijumima
-u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd... Detaljnije: `man git remote`.
+Postoji skup komandi oblika `git remote [OPCIJA]` koja služi za rad sa `remote` repozitorijumima u smislu ispisivanja informacija o njima, dodavanja, brisanja, preimonovanja itd... Više informacija na `man git remote`.
 
 ## Fetch, Merge i Pull
 
 **Šta se dešava ako izvršimo promenu na remote repozitorijumu?**
 
-Primer:
-- Vratimo se na originalni repozitorijum:
-    * `cd ../hello`
-    * Dodajmo novu implementaciju nove funkcije `bye()`:
+**Primer**. Vratimo se na originalni repozitorijum:
+
+* `cd ../01_VectorExtension`
+* Dodajmo implementaciju nove funkcije `nduplicates()` koja vraća broj duplikata u vektoru. Ovo možemo da implementiramo direktno preko `drop_duplicates` funkcije.
+
 ```
-void bye()
+unsigned nduplicates(const std::vector<int>& v)
 {
-    std::cout << "Goodbye!" << std::endl;
+    auto v_unq = drop_duplicates(v);
+    return v.size() - v_unq.size();
 }
 ```
-- I dodajmo njen poziv pri kraju glavne funkcije.
+- **Napomena:** `auto` je ključna koja nam omogućava da ostavimo kompajleru da zaključi tip (`std::vector<int>` u ovom slučaju).
+- I dodajmo njen poziv u glavnu funkciju:
 ```
 #include <iostream>
+#include <vector>
+#include <fstream>
 
-void hello()
+std::vector<int> load(std::istream& input)
 {
-    std::cout << "Hello World!" << std::endl;
+    std::vector<int> v;
+    int value;
+    while(input >> value)
+        v.push_back(value);
+    return v;
 }
 
-void nPlusHello(int n)
+void store(const std::vector<int>& v, std::ostream& output)
 {
-    while(n >= 0)
+    for(int value: v)
+        output << value << " ";
+}
+
+std::vector<int> drop_duplicates(const std::vector<int>& v)
+{
+    unsigned n = v.size();
+
+    std::vector<int> result;
+    for(int i=0; i<n; i++)
     {
-        hello();
-        n--;
+        bool add = true;
+        for(int j=0; j<i-1; j++)
+        {
+            if(v[i] == v[j])
+            {
+                add = false;
+                break;
+            }
+        }
+        if(add)
+            result.push_back(v[i]);
     }
+    return result;
 }
 
-void bye()
+unsigned nduplicates(const std::vector<int>& v)
 {
-    std::cout << "Goodbye!" << std::endl;
+    auto v_unq = drop_duplicates(v);
+    return v.size() - v_unq.size();
 }
 
 int main()
 {
-    int n;
-    std::cin >> n;
-    nPlusHello(n);
-    bye();
+    // test load
+    std::ifstream input("input.txt");
+	auto v = load(input);
+
+    std::cout << nduplicates(v) << std::endl;
+    v = drop_duplicates(v);
+
+    // test store
+    std::ofstream output("output.txt");
+    store(v, output);
     return 0;
 }
 ```
-- Potrebno je da se komituju izmene:
+- Potrebno je da komitujemo izmene:
     * `git add main.cpp`
-    * `git commit -m "Implementirana je bye() funkcija"` 
+    * `git commit -m "Implementirana je funkcija nduplicates()"` 
     * Očekivani rezultat za `git hist --all`:
 ```
-* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (HEAD -> master) [Robotmurlock]
-* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+* 9fc05e0 2021-10-04 | Implementirana je funkcija nduplicates() (HEAD -> master) [Robotmurlock]
+*   b920588 2021-10-02 | Razrešeni konflikti [Robotmurlock]
+|\  
+| * 105d348 2021-10-02 | Implementirana je drop_duplicates funkcionalnost (feature/drop-duplicates) [Robotmurlock]
+* | 188122e 2021-10-02 | Obelezeno je mesto za testiranje drop_duplicates [Robotmurlock]
+|/  
+*   ca669e3 2021-10-02 | Merge branch 'feature/load-store' [Robotmurlock]
+|\  
+| * 642a448 2021-10-02 | Implementirana je store funkcionalnost [Robotmurlock]
+| * 2700cb0 2021-10-02 | Implementirana je load funkcija [Robotmurlock]
+* | 9b495dd 2021-10-02 | Azuriran je README [Robotmurlock]
+|/  
+* 20b6eef 2021-10-02 | Dodat je README.md [Robotmurlock]
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
 ```
-- Ako se sada vratimo na `hello_cloned`, možemo videti da je `main.cpp` nepromenjen, što je i očekivano, jer smo ga takvog i ostali u tom direktorijumu. Čak i `git hist --all` daje stari rezultat:
+- Ako se sada vratimo na `01_VectorExtensionClone`, možemo da vidmo da je `main.cpp` nepromenjen, što je i očekivano, jer smo ga takvog i ostavili u tom direktorijumu. Čak i `git hist --all` daje stari rezultat:
 ```
-* 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
+*   b920588 2021-10-02 | Razrešeni konflikti (HEAD -> master, origin/master, origin/HEAD) [Robotmurlock]
+|\  
+| * 105d348 2021-10-02 | Implementirana je drop_duplicates funkcionalnost (origin/feature/drop-duplicates) [Robotmurlock]
+* | 188122e 2021-10-02 | Obelezeno je mesto za testiranje drop_duplicates [Robotmurlock]
+|/  
+*   ca669e3 2021-10-02 | Merge branch 'feature/load-store' [Robotmurlock]
+|\  
+| * 642a448 2021-10-02 | Implementirana je store funkcionalnost [Robotmurlock]
+| * 2700cb0 2021-10-02 | Implementirana je load funkcija [Robotmurlock]
+* | 9b495dd 2021-10-02 | Azuriran je README [Robotmurlock]
+|/  
+* 20b6eef 2021-10-02 | Dodat je README.md [Robotmurlock]
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
 ```
-- Potrebno je da ažuriramo istoriju. To se može izvršiti preko komande `git fetch`. 
+- Potrebno je da ažuriramo istoriju. To se može da se izvrši preko komande `git fetch`. Očekivani oblik rezultata:
+
+```
+remote: Enumerating objects: 5, done.
+remote: Counting objects: 100% (5/5), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 3 (delta 2), reused 0 (delta 0)
+Unpacking objects: 100% (3/3), 395 bytes | 395.00 KiB/s, done.
+From /home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension
+   b920588..9fc05e0  master     -> origin/master
+```
+
 - Sada je očekivani rezultat za `git hist --all`:
 ```
-* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
-* 3c14a07 2020-10-18 | Inicijalni komit (HEAD -> master) [Robotmurlock]
+* 9fc05e0 2021-10-04 | Implementirana je funkcija nduplicates() (origin/master, origin/HEAD) [Robotmurlock]
+*   b920588 2021-10-02 | Razrešeni konflikti (HEAD -> master) [Robotmurlock]
+|\  
+| * 105d348 2021-10-02 | Implementirana je drop_duplicates funkcionalnost (origin/feature/drop-duplicates) [Robotmurlock]
+* | 188122e 2021-10-02 | Obelezeno je mesto za testiranje drop_duplicates [Robotmurlock]
+|/  
+*   ca669e3 2021-10-02 | Merge branch 'feature/load-store' [Robotmurlock]
+|\  
+| * 642a448 2021-10-02 | Implementirana je store funkcionalnost [Robotmurlock]
+| * 2700cb0 2021-10-02 | Implementirana je load funkcija [Robotmurlock]
+* | 9b495dd 2021-10-02 | Azuriran je README [Robotmurlock]
+|/  
+* 20b6eef 2021-10-02 | Dodat je README.md [Robotmurlock]
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
 ```
-- Sa druge strane, datoteka `main.cpp` i dalje nema učitane promene. Da bi se spojile promene, potrebno je iskoristi komandu `git merge [LOKACIJA]` tj. u ovom slučaju `git merge origin/master`, što spaja promene sa `remote`, odnosno `hello` repozitorijumom. Očekivani rezultat:
+- Sa druge strane, datoteka `main.cpp` i dalje nema učitane promene. Da bi se spojile promene, potrebno je iskoristimo komandu `git merge [LOKACIJA]` tj. u ovom slučaju `git merge origin/master`, što spaja promene sa `remote`, odnosno `01_VectorExtension` repozitorijumom i `master` granom. Očekivani rezultat:
 ```
-Updating 3c14a07..9bd65e2
+Updating b920588..9fc05e0
 Fast-forward
- main.cpp | 6 ++++++
- 1 file changed, 6 insertions(+)
+ main.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
 ```
-- Ove dve komande se često korist jedna za drugom:
+- Ove dve komande se često koriste jedna za drugom:
     * `git fetch`
     * `git merge`
 - Zbog toga postoji komanda `git pull` koji predstavlja kombinaciju prethodne dve komande tj. izvršava prvo `git fetch` operaciju, pa onda `git merge` operaciju.
@@ -1179,37 +1235,120 @@ Fast-forward
 
 Promene mogu da se vrše i na kloniranim repozitorijuma koji nisu `remote` repozitorijumi i da se onda `gurnu (pull)` na `remote` repozitorijum. 
 
-Primer:
-- Želimo da izvršimo promene na `hello_cloned` repozitorijumu:
-    * `cd hello_cloned`
-- Menjamo ispis funkcije `bye()`:
+**Primer**. Želimo da izvršimo promene na `01_VectorExtensionClone` repozitorijumu:
+
+- `cd 01_VectorExtensionClone`
+
+- Dodajemo simetričnu funkciju `nunique()`:
 ```
-void bye()
+unsigned nunique(const std::vector<int>& v)
 {
-    std::cout << "Cya later alligator!" << std::endl;
+    return v.size() - nduplicates(v);
 }
 ```
-- Potrebno je komitovati promene:
+- Ažuriramo i `main()` funkciju tj. deo gde se ispisuje broj duplikata:
+
+```
+std::cout << "duplicates(" << nduplicates(v) << ") + uniques(" << nunique(v) << ") == " << v.size() << std::endl;
+```
+
+- Ceo kod:
+
+```
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+std::vector<int> load(std::istream& input)
+{
+    std::vector<int> v;
+    int value;
+    while(input >> value)
+        v.push_back(value);
+    return v;
+}
+
+void store(const std::vector<int>& v, std::ostream& output)
+{
+    for(int value: v)
+        output << value << " ";
+}
+
+std::vector<int> drop_duplicates(const std::vector<int>& v)
+{
+    unsigned n = v.size();
+
+    std::vector<int> result;
+    for(int i=0; i<n; i++)
+    {
+        bool add = true;
+        for(int j=0; j<i-1; j++)
+        {
+            if(v[i] == v[j])
+            {
+                add = false;
+                break;
+            }
+        }
+        if(add)
+            result.push_back(v[i]);
+    }
+    return result;
+}
+
+unsigned nduplicates(const std::vector<int>& v)
+{
+    auto v_unq = drop_duplicates(v);
+    return v.size() - v_unq.size();
+}
+
+unsigned nunique(const std::vector<int>& v)
+{
+    return v.size() - nduplicates(v);
+}
+
+int main()
+{
+    // test load
+    std::ifstream input("input.txt");
+	auto v = load(input);
+
+    std::cout << "duplicates(" << nduplicates(v) << ") + uniques(" << nunique(v) << ") == " << v.size() << std::endl;
+    v = drop_duplicates(v);
+
+    // test store
+    std::ofstream output("output.txt");
+    store(v, output);
+    return 0;
+}
+```
+
+- Potrebno je dat komitujemo promene:
     * `git add main.cpp`
-    * `git commit -m "Dodat lepši tekst u bye() funkciji"`
-    * Očekivani izlaz za `git hist --all`:
+    * `git commit -m "Implementacija nunique() funckije"`
+    * Očekivani izlaz za `git hist --all -n 5` (ovde već postaje glomazno da se gleda cela istorija, pa možemo da prikažemo samo poslednjih 5 komitova) :
 ```
-* 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
-* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija (origin/master, origin/HEAD) [Robotmurlock]
-* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+* ea25aa9 2021-10-04 | implementacija nunique() funkcije (HEAD -> master) [Robotmurlock]
+* 9fc05e0 2021-10-04 | Implementirana je funkcija nduplicates() (origin/master, origin/HEAD) [Robotmurlock]
+*   b920588 2021-10-02 | Razrešeni konflikti [Robotmurlock]
+|\  
+| * 105d348 2021-10-02 | Implementirana je drop_duplicates funkcionalnost (origin/feature/drop-duplicates) [Robotmurlock]
+* | 188122e 2021-10-02 | Obelezeno je mesto za testiranje drop_duplicates [Robotmurlock]
+|/  
 ```
-- Ako se sada vratimo na `hello` repozitorijum i izvršimo `git fetch`, onda se ništa neće desiti:
-    * `cd ../hello`
+- Ako se sada vratimo na `01_VectorExtension` repozitorijum i izvršimo `git fetch`, onda se ništa neće desiti:
+    * `cd ../01_VectorExtension`
     * `git fetch`
-- To je zato što `remote` repozitorijum nije ažuriran. Potrebno je da se vratimo u `hello_cloned` repozitorijum i gurnemo izmene:
-    * `git push remote origin`
+- To je zato što `remote` repozitorijum nije ažuriran. Potrebno je da se vratimo u `01_VectorExtensionClone` repozitorijum i gurnemo izmene na `remote` komandom `git push`:
+    * `git push `
     * Očekivani oblik izlaza:
 ```
-Counting objects: 3, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (2/2), done.
-Writing objects: 100% (3/3), 327 bytes | 327.00 KiB/s, done.
-Total 3 (delta 1), reused 0 (delta 0)
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 401 bytes | 401.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
 remote: error: refusing to update checked out branch: refs/heads/master
 remote: error: By default, updating the current branch in a non-bare repository
 remote: is denied, because it will make the index and work tree inconsistent
@@ -1224,34 +1363,39 @@ remote: other way.
 remote: 
 remote: To squelch this message and still keep the default behaviour, set
 remote: 'receive.denyCurrentBranch' configuration variable to 'refuse'.
-To /home/mokoyo/Desktop/ALATI/cas2/hello
+To /home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension
  ! [remote rejected] master -> master (branch is currently checked out)
-error: failed to push some refs to '/home/mokoyo/Desktop/ALATI/cas2/hello'
+error: failed to push some refs to '/home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension'
 ```
-- Ne može se izvršiti push osim ako `remote` repozitorijum nije `bare`. Detaljnije objašnjenje o tome šta su `bare` repozitorijumi u sledećoj sekciji.
-- Potrebno je postaviti da `hello` repozitorijum bude `bare`:
-    * `cd ../hello`
+- Ne može da se izvrši `push` osim ako `remote` repozitorijum nije `bare`. Detaljnije objašnjenje o tome šta su `bare` repozitorijumi je u sledećoj sekciji.
+- Potrebno je da postavimo da `01_VectorExtension` repozitorijum bude `bare`:
+    * `cd ../01_VectorExtension`
     * `cd .git`
     * Zameniti linuju `bare = false` u datoteci `config` unutar `.git` direktorijuma sa linijom `bare = true` i sačuvati izmene.
 - Alternativa je da se iskoristi komanda `git config --bool core.bare true` koja daje isti rezultat.
-- Sada možemo da se vratimo u `hello_cloned` i gurnemo promene:
-    * `cd ../../hello_cloned`
-    * `git push origin master`
+- Sada možemo da se vratimo u `01_VectorExtensionClone` i gurnemo promene:
+    * `cd ../../01_VectorExtension`
+    * `git push`
     * Očekivani oblik izlaza:
 ```
-Counting objects: 3, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (2/2), done.
-Writing objects: 100% (3/3), 327 bytes | 327.00 KiB/s, done.
-Total 3 (delta 1), reused 0 (delta 0)
-To /home/mokoyo/Desktop/ALATI/cas2/hello
-   9bd65e2..380a25e  master -> master
+Enumerating objects: 5, done.
+Counting objects: 100% (5/5), done.
+Delta compression using up to 4 threads
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (3/3), 401 bytes | 401.00 KiB/s, done.
+Total 3 (delta 2), reused 0 (delta 0)
+To /home/mokoyo/Desktop/AZRS/cas01/01_VectorExtension
+   9fc05e0..ea25aa9  master -> master
 ```
-- Ako se vratimo u `hello` repozitorijum i izvršimo `git hist --all` dobijamo sledeći oblik izlaza:
+- Ako se vratimo u `01_VectorExtension` repozitorijum i izvršimo `git hist --all -n 5` dobijamo sledeći oblik izlaza:
 ```
-* 380a25e 2020-10-18 | Dodat lepši tekst u bye() funkciji (HEAD -> master) [Robotmurlock]
-* 9bd65e2 2020-10-18 | Implementirana je bye() funkcija [Robotmurlock]
-* 3c14a07 2020-10-18 | Inicijalni komit [Robotmurlock]
+* ea25aa9 2021-10-04 | implementacija nunique() funkcije (HEAD -> master) [Robotmurlock]
+* 9fc05e0 2021-10-04 | Implementirana je funkcija nduplicates() [Robotmurlock]
+*   b920588 2021-10-02 | Razrešeni konflikti [Robotmurlock]
+|\  
+| * 105d348 2021-10-02 | Implementirana je drop_duplicates funkcionalnost (feature/drop-duplicates) [Robotmurlock]
+* | 188122e 2021-10-02 | Obelezeno je mesto za testiranje drop_duplicates [Robotmurlock]
+|/  
 ```
 - Kao da je automatski izvršen `git fetch`. Međutim, promene nisu izvršene i `git pull` vraća sledeću poruku:
 ```
