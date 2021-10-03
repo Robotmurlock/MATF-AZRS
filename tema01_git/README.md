@@ -887,7 +887,8 @@ Automatic merge failed; fix conflicts and then commit the result.
 ```
 ## Rebase
 
-Primer. U okviru prvog komita je implementiran jednostavan `C++` program:
+**Primer**. U okviru prvog komita je implementiran jednostavan `C++` program:
+
 ```
 #include <iostream>
 
@@ -917,8 +918,8 @@ int main()
 - Dodaje se `main.cpp` datoteka na `staging area`: 
     * `git add main.cpp`
 - Postavlja se prvi komit: 
-    * `git commit -m "Implementiran main.cpp"`
-- U prethodnom kodu možemo uočiti dve relativno očigledne greške:
+    * `git commit -m "Inicijalni komit"`
+- U prethodnom kodu možemo da uočimo dve relativno očigledne greške:
     * Piše `Hello Warld!` umesto `Hello World`;
     * Pošto je promenljiva `n` tipa `unsigned`, uslov `n >= 0` je uvek tačan i posledica je beskonačna petlja.
 - Pretpostavimo da ove greške nisu uočene. Pravimo novu granu `bugFix` za debagovanje beskonačne petlje: `git checkout -b bugFix`.
@@ -931,18 +932,17 @@ int main()
     * `git commit -m "Dodat ispis za debagovanje"`
 - Sada je razlog beskonačne petlje očigledan i vrši se ispravka `unsigned n` u `int n`:
     * `git add main.cpp`
-    * `git commit -m "Uklonjena je beskonačna petlja"`
+    * `git commit -m "Uklonjena beskonačna petlja"`
 - Git stablo trenutno ima oblik sličan sledećem:
 ```
-* 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
-* f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
-* a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* 9e98493 2020-10-20 | Implementiran main.cpp (master) [Robotmurlock]
+* 29adf28 2021-10-03 | Uklonjena beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
+* 56c4a16 2021-10-03 | Dodat ispis za debagovanje [Robotmurlock]
+* 2564245 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 86ee08f 2021-10-03 | Inicijalni komit (master) [Robotmurlock]
 ```
 - Pretpostavimo još da je u `master` grani dodat neki komit koji uključuje novu datoteku `input.txt`:
 ```
 5
-1 2 3 4 5
 ```
 - Izvšene su sledeće komande:
     * `git checkout master`
@@ -951,23 +951,19 @@ int main()
     * `git commit -m "Dodat je primer unosa za buduću mnogo dobru funkcionalnost"`
 - Očekivani oblik rezultata za `git hist --all`:
 ```
-* 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (HEAD -> master) [Robotmurlock]
-| * 6bc80e9 2020-10-20 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
-| * f76787e 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
-| * a581d8d 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* bdf7653 2021-10-03 | Dodat primer unosa za buduću mnogo dobru funkcionalnost (HEAD -> master) [Robotmurlock]
+| * 29adf28 2021-10-03 | Uklonjena beskonačna petlja (bugFix) [Robotmurlock]
+| * 56c4a16 2021-10-03 | Dodat ispis za debagovanje [Robotmurlock]
+| * 2564245 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 |/  
-* 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
+* 86ee08f 2021-10-03 | Inicijalni komit [Robotmurlock]
 ```
-- Potrebno je dodati ispravke na `master` granu. To se može izvršiti na sledeće načine:
-    1. Može se izvršiti spajanje i onda obrisati deo za debagovanje u okviru `master` grane;
-    2. Može se obrisati deo za debagovanje u okviru `bugFix` grane i onda izvršiti spajanje;
-    3. Može se izvršiti `git rebase master` komanda koja menja strukturu git drveta. Dobijeni rezultat je
-    ekvivalentan kao da su od početka vršeni komitovi na `master` grani tj. kao da `bugFix`
-    grana nikad nije ni postojala. Dobijeno drvo je sada postalo `linearno` i samim tim i čitljvije. I u tom slučaju je potrebno naknadno obrisati deo za debagovanje.
-    4. Modifikacije prethodnog je da se koristi `git rebase -i master`, gde se komit za dodavanje
-    koda za debagovanje odbacuje kao da nikad nije ni postojao. Ako se instaliran i konfigurisan `git interactive rebase tool`, onda je korisnički interfejs malo prikladniji. Instalacija i 
-    konfiguracija ovog alata je objašnjenja u sledećoj sekciji. Potrebno je izabrati `pick` opciju
-    za prvi i poslednji komit grane `bugFix` (to znači da će komitovi biti prebačeni na `master` granu) i opciju `drop` za drugi komit (to znači da će komit biti odbačen).
+- Potrebno je dodati ispravke na `master` granu. To se može da se izvrši na sledeće načine:
+    1. Može da se izvrši spajanje i onda brisanje dela za debagovanje u okviru `master` grane;
+    2. Može da se obriše deo za debagovanje u okviru `bugFix` grane i onda da se izvrši spajanje;
+    3. Može da se izvrši `git rebase master` komanda koja menja strukturu git drveta. Dobijeni rezultat je ekvivalentan kao da su od početka vršeni komitovi na `master` grani tj. kao da `bugFix` grana nikad nije ni postojala. Dobijeno drvo je sada postalo `linearno` i samim tim i čitljvije. I u tom slučaju je potrebno naknadno obrisati deo za debagovanje.
+    4. Modifikacije prethodnog je da se koristi `git rebase -i master`, gde se komit za dodavanje koda za debagovanje odbacuje kao da nikad nije ni postojao. Ako je instaliran i konfigurisan `git interactive rebase tool`, onda je korisnički interfejs malo prikladniji. Instalacija i 
+    konfiguracija ovog alata je objašnjenja u sledećoj sekciji. Potrebno je da se izabere `pick` opcija za prvi i poslednji komit grane `bugFix` (to znači da će komitovi biti prebačeni na `master` granu) i opciju `drop` za drugi komit (to znači da će komit biti odbačen).
 - Primenom poslednjeg rešenja se dobija sledeća struktura git drveta:
 ```
 * df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> bugFix) [Robotmurlock]
@@ -975,61 +971,65 @@ int main()
 * 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost (master) [Robotmurlock]
 * 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
 ```
-- U datoteci `main.cpp` su ostale ispravke, ali kod za debagovanje je odbačen.
+- Prikaz svih koraka:
+    - `git checkout bugFix`
+    - `git rebase -i master`
 
+![](/home/mokoyo/Desktop/AZRS/MATF-AZRS/tema01_git/slike/git-interactive-rebase-tool.png)
+
+- U datoteci `main.cpp` su ostale ispravke, ali kod za debagovanje je odbačen.
 - Ostalo je još samo da se `bugFix` spoji sa trenutnim komitom:
     * `git checkout master`
     * `git merge bugFix`
+    * `git branch -d bugFix`
 - Očekivani rezultat za `git hist --all`:
 ```
-* df26046 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master, bugFix) [Robotmurlock]
-* 068b021 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* 3979e3a 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
-* 9e98493 2020-10-20 | Implementiran main.cpp [Robotmurlock]
+* 05cf5e7 2021-10-03 | Uklonjena beskonačna petlja (HEAD -> master, bugFix) [Robotmurlock]
+* 391396f 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* bdf7653 2021-10-03 | Dodat primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+* 86ee08f 2021-10-03 | Inicijalni komit [Robotmurlock]
 ```
 
 - Primetimo ovde da imamo mnogo čistiju istoriju, nego kad smo koristili `git merge`.
 
 U okviru `git interactive rebase tool` postoji i opcija `squash` koja spaja komitove u jedan. Ovo je korisno ako su ti komitovi vezani za rešavanje iste greške i ima smisla da predstavljaju celinu. 
 
-Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a nisu butno da znamo sve komitove u unutar te implementacije. Time se dobija čitljivija istorija komitova.
+Opcija `squash` se često koristi kada se radi na nekoj novoj funkcionalnost, a nije bitno da znamo sve komitove u unutar te implementacije. Time se dobija čitljivija istorija komitova.
+
+**Primer upotrebe za Rebase komandu**: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama).
 
 ### git interactive rebase tool
 
 Za instalaciju `git interactive rebase tool` posetiti sledeću [stranicu](https://gitrebasetool.mitmaro.ca/).
 
-### Upotreba rebase
-
-Primer upotrebe: Pretpostavimo da paralelno radimo sa nekim drugim timom, gde je implementiran deo koda na našoj grani i deo koda na grani drugog tima. U nekom trenutku je potrebna deo funkcionalnosti koja je implementirana na grani drugog tima. U tom slučaju može da se izvrši `rebase` grane našeg tima na granu drugog tima. Ako se promene guraju na `remote`, onda je potrebno da se koristi `git push --force` (detaljnije objašnjenje u kasnijim sekcijama)
-
 ### Cherry-pick
 
 - Postoji još jedan način da se dobije isti rezultat iz prethodnog primera preko komande `git cherry-pick`:
     * `git checkout master`
-    * `git cherry-pick da63caf a847380`
+    * `git cherry-pick 2564245 29adf28` 
 - Ova komanda bira niz komitova i kopira ih na trenutnu `master` granu. Očekivani rezultat:
 ```
-* 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
-* ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
-| * 02641c6 2020-10-20 | Uklonjena je beskonačna petlja (bugFix) [Robotmurlock]
-| * 3b1e768 2020-10-20 | Dodat ispis za debagovanje [Robotmurlock]
-| * f6b2c45 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* 2572742 2021-10-03 | Uklonjena beskonačna petlja (HEAD -> master) [Robotmurlock]
+* 17601ad 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* bdf7653 2021-10-03 | Dodat primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+| * 29adf28 2021-10-03 | Uklonjena beskonačna petlja (bugFix) [Robotmurlock]
+| * 56c4a16 2021-10-03 | Dodat ispis za debagovanje [Robotmurlock]
+| * 2564245 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
 |/  
-* 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
+* 86ee08f 2021-10-03 | Inicijalni komit [Robotmurlock]
 ```
 - Grana `bugFix` nam više nije od koristi:
     * `git branch -D bugFix` (Koristimo opciju `-D` jer je to grana koja nije spojena)
 - Očekivani konačan rezultat:
 ```
-* 1ab57e4 2020-10-20 | Uklonjena je beskonačna petlja (HEAD -> master) [Robotmurlock]
-* ab69264 2020-10-20 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
-* f311874 2020-10-20 | Dodat je primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
-* 789911e 2020-10-20 | Implementiran main.cpp [Robotmurlock]
+* 2572742 2021-10-03 | Uklonjena beskonačna petlja (HEAD -> master) [Robotmurlock]
+* 17601ad 2021-10-03 | Ispravljena štamparska greška u f-ji hello() [Robotmurlock]
+* bdf7653 2021-10-03 | Dodat primer unosa za buduću mnogo dobru funkcionalnost [Robotmurlock]
+* 86ee08f 2021-10-03 | Inicijalni komit [Robotmurlock]
 ```
 
-Primer: Problem je pronađen na produkcionoj `master` grani (za detaljnije objašnjenje pogledati gitflow sekciju). Problem je nastao na grani `H`, ali `develop` grani nije potreban komit `G`. Zbog toga se `git cherry-pick` komandom bira komit `H` sa grane `master` i dodaje se kao kopija ``H` ``
-na `develop` granu, gde se može nastaviti dalje razvoj.
+**Primer**: Problem je pronađen na produkcionoj `master` grani (za detaljnije objašnjenje pogledati gitflow sekciju). Problem je nastao na grani `H`, ali `develop` grani nije potreban komit `G`. Zbog toga se `git cherry-pick` komandom bira komit `H` sa grane `master` i dodaje se kao kopija `H'`
+na `develop` granu, gde se može nastaviti dalje razvoj. Ako bismo spajali produkcionu granu `master` sa `develop` granom, onda bismo preneli i komit `G` na `develop` granu.
 
 ![](./slike/cherry_pick.png)
 
@@ -1043,7 +1043,7 @@ Kloniranje repozitorijuma se vrši komandom: \
 `git clone [LOKACIJA REPOZITORIJUMA] [IME NOVOG DIREKTORIJUMA]`, \
 gde lokacija može da bude relativna putanja do lokalnog git repozitorijuma ili URL Github stranice repozitorijuma koji se klonira. 
 
-Primer: 
+**Primer**: 
 - Pretpostavimo da imamo git repozitorijum `hello` koji sadrži datoteku `main.cpp`:
     * `mkdir hello`
     * `cd hello`
