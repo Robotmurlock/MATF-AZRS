@@ -1517,81 +1517,79 @@ Pogledati sledeći [video](https://www.youtube.com/watch?v=3a2x1iJFJWc&ab_channe
 
 Često želimo da komitujemo izmene sa više datoteka. Komandom `git add *` dodajemo sve izmene u okviru našeg lokalnog repozitorijuma. Postoje ekstenzije datoteka koje nikad ne želimo da komitujemo, kao što su objektne datoteke `*.o`, izvršne datoteke `*.exe` itd... Zbog ovih datoteka morali bismo da vršimo dodavanje na `staging area` jedan po jedan (ili da dodamo sve pa da ih brišemo sa `staging area` preko `git reset`). Čak i tada, `git status` će nam davati informacije da ove promene nisu postavljene na `staging area`, a nas ne interesuju informacije o ovim datotekama (spam). Zbog toga postoji opcija da dodamo `.gitignore` datoteku na naš repozitorijum u okviru koje se definišu pravila za ignorisanje datoteka.
 
-**Primer**. Posmatrajmo `helloClass` primer:
+**Primer**. Vratimo se na `01_VectorExtensionClone` (neklonirani je `bare`):
 
-- Neka to bude novi git repozitorjum:
-    `git init`
-- Inicijalni komit:
-    * `git add *`
-    * `git commit -m "Inicijalni komit"`
-- Imamo sledeće datoteke: `hello.cpp` `hello.hpp` `hello.pro` `main.cpp`
-- Ove datoteke su dovoljne za generisanje svih ostalih datoteka:
-    * `qmake -o Makefile hello.pro` (ova komanda generiše Makefile)
-    * `make` (ovo generiše objekte i izvršne datoteke)
-- Sada imamo sledeće dodatne datoteke: `helloworld` `hello.o` `main.o` `Makefile`
-- Ako obrišemo ove datoteke, možemo da ih generišemo na isti način. Ne želimo da dodajemo datoteke koje se uvek mogu generisati, a dodatno mogu praviti neke konflitke koje možemo izbeći.
-- Dodatno ako pokrenemo komandu `git status` očekivani izlaz je:
+- Testiramo program:
+    * `g++ main.cpp -o program.out` (generiše `program.out` datoteku).
+    * `./program.out` (generiše `output.txt` i `transfered.txt` datoteku)
+    * Lista datoteka koje ne mogu da se generišu:
+      * `input.txt`, `main.cpp`, `README.md`
+    * Lista datoteka koje mogu da se generišu:
+      * `program.out`, `output.txt`, `transfered.txt`
+- Nepotrebno je da čuvamo datoteke koje mogu da se generišu na osnovu izvornog programa (izvrši programi uglavnom više zauzimaju memorijski). Još jedan problem je što je velika verovatnoća da dođe do konflikata pri spajanju generisanih datoteka. Rezultat za `git status`:
+
 ```
 On branch master
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
+Your branch is up to date with 'origin/master'.
 
-        .qmake.stash
-        Makefile
-        hello.o
-        helloworld
-        main.o
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	new file:   output.txt
+	new file:   program.out
+	new file:   transfered.txt
 
-nothing added to commit but untracked files present (use "git add" to track)
 ```
-- Ne interesuje nas status za ove datoteke.
-- Pravimo `.gitignore` datoteku:
+
+- Idealno bi bilo ako možemo u potpunosti da ih ignorišemo (čak i u okviru `git status`). Rešenje za ovaj problem je `.gitignore`. 
+- Pravimo `.gitignore` datoteku (`vim .gitignore`):
 ```
-*.o
-Makefile
-.qmake.*
-helloworld
+*.out
+*.txt
+!input.txt
 ```
 - Objašnjenje:
     * `*.o` je pravilo kojim se ignorišu sve datoteke sa ekstenzijom `.o`.
-    * `Makefile` ignoriše baš tu datoteku.
-    * `.qmake.*` ignoriše sakrivene datoteke koje generiše `qmake`.
-    * `helloworld` ignoriše baš tu datoteku.
+    * `*.txt` ignoriše sve datoteke sa `txt` ekstenzijom.
+    * `!input.txt` postavlja izuzetak prethodnom pravilu za `input.txt` datoteku.
 - Komitujemo `.gitignore` datoteku:
     * `git add .gitignore`
     * `git commit -m "Dodat .gitignore`
-- Sada ako pokrenemo komandu `git status`, očekivani izlaz je:
+- Sada ako pokrenemo komandu `git status`, očekivani izlaz je (prvi deo poruke nam samo sugeriše da uradimo `push` na `remote`):
 ```
 On branch master
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+
 nothing to commit, working tree clean
 ```
 - Ako pokrenemo komandu `git add *`, očekivani izlaz je:
 ```
 The following paths are ignored by one of your .gitignore files:
-Makefile
-hello.o
-helloworld
-main.o
+output.txt
+program.out
+transfered.txt
 Use -f if you really want to add them.
 ```
 
-Pravila:
-- Razmaci se ignorišu osim ako se ne navede ispred razmaka `\`"
+**Pravila**:
+
+- Sve datoteke sa egzaktnim imenom u `.gitignore` se ignorišu.
+- Razmaci se ignorišu osim ako se ne navede ispred razmaka `\`
     * `hello\ world`
 - Za komentare se koristi `#`, a `\#` za baš taj karakter:
     * `# ovo je jedan komentar`
-- Operator `!` vrši suprotnu operaciju tj. neignoriše datoteke:
+- Operator `!` se koristi za izuzetke (oznaka za neignorisanje):
     * Ako dodamo pravilo `*.txt` u `.gitignore`, onda se ignorišu sve `.txt` datoteke;
-    * Ako dodamo ispod toga pravilo `!log.txt`, onda se ignorišu sve `.txt` datoteke sem te.
+    * Ako dodamo ispod toga pravilo `!log.txt`, onda se ignorišu sve `.txt` datoteke sem `log.txt`.
 - Može da se navodi relativna putanja, gde se ignorišu datoteke:
     * `src/*.txt`
     * `docs/images/*.txt`
-- Dupla zvezdica `**` predstavlja nula ili više datoteka:
+- Dupla zvezdica `**` predstavlja nula ili više direktorijuma u putanji:
     * `**/*.txt`, ignoriše sve `.txt` datoteke u svim direktorijumima.
-- Jedna zvezdica označava bilo koji šta sem `/`.
+- Jedna zvezdica označava bilo koji karakter šta sem `/`.
 - Upitnik označava bilo koji karakter sem `/` (kao zvezdica za jedan karakter).
 - Notacija za opseg: `[a-zA-Z]`.
-- Celu dokumentaciju pogledati na sledećoj [stranici](https://git-scm.com/docs/gitignore).
+- Za više informacije treba da se pogleda ova [stranica](https://git-scm.com/docs/gitignore).
 
 ## Kako se pišu komitovi?
 
@@ -1603,18 +1601,20 @@ Postavljanje podrazumevanog editora za `git commit` komandu:
 
 ### Zašto je bitno pisati dobre komitove?
 
-- **Bolja saradnja:** Ako radimo u firmi ili projektu otvorenog koda onda je neophodno da se poštuju određena pravila za bolju saradnju. Potrebno je da se poštuju pravila projekta, što povećava efikasnost izrade softvera. Ovo povećava efikasnost čak i kada radimo sami na projektu i ostavlja prostor da se neko lakše priključi da radi na projektu.
+- **Bolja saradnja:** Ako radimo u firmi ili projektu otvorenog koda onda je neophodno da se poštuju određena pravila za bolju saradnju. Potrebno je da se poštuju pravila projekta, što povećava efikasnost izrade softvera. Ovo povećava efikasnost čak i kada radimo sami na projektu i ostavlja prostor da se neko lakše priključi kasnije. Prazne komit poruke su neprihvatljive.
 - **Bolje razumevanje:** Bitno je da se pišu čiste i jednostavne poruke. Primer komitova gde se ništa ne razume: 
 ![](./slike/losi_komitovi.png)
 - **Generisanje changelog-a:** Lista promena - [link](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
 
-### Kako pisati dobre komitove?
+### Kako treba da se pišu dobri komitovi?
 
-- **Komitovi moraju da budu gramatički ispravni**.
-- **Jedan komit za jednu promenu:** Želimo da imamo svaku promenu na jednom komitu. Na taj način je lakše da se vratimo na prethodni posao.
+- **Poželjno je da budu gramatički ispravni** (štamparske greške treba izbegavati, ali nije smak sveta sve dok je poruka razumljiva).
+- **Jedan komit za jednu promenu:** Želimo da imamo svaku `promenu` na jednom komitu. Na taj način je lakše da se vratimo na prethodni posao. Šta tačno označava `promena` može da varira i zavisi koliko je zadatak dekomponovan. Primer:
+  - `Implementirana je Point klasa` - Ova klasa može ima napredne funkcionalnosti (računanje različitih mera udaljenosti između dve tačke) i u tom slučaju je poželjno da bude podeljena na više delova, ali ako je to samo struktura sa konstruktorom, onda je dovoljno da bude jedan komit.
+  - `Implementirane su Point, Cirle, Rectangle, Square, Triangle klase` - Ovde nam sama poruka sugeriše da komit treba da se dekomponuje.
 - **Izbegavati dvosmislenost**.
 - **Objasniti šta je promenjeno**.
-- **Git smernice (guideline)**.
+- **Koristiti Git smernice (guidelines)**.
 
 ### Udacity guidelines
 
@@ -1634,13 +1634,13 @@ footer
 - **style:** Stvari koje nisu vezane za kod kao što su formatiranje i slično
 - **refactor:** Refaktorisanje koda
 - **test:** Dodavanje testova, refaktorisanje testova
-- **chore:** "updating build tasks, package manager configs, etc"
+- **chore:** Ažuriranje biblioteka, menadžera paketa, ...
 
 #### The Subject (predmet)
 - Predmet je dužine ispod 50 karaktera. 
 - Predmet počinje velikim slovom.
 - Predmet nema tačku na kraju.
-- Potrebno je pisati u imperativu. Primer: `change`, ne `changes` ili `changed`.
+- Treba pisati u imperativu. Primer: `change`, ne `changes` ili `changed`. 
 
 #### The Body (telo)
 - Telo je opcionalno i može se izostaviti u slučaju jednostavnih komitova. 
@@ -1683,28 +1683,29 @@ Resolves: #123
 See also: #456, #789
 ```
 
-Primeri:
-- [homebrew-commits](https://github.com/Homebrew/brew/commits/master?after=6747474148b13bd6d399b05de38ffed515d4c395+34&branch=master)
-- [cloud-factory](https://github.com/cloudfoundry/cf-for-k8s/commits/develop)
-- [imgui](https://github.com/ocornut/imgui/commits/master)
+- Često može sve što je promenjeno da se objasni u okviru naslova. Ukoliko naslov nije dovoljan (npr. implementacija nekog algoritma ili razrešavanje nezgodnog baga), onda je potrebno da se opiše detaljnije u telu komita.
+- **Primeri projekata otvorenog koda**:
+  - [Homebrew-commits](https://github.com/Homebrew/brew/commits/master?after=6747474148b13bd6d399b05de38ffed515d4c395+34&branch=master)
+  - [Cloud-factory](https://github.com/cloudfoundry/cf-for-k8s/commits/develop)
+  - [imgui](https://github.com/ocornut/imgui/commits/master)
 
 ## Dodatak
 
-Na sledećem [linku](https://training.github.com/downloads/github-git-cheat-sheet/) možete pogledati rezime komandi za git. Dobar kandidat za `bookmark`.
+Na sledećem [linku](https://training.github.com/downloads/github-git-cheat-sheet/) možete da pogledate rezime komandi za git. Dobar kandidat za `bookmark`.
 
 ## Reference
-`git strane`
+`[0] git strane`
 
-[githowto](https://githowto.com/)
+[[1] githowto](https://githowto.com/)
 
-[medium-hackernoon-understanding-git-index](https://medium.com/hackernoon/understanding-git-index-4821a0765cf)
+[[2] medium-hackernoon-understanding-git-index](https://medium.com/hackernoon/understanding-git-index-4821a0765cf)
 
-[cherry-pick-example](https://www.farreachinc.com/blog/git-cherry-pick-why-and-how)
+[[3] farreachinc-cherry-pick-why-and-how](https://www.farreachinc.com/blog/git-cherry-pick-why-and-how)
 
-[thoughtram-the-anatomy-of-a-git-commit](https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html)
+[[4] thoughtram-the-anatomy-of-a-git-commit](https://blog.thoughtram.io/git/2014/11/18/the-anatomy-of-a-git-commit.html)
 
-[git-commits](https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49)
+[[5] devto-galethomas-git-commits-guide](https://dev.to/gaelthomas/a-beginner-s-guide-to-git-how-to-write-a-good-commit-message-2j49)
 
-[git-changelog](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
+[[6] herewecode-git-changelog](https://herewecode.io/blog/a-beginners-guide-to-git-what-is-a-changelog-and-how-to-generate-it/)
 
-[udacity-commit-message-style-guide](http://udacity.github.io/git-styleguide/)
+[[7] udacity-commit-message-style-guide](http://udacity.github.io/git-styleguide/)
