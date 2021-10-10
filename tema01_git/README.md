@@ -132,7 +132,7 @@ Initialized empty Git repository in /home/mokoyo/Desktop/AZRS/cas01/VectorExtens
     * `input.txt`
 - Implementiramo skelet za `main.cpp`:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 
@@ -266,7 +266,7 @@ Takođe je moguće stavljati tagove verzija na bitne komitove. Na te komitove mo
 
 **Primer**. Treba nam funkcija koja obrće redosled elemenata u vektoru. Implementacija:
 
-```
+```c++
 void reverse(std::vector<int>& v)
 {
 	unsigned n = v.size();
@@ -277,13 +277,13 @@ void reverse(std::vector<int>& v)
 
 - Dodatno inicijalizujemo vektor sa elementima `{1, 2, 3, 4 5}`
 
-```
+```c++
 std::vector<int> v{1, 2, 3, 4, 5};
 ```
 
 - Pregled cele `main.cpp` datoteke:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 
@@ -329,7 +329,7 @@ sha: e8712f8
 - **Napomena:** Isti interfejs se otvara i kada izvršimo `git commit` bez `-m` opcije. Interfejs je zapravo podrazumevani editor. Možemo da podesimo podrazumevani editor sledećom komandom: `git config --global core.editor kate` (umesto kate može bilo koji editor).
 - Očekivani sadržaj za `main.cpp`:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 
@@ -518,7 +518,7 @@ Switched to a new branch 'feature/load-store'
 
 - Prvo implementiramo `load` funkciju:
 
-```
+```c++
 std::vector<int> load(std::istream& input)
 {
      std::vector<int> v;
@@ -531,7 +531,7 @@ std::vector<int> load(std::istream& input)
 
 - Klasa `std::istream` je natklasa za ulazne tokove podataka. Analogno za `std::ostream`. Ovo nam omogućava da kroz funkciju prosledimo kao argumente `std::cin` (standardni ulaz) ili neki objekat klase `std::ifstream` (datoteka), a da pritom ne menjamo ništa u osnovnoj funkciji. Ceo kod:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 
@@ -555,7 +555,7 @@ int main()
 - `git commit -m "Implementirana je load funkcija"`
 - sad implementiramo `store` funkciju:
 
-```
+```c++
 void store(const std::vector<int>& v, std::ostream& output)
 {
     for(auto value: v)
@@ -570,7 +570,7 @@ void store(const std::vector<int>& v, std::ostream& output)
 - Ako ne postavimo referencu `&` kao deo tipa, onda prosleđujemo kopiju vektor (kopiranje vektora nije jeftina operacija kada to nije neophodno). Ovako koristimo isti objekat tj. prosleđujemo referencu koji neće sigurno biti izmenjen zbog `const` modifikatora. Dodavanje reference može da bude  ključan faktor za performanse kada se vektor prosleđuje kroz rekurziju. 
 - U `main` funkciji dodajemo tok podataka ulazne datoteke i izlazne datoteke. Za ovo koristimo `fstream` modul. Korišćenje je veoma klasa `std::ifstream` i `std::ofstream` je jednostavno. Funkcija `main`:
 
-```
+```c++
 int main()
 {
     // test load
@@ -589,7 +589,7 @@ int main()
 - **Napomena:** Ako prosledimo `std::cout` kao drugi parametar u `store`, onda dobijamo ispis na standardni izlaz.
 - Ceo kod:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -724,7 +724,7 @@ Deleted branch feature/load-store (was 642a448).
 - `git checkout -b "feature/drop-duplicates"`
 - Ceo kod:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -794,8 +794,7 @@ int main()
 
 - Sad se vraćamo na `master` granu i menjamo `main` funkciju. Označavamo gde treba da se testira `drop_duplicates`. U ovom slučaju ovo deluje neprirodno kada jedna osoba radi, ali prilikom rada u timu je skroz prirodno:
 
-```
-
+```c++
 int main()
 {
     // test load
@@ -889,7 +888,7 @@ Automatic merge failed; fix conflicts and then commit the result.
 
 **Primer**. U okviru prvog komita je implementiran jednostavan `C++` program:
 
-```
+```c++
 #include <iostream>
 
 void hello()
@@ -1082,7 +1081,7 @@ unsigned nduplicates(const std::vector<int>& v)
 ```
 - **Napomena:** `auto` je ključna koja nam omogućava da ostavimo kompajleru da zaključi tip (`std::vector<int>` u ovom slučaju).
 - I dodajmo njen poziv u glavnu funkciju:
-```
+```c++
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -1240,7 +1239,7 @@ Promene mogu da se vrše i na kloniranim repozitorijuma koji nisu `remote` repoz
 - `cd 01_VectorExtensionClone`
 
 - Dodajemo simetričnu funkciju `nunique()`:
-```
+```c++
 unsigned nunique(const std::vector<int>& v)
 {
     return v.size() - nduplicates(v);
@@ -1248,13 +1247,13 @@ unsigned nunique(const std::vector<int>& v)
 ```
 - Ažuriramo i `main()` funkciju tj. deo gde se ispisuje broj duplikata:
 
-```
+```c++
 std::cout << "duplicates(" << nduplicates(v) << ") + uniques(" << nunique(v) << ") == " << v.size() << std::endl;
 ```
 
 - Ceo kod:
 
-```
+```c++
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -1414,7 +1413,7 @@ Razlog zašto u prethodnom nije radila komanda `git pull` je skroz logičan. Nem
 - Sada je `remote` repozitorijum `bare` repozitorijum koji predstavlja posrednika između `01_VectorExtensionClone` i `01_VectorExtensionClonedOnceMore` repozitorijuma:
     - `cd 01_VectorExtensionClonedOnceMore`
     - `vim main.cpp` (implementiramo `transfer` funkciju)
-```
+```c++
 inline void transfer(std::istream& input, std::ostream& output)
 {
     store(load(input), output);
@@ -1422,7 +1421,7 @@ inline void transfer(std::istream& input, std::ostream& output)
 ```
 - Funkcija `transfer` nam omogućava da preusmerimo ulaz iz nekog toka podataka u izlaz nekog drugog toka podataka. Dodajemo i deo za testiranje u `main` funkciju:
 
-```
+```c++
 int main()
 {
     // test load
