@@ -1,0 +1,18 @@
+PROGRAM  = test.out
+CXX      = g++
+CXXFLAGS = -g -std=c++17 -Wall -Wextra
+
+$(PROGRAM): test.o vector_extension.o
+	$(CXX) -o %@ $^
+
+test.o: test.cpp
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+vector_extension.o: vector_extension.cpp vector_extension.hpp
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+.PHONY: clean
+
+clean:
+	rm *.o $(PROGRAM) output.txt transfered.txt
+

@@ -61,8 +61,145 @@ Debager `gdb` nudi interfejs tj. `TUI (Textual User Interface)`. Za neke jezike 
 
 Ovde možete da pronađete [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf).
 
-### 01_basic
+### Makefile
+
+Pre nego što krenemo sa učenjem `gdb` alate, treba da obnovimo `Makefile`. Možemo da uzmemo `VectorExtension` primer sa pretodne teme i razdvojimo program na biblioteku `vector_extension` (cpp i hpp) i test `test` (cpp). Izvorni kod može da se pronađe na lokaciji `00_Makefile` u datotekama `test.cpp`, `vector_extension.hpp` i `vector_extension.cpp`. Prevođenje:
+
+- Prevodimo `vector_extension` u objektnu datoteku bez linkovanja:
+  - `g++ -c -o vector_extension.o -g -std=c++17 -Wall -Wextra vector_extension.cpp`
+- Prevodimo `test` u objektnu datoteku bez linkovanja:
+  - `g++ -c -o test.o -g -std=c++17 -Wall -Wextra test.cpp    `
+- Vršimo linkovanje objektnih datoteka u `test.out` :
+  - `g++ -o test.out test.o vector_extension.o`
+- Testiranje: 
+  - `./test.out`
+
+#### 01_compile
+
+Da ne bismo svaki put ponavljali isti proces, možemo da poređamo sve komande za prevođenje u jednu `bash` skriptu i da svaki put pokrenemo skriptu sa `sh -x 01_compile.sh`, gde je `01_compile.sh` naziv skripte i `-x` je opcija za ispisivanje komandi koje se izvrše:
+
+```bash
+g++ -c -o vector_extension.o -g -std=c++17 -Wall -Wextra vector_extension.cpp
+g++ -c -o test.o -g -std=c++17 -Wall -Wextra test.cpp
+g++ -o test.out test.o vector_extension.o
 ```
+
+#### 02_makefile
+
+`Makefile` je alat koji nam omogućava nešto naprednije funkcionalnosti od obične `bash` skripte, kao što je definisanje zavisnosti (na osnovu koje makefile definiše redosled preko topološkog sortiranja), prečice, itd...  Takođe je vrlo jednostavan za korišćenje:
+
+```makefile
+test.out: test.o vector_extension.o
+	g++ -o test.out test.o vector_extension.o
+
+test.o: test.cpp
+	g++ -c -o test.o -g -std=c++17 -Wall -Wextra test.cpp
+
+vector_extension.o: vector_extension.cpp vector_extension.hpp
+	g++ -c -o vector_extension.o -g -std=c++17 -Wall -Wextra vector_extension.cpp
+```
+
+**Objašnjenje**: Opšti oblik za jedan deo prevođenja je:
+
+```
+[RESULT]: [DEPENDENCIES]
+	[COMMANDS]
+```
+
+Da bismo dobili rezultat, neophodne su nam navedene zavisnosti koje konvertujemo nizom komandi u odgovarajući rezulat. Na osnovu zavisnosti možemo da formiramo topološki redosled (nije bitan redosled definisanja zavisnosti):
+
+```
+     test.out
+    /        \
+test.o        vector_extension.o
+   |         /                  \     
+test.cpp   vector_extension.cpp  vector_extension.hpp
+```
+
+- Pokretanje:
+  - `make -f 02_makefile` (Najčešće se pokreće sa `make`, što je ekvivaletno sa `make -f Makefile`)
+  - Očekivani izlaz: `make: 'test.out' is up to date.`; Već imamo najnoviju verziju, pa možemo da obrišemo `test.out` i `*.o` datoteka sa `rm test.out *.o` kako bismo testirali kompilaciju od nule.
+
+#### 03_makefile
+
+Imamo dosta ponavljanja koda u prethodnoj `Makefile` skripti. Možemo da definišemo promenljive na sledeći način: 
+- `X = Value`, gde je `X` ime promenljive, a `Value` vrednost (niska).
+
+Vrednostima definisanih promenljivih pristupamo sa:
+
+- `$(X)`, gde je `X` ime promenljive.
+
+Prečice:
+
+- `$@` se odnosi na ime `[RESULT]`. Primer:
+
+```
+average: average.cpp
+	g++ -o $@ average.cpp
+```
+
+Ovo je ekvivaletno sa:
+
+```
+average: average.cpp
+	g++ -o average average.cpp
+```
+
+- `$^` se odnosi na `[DEPENDENCIES]`. Primer:
+
+```
+result: a.o b.o c.o
+	g++ -o average $^
+```
+
+Ovo je ekvivaletno sa:
+
+```
+result: a.o b.o c.o
+	g++ -o result a.o b.o c.o
+```
+
+- `$<` se odnosi na prvu vrednost `[DEPENDICIES]`. Primer:
+
+```
+average.o: average.cpp average.hpp
+	g++ -c -o average.o $<
+```
+
+Ovo je ekvivaletno sa:
+
+```
+average.o: average.cpp average.hpp
+	g++ -c -o average.o average.cpp
+```
+
+Sada možemo sa sredimo naš `Makefile` (`03_makefile`)
+
+```makefile
+PROGRAM  = test.out
+CXX      = g++
+CXXFLAGS = -g -std=c++17 -Wall -Wextra
+
+$(PROGRAM): test.o vector_extension.o
+	$(CXX) -o %@ $^
+
+test.o: test.cpp
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+vector_extension.o: vector_extension.cpp vector_extension.hpp
+	$(CXX) -c -o $@ $(CXXFLAGS) $<
+
+.PHONY: clean
+
+clean:
+	rm *.o $(PROGRAM) output.txt transfered.txt
+```
+
+- `.PHONY` nam daje izuzetak da je `clean` komanda, a ne datoteka. Sa `make clean` možemo da pobrišemo generisane datoteke. **Napomena:** Vodite računa sa da ne obrišete slučajno deo projekta na ispitu.
+
+### 01_basic
+
+```c++
 #include <iostream>
 
 int main() {
@@ -163,7 +300,7 @@ Breakpoint 1, main () at main.cpp:3
     * `print 2*k-3*j`, izlaz : `$6 = 10`
 
 ### 02_list
-```
+```c++
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -232,7 +369,7 @@ Program received signal SIGSEGV, Segmentation fault.
 ```
 - **Objašnjenje:** Statičke promenljive koje se inicijalizuju u okviru neke funkcije su inicijalizovane na stek okviru te funkcije. Kada se završi izvršavanje funkcije, stek okvir se briše i brišu se sve lokalne statičke promenljive sto je u ovom slučaju `n`. Zbog toga je `&n` u funkciji `newNode` pokazuje na nešto, a u `main` je `null` pokazivač. Ovo možemo da popravimo tako što inicijalizujemo dinamičku promenljivu na hipu pomoću funkcije `malloc`. Popravljen primer može da se pronađe u datoteci `02_list/solution.c`:
 
-```
+```c++
 Node* newNode(int val)
 {
     Node n;
@@ -245,10 +382,10 @@ Node* newNode(int val)
 - Umesto da stalno pišemo `next` pa `print n` za svaku liniju, možemo da iskoristimo komandu `display [var_name]`:
     * `display n`
 - Svaki put kad se zaustavimo na nekoj liniji (u odgovarajućem opsegu), vrednost ove promenljive se ispiše. Ukoliko u nekom trenutku ne želimo više da se ispisuje vrednost neke promenljive, možemo da iskoristimo komandu `undisplay [var_id]`. **Napomena:** Primetimo da se za `undisplay` piše `[var_id]` umesto `[var_name]`. To je zato što svaka promenljiva (tačnije izraz) koju ispisujemo ima neki svoj `id`.
-- **Napomena:** Ako želimo da obrišemo neku tačku prekida koju smo postavili, treba prvo da izlistamo sve tačke predika preko `info b`  (odnosno `info breakpoint`) i onda da obrišemo po indeksu odgovarajuću tačku prekida sa `del X`.
+- **Napomena:** Ako želimo da obrišemo neku tačku prekida koju smo postavili, treba prvo da izlistamo sve tačke prekida preko `info b`  (odnosno `info breakpoint`) i onda da obrišemo po indeksu odgovarajuću tačku prekida sa `del X`.
 
 ### 03_stack
-```
+```c++
 void A();
 void B();
 void C() {}
@@ -285,10 +422,10 @@ int main(){
     return 0;
 }
 ```
-Ovo je nešto što očekujemo sa `-O2` optimizacijom (drugi nivo). Postoji alat [godbolt](https://godbolt.org/) koji će nam pomoći da se uverimo u to. Ovaj sajt nam nudi opciju da pišemo kod, gde nam se sa desne strane prikazuje `asembler` kod. Nas ovde konkretno zanima `C` i `C++`, ali postoje i druge opcije tj. jezici. Ako prekopiramo naš kod, dobićemo odgovarajući asembler kod koji ima oko 50 linija. Svaka linija u našem kodu ima neku boju preko koje možemo da odredimo asembler kod koji odgovara toj liniji. Podrazumevana opcija za prevođenje na asembler kod je `-g`. Možemo da zamenimo tu opciju sa `-O2` i dobićemo asembler kod dužine 15-20 linija. Ovde vidimo da su samo deklarisanje f-je i da `main` f-ja ima samo `return 0`. Povratna vrednost f-je je vrednost u registru `eax`, a `xor eax, eax` postavlja vrednost `eax` na nulu. Sada smo se uverili da je prethodna pretpostavka tačna.
+Ovo je nešto što očekujemo sa `-O2` optimizacijom (drugi nivo). Postoji alat [godbolt](https://godbolt.org/) koji će nam pomoći da se uverimo u to. Ovaj vebsajt nam nudi opciju da pišemo kod, gde nam se sa desne strane prikazuje `asembler` kod. Nas ovde konkretno zanima `C` i `C++`, ali postoje i druge opcije tj. jezici. Ako prekopiramo naš kod, dobićemo odgovarajući asembler kod koji ima oko 50 linija. Svaka linija u našem kodu ima neku boju preko koje možemo da odredimo asembler kod koji odgovara toj liniji. Podrazumevana opcija za prevođenje na asembler kod je `-g`. Možemo da zamenimo tu opciju sa `-O2` i dobićemo asembler kod dužine 15-20 linija. Ovde vidimo da su samo deklarisanje f-je i da `main` f-ja ima samo `return 0`. Povratna vrednost f-je je vrednost u registru `eax`, a `xor eax, eax` postavlja vrednost `eax` na nulu. Sada smo se uverili da je prethodna pretpostavka tačna.
 
-Kada radimo na nekom projektu, želimo da imamo `produkcioni` kod na koji se primenjuje optimizacija nekog nivoa (efikasniji program) i `kod za debagovanje` koji nema nikakve optimizacija i uključuje dodatne opcije koje usporavaju rad programa (manje efikasan program). Zbog toga ima smisla da imamo dve različite `izgradnje (build)` koda tj. jednu za produkciju i jednu za debagovanje. Ako koristimo neko okruženje kao što je `qtcreator`, onda nam on već nudi lak način da se prebacimo sa jednog `build`-a na drugi `build`. Ako radimo u nekom običnom `editor`-u, onda možemo da to izvedemo koristeći `GNU make` tj. `Makefile`. 
-```
+Kada radimo na nekom projektu, želimo da imamo `produkcioni` kod na koji se primenjuje optimizacija nekog nivoa (efikasniji program) i kod za `debagovanje` koji nema nikakve optimizacije i uključuje dodatne opcije za lakše debagovanje koje usporavaju rad programa (manje efikasan program). Zbog toga ima smisla da imamo dve različite `izgradnje (build)` koda tj. jednu za produkciju i jednu za debagovanje. Ako koristimo neko okruženje kao što je `qtcreator`, onda nam on već nudi lak način da se prebacimo sa jednog `build`-a na drugi `build`. Ako radimo u nekom običnom `editor`-u, onda možemo da to izvedemo koristeći `GNU make` tj. `Makefile`. 
+```makefile
 CXX      = g++ 
 CXXFLAGS = -std=c++17 -Wall -Wextra
 TARGET   = stack
@@ -313,7 +450,7 @@ release debug:
 clean:
 	rm -r release_$(TARGET) debug_$(TARGET)
 ```
-Ključna razlika u odnosu na klasičan `Makefile` (koji smo do sada viđali) je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavimo određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo kompiliramo program za debagovanje i produkciju u zavisnosti od potrebe.
+Ključna razlika u odnosu na klasičan `Makefile` (koji smo do sada viđali) je `grananje`. U zavisnosti od `BUILD` opcije možemo da postavimo određene opcije kompilatoru. Ako pokrenemo `make debug` (ili samo `make`), onda se kod kompilira sa dodatnom opcijom `-g` i ime izvršne datoteke je `debug_stack`, a ako pokrenemo `make release`, onda se kod kompilira sa dodatnom opcijom `-O2` i ime izvršne datoteke je `release_stack`. Alternativan način kompilacije je `make BUILD=debug` i `make BUILD=release`. Sada možemo uporedo da imamo kompiliran program za debagovanje i produkciju u zavisnosti od potrebe.
 
 - Vratimo se sada na `gdb`. Pokrećemo debager:
     * `gdb debug_stack`
@@ -346,7 +483,7 @@ Ključna razlika u odnosu na klasičan `Makefile` (koji smo do sada viđali) je 
 - Ako želimo da završimo f-ju na trenutnom stek okviru i vidimo njenu povratnu vrednost, to možemo da uradimo komandom `finish`.
 
 ### Četvrti primer (04_factorial)
-```
+```c++
 #include <iostream>
 
 int a = 3, b = 5, c = 7;
