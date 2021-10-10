@@ -61,7 +61,7 @@ Debager `gdb` nudi interfejs tj. `TUI (Textual User Interface)`. Za neke jezike 
 
 Ovde možete da pronađete [gdb cheat sheet](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf).
 
-### Prvi primer (01_basic)
+### 01_basic
 ```
 #include <iostream>
 
@@ -102,7 +102,7 @@ Find the GDB manual and other documentation resources online at:
 For help, type "help".
 Type "apropos word" to search for commands related to "word"...
 Reading symbols from ./basic...
-``` 
+```
 - Sada je otvoren `(gdb)` interfejs. Tu možemo da unosimo debager komande.
 
 Program pokrećemo komandom `run` (ili `r` skraćeno), što se u ovom slučaju svodi na normalno pokretanje programa (kao preko `./a.out`). U nastavku komande `run` možemo da dodamo argumente komandne linije. Primer: `run input.txt`. 
@@ -115,7 +115,8 @@ Da bi komanda `run` bila smislena, potrebno je da postavimo neki `breakpoint (ta
 - Relativna lokacija: `break +offset` `break -offset`
 - itd... Pogledati sve mogućnosti [ovde](https://ftp.gnu.org/old-gnu/Manuals/gdb/html_node/gdb_28.html)
 
-Primer. Postavljanje `breakpoint`-a na funkciju:
+**Primer**. Postavljanje `breakpoint`-a na funkciju:
+
 - Postavljamo `breakpoint` na `main` funkciju:
     * `break main` (ili skraćeno `b main`)
 - Očekivani oblik izlaza:
@@ -128,7 +129,7 @@ Breakpoint 1 at 0x5555555551a9: file main.cpp, line 3.
 ```
 Breakpoint 1, main () at main.cpp:3
 3       int main() {
-``` 
+```
 - Ako želimo da izvršimo trenutnu liniju i da se zaustavimo na sledećoj liniji, onda to možemo da uradimo preko komande `next` koja pokreće (nastavlja) program i zaustavlja se na sledećoj liniji:
     * `next` (ili skraćeno samo `n`)
 - Očekivani izlaz:

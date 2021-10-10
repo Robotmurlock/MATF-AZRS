@@ -8,10 +8,10 @@ typedef struct node{
 
 Node* newNode(int val)
 {
-    Node n;
-    n.value = val;
-    n.next = NULL;
-    return &n;
+    Node* n = (Node*) malloc(sizeof(Node));
+    n->value = val;
+    n->next = NULL;
+    return n;
 }
 
 int main()
