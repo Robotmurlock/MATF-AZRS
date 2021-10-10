@@ -2,7 +2,7 @@
 
 ## Snimci vežbi
 
-Na ovom [linku](https://www.youtube.com/playlist?list=PLr6PFLAj4aAEWiiY9E3w8hw1rezBTIR4M) se mogu pronaći snimci vežbi iz 2020. godine.
+Na ovom [linku](https://www.youtube.com/watch?v=it4lci7lKEQ&list=PLr6PFLAj4aAHw_-TeEJ-boMKUCJi0NxAK&ab_channel=MomirAdzemovic) se mogu pronaći snimci vežbi iz 2020. godine.
 
 ## Predavanja
 
