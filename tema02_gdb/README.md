@@ -160,9 +160,9 @@ Breakpoint 1, main () at main.cpp:3
     * `next`
     * `print k`, izlaz: `$4 = 7`
     * `print k+j`, izlaz: `$5 = 10`
-    * `print 2*k-3*j`, izlaz : `$6 = 5`
+    * `print 2*k-3*j`, izlaz : `$6 = 10`
 
-### Drugi primer (02_list)
+### 02_list
 ```
 #include <stdio.h>
 #include <stdlib.h>
@@ -230,11 +230,24 @@ Program received signal SIGSEGV, Segmentation fault.
 0x00005555555551ce in main () at main.c:20
 20          printf("%d\n", n->value);
 ```
+- **Objašnjenje:** Statičke promenljive koje se inicijalizuju u okviru neke funkcije su inicijalizovane na stek okviru te funkcije. Kada se završi izvršavanje funkcije, stek okvir se briše i brišu se sve lokalne statičke promenljive sto je u ovom slučaju `n`. Zbog toga je `&n` u funkciji `newNode` pokazuje na nešto, a u `main` je `null` pokazivač. Ovo možemo da popravimo tako što inicijalizujemo dinamičku promenljivu na hipu pomoću funkcije `malloc`. Popravljen primer može da se pronađe u datoteci `02_list/solution.c`:
+
+```
+Node* newNode(int val)
+{
+    Node n;
+    n.value = val;
+    n.next = NULL;
+    return &n;
+}
+```
+
 - Umesto da stalno pišemo `next` pa `print n` za svaku liniju, možemo da iskoristimo komandu `display [var_name]`:
     * `display n`
 - Svaki put kad se zaustavimo na nekoj liniji (u odgovarajućem opsegu), vrednost ove promenljive se ispiše. Ukoliko u nekom trenutku ne želimo više da se ispisuje vrednost neke promenljive, možemo da iskoristimo komandu `undisplay [var_id]`. **Napomena:** Primetimo da se za `undisplay` piše `[var_id]` umesto `[var_name]`. To je zato što svaka promenljiva (tačnije izraz) koju ispisujemo ima neki svoj `id`.
+- **Napomena:** Ako želimo da obrišemo neku tačku prekida koju smo postavili, treba prvo da izlistamo sve tačke predika preko `info b`  (odnosno `info breakpoint`) i onda da obrišemo po indeksu odgovarajuću tačku prekida sa `del X`.
 
-### Treći primer (03_stack)
+### 03_stack
 ```
 void A();
 void B();
