@@ -1,0 +1,11 @@
+Program pokrecemo sa: ./voronoi.out dok se ne prodju svi testovi
+
+voronoi.cpp:
+* Linija 31: Nedostaje ".txt" ekstenzija za generisane datoteke
+* Linija 47: Treba "p.label" umesto "curr_point.label".
+  Objasnjenje: Treba trenutnoj tacki da dodelimo labelu najblize tacke.
+  Iteriramo kroz tacke points i analiziramo tacke. Ako p najbliza, onda 
+  trenutna tacka curr_point treba da ima labelu p.label.
+
+voronoi.hpp:
+* Linija 21: Pogresno se racuna euklidsko rastojanje

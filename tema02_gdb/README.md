@@ -133,42 +133,42 @@ Prečice:
 
 - `$@` se odnosi na ime `[RESULT]`. Primer:
 
-```
+```makefile
 average: average.cpp
 	g++ -o $@ average.cpp
 ```
 
 Ovo je ekvivaletno sa:
 
-```
+```makefile
 average: average.cpp
 	g++ -o average average.cpp
 ```
 
 - `$^` se odnosi na `[DEPENDENCIES]`. Primer:
 
-```
+```makefile
 result: a.o b.o c.o
 	g++ -o average $^
 ```
 
 Ovo je ekvivaletno sa:
 
-```
+```makefile
 result: a.o b.o c.o
 	g++ -o result a.o b.o c.o
 ```
 
 - `$<` se odnosi na prvu vrednost `[DEPENDICIES]`. Primer:
 
-```
+```makefile
 average.o: average.cpp average.hpp
 	g++ -c -o average.o $<
 ```
 
 Ovo je ekvivaletno sa:
 
-```
+```makefile
 average.o: average.cpp average.hpp
 	g++ -c -o average.o average.cpp
 ```
@@ -181,7 +181,7 @@ CXX      = g++
 CXXFLAGS = -g -std=c++17 -Wall -Wextra
 
 $(PROGRAM): test.o vector_extension.o
-	$(CXX) -o %@ $^
+	$(CXX) -o $@ $^
 
 test.o: test.cpp
 	$(CXX) -c -o $@ $(CXXFLAGS) $<
@@ -482,7 +482,7 @@ Ključna razlika u odnosu na klasičan `Makefile` (koji smo do sada viđali) je 
 - Ako želimo da zaustavimo program, to možemo da uradimo komandom `kill`.
 - Ako želimo da završimo f-ju na trenutnom stek okviru i vidimo njenu povratnu vrednost, to možemo da uradimo komandom `finish`.
 
-### Četvrti primer (04_factorial)
+### 04_factorial
 ```c++
 #include <iostream>
 
@@ -576,13 +576,17 @@ Postoji komanda `info` koja može da nam da svakakve informacije u zavisnosti od
 Postoji komanda `whatis` koja može da nas podseti kojeg je šta je neka promenljiva tj. kojeg je ona tipa:
 - `whatis sol`, izlaz: `type = int`
 
-### Peti primer (05_parser)
+### 05_parser
 
 Primeniti prethodno naučeno znanje i popraviti program.
 
 Problem: `05_parser/main.cpp`
 
 Rešenje: `05_parser/solution.cpp`
+
+### 06_voronoi (zadatak sa ispita)
+
+Primeniti prethodno naučeno znanje i popraviti program. Detaljan tekst zadataka se može pronaći u `readme.txt`.
 
 ## LLDB
 
