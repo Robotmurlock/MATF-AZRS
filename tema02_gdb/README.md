@@ -428,12 +428,12 @@ Kada radimo na nekom projektu, želimo da imamo `produkcioni` kod na koji se pri
 ```makefile
 CXX      = g++ 
 CXXFLAGS = -std=c++17 -Wall -Wextra
-TARGET   = stack
+TARGET   = stack.out
 DEBFLAGS = -g
 RELFLAGS = -O2
 
 ifneq ($(BUILD),release)
-    BUILD = debug
+	BUILD = debug
 	FLAGS = $(DEBFLAGS)
 else
 	FLAGS = $(RELFLAGS)
