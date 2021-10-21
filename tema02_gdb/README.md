@@ -576,7 +576,7 @@ Postoji komanda `info` koja može da nam da svakakve informacije u zavisnosti od
 Postoji komanda `whatis` koja može da nas podseti kojeg je šta je neka promenljiva tj. kojeg je ona tipa:
 - `whatis sol`, izlaz: `type = int`
 
-### 05_parser
+### 05_parser (ispitni zadatak)
 
 Primeniti prethodno naučeno znanje i popraviti program.
 
@@ -584,11 +584,15 @@ Problem: `05_parser/main.cpp`
 
 Rešenje: `05_parser/solution.cpp`
 
-### 06_voronoi (zadatak sa ispita)
+### 06_voronoi (ispitni zadatak)
 
 Primeniti prethodno naučeno znanje i popraviti program. Detaljan tekst zadataka se može pronaći u `readme.txt`.
 
-### 07_aggregator (zadatak sa ispita)
+Problem: `06_voronoi/task`
+
+Rešenje: `06_voronoi/solution`
+
+### 07_aggregator (ispitni zadatak)
 
 Primeniti prethodno naučeno znanje i popraviti program. Detaljan tekst zadataka se može pronaći u `readme.txt`.
 
