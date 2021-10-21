@@ -602,8 +602,8 @@ Alternativa za `gdb` debager je `lldb` (`LLVM` projekat) debager koji se koristi
 
 ## Reference
 
-[gdb](https://www.gnu.org/software/gdb/)
+[\[1\] GDB: The GNU Project Debugger](https://www.gnu.org/software/gdb/)
 
-[Debagovanje-sa-LLDB](https://github.com/Robotmurlock/MSNR-20-4MS/blob/master/05_LLDBDebager_Adzemovic_Mikovic_Spasic_Dobrasinovic.pdf)
+[\[2\] Debagovanje-sa-LLDB](https://github.com/Robotmurlock/MSNR-20-4MS/blob/master/05_LLDBDebager_Adzemovic_Mikovic_Spasic_Dobrasinovic.pdf)
 
-[GBD-Tutorial](https://www.youtube.com/watch?v=svG6OPyKsrw&ab_channel=CS246)
+[\[3\] GBD-Tutorial](https://www.youtube.com/watch?v=svG6OPyKsrw&ab_channel=CS246)
