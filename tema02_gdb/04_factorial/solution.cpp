@@ -5,13 +5,14 @@ int a = 3, b = 5, c = 7;
 int factorial(int n)
 {
     int sol = 1;
-    while(n--)
+    do 
     {
         a = a*c - b;
         sol *= n;
         b = 3*c - a;
         c = 20*a - 7*(a-b+c*c);
-    }
+        n--;
+    } while(n);
     return sol;
 }
 
