@@ -25,7 +25,7 @@ Ideja profajlera je da koji delovi koda (npr. funkcije) najviše utiču na perfo
 
 ![kcachegrind](http://kcachegrind.sourceforge.net/html/pics/KcgShot3.gif)
 
-### Uvod u Callgrind (07_callgrind)
+### Uvod u Callgrind (01_callgrind)
 
 - Pogledajmo sledeći program:
 ```
@@ -135,7 +135,7 @@ kcachegrind callgrind.out`
   * `CEst per call`: Ukupan broj ciklusa po pozivu
   * `Count`: Broj poziva.
 
-### Benchmark (08_primes)
+### Benchmark (02_primes)
 
 Na fakultetu smo do sada uglavnom govorili o složenosti programa i na osnovu toga upoređivali koja je implementacija bolja od koje. Ako su algoritmi bili iste složenosti, onda se svelo na neku diskusiju o konstanti. U nastavku imamo `5` implementacija za prebrojavanje prostih brojeva do `100000`. Na osnovu složenosti funkcije možemo da pretpostavimo otprilike koliko iteracija zahtevaju i tako da ih uporedimo.
 
@@ -293,93 +293,6 @@ Ako prevedemo program i pokrenemo `callgrind` za analizu, možemo da očekujemo 
 
 - Možemo uporediti rad različitih funkcija za sortiranje preko `callgrind`-a.
 - Algoritam `KMP` je algoritam linearne složenosti za pretragu uzorka u tekstu. Naivni algoritam je kvadratne složenosti, ali se ispostavlja da je efikasniji na realnim primerima. Ovo možemo testirati.
-
-### Vežbanje - hellgrind (09_deadlock)
-
-- Imamo program koji pravi 2 niti i pokreće ih. Jedna nit vrši funkciju `f()`:
-```
-void f(const std::string& name)
-{
-    tprint(name, "Started!");
-    for(int i=0; i<10000; i++)
-    {
-        std::this_thread::sleep_for (std::chrono::milliseconds(1));
-        tprint(name, "Locking r1!");
-        r1_lock.lock();
-        tprint(name, "Locking r2!");
-        r2_lock.lock();
-        tprint(name, "Doing my job...");
-        r1.use();
-        r2.use();
-        tprint(name, "Unlocking r1!");
-        r1_lock.unlock();
-        tprint(name, "Unlocking r2!");
-        r2_lock.unlock();
-    }
-    tprint(name, "Ended!");
-}
-```
-- Druga nit vrši sličnu funkciju (suprotan redosled zaključavanja niti):
-```
-void g(const std::string& name)
-{
-    tprint(name, "Started!");
-    for(int i=0; i<10000; i++)
-    {
-        std::this_thread::sleep_for (std::chrono::milliseconds(1));
-        tprint(name, "Locking r2!");
-        r2_lock.lock();
-        tprint(name, "Locking r1!");
-        r1_lock.lock();
-        tprint(name, "Doing my job...");
-        r1.use();
-        r2.use();
-        tprint(name, "Unlocking r2!");
-        r2_lock.unlock();
-        tprint(name, "Unlocking r1!");
-        r1_lock.unlock();
-    }
-    tprint(name, "Ended!");
-}
-```
-- Imamo pomoćnu nit koja zaustavlja program posle nekog vremana (veštački primer u kome očekujemo `deadlock`):
-```
-void stop()
-{
-    std::this_thread::sleep_for (std::chrono::seconds(10));
-    exit(EXIT_FAILURE);
-}
-```
-- Možemo da vidimo kakve nam informacije daje `helgrind` za `deadlock` probleme:
-- `deadlock` je pojava gde jedna nit drži resurs `A` i potreban joj je resurs `B` da završi posao i oslobodi resurs `A`, a drug nit ima resurs `B` i potreban joj je resurs `A` da završi posao i oslobodi resurs `B`.
-- U ovom slučaju nam `helgrind` ispravlje neke redoslede zaključavanja (sređen izlaz):
-```
-Thread #3: lock order "0x111180 before 0x1111C0" violated
-
-Observed (incorrect) order is: acquisition of lock at 0x1111C0
-  at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
-  by 0x10B295: std::mutex::lock()
-  by 0x10ABAA: g(...) (main.cpp:51)
-
-followed by a later acquisition of lock at 0x111180
-  at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
-  by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*) 
-  by 0x10B295: std::mutex::lock() 
-  by 0x10AC04: g(...) (main.cpp:53)
-
-Required order was established by acquisition of lock at 0x111180
-   at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
-   by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*)
-   by 0x10B295: std::mutex::lock()
-   by 0x10A753: f(...) (main.cpp:30)
-
-followed by a later acquisition of lock at 0x1111C0
-   at 0x483FEDF: ??? (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_helgrind-amd64-linux.so)
-   by 0x10B141: __gthread_mutex_lock(pthread_mutex_t*) 
-   by 0x10B295: std::mutex::lock() 
-   by 0x10A7AD: f(...) (main.cpp:32)
-```
-- Namešta da se redosled zaključavanja f-je `g()` poklapa sa redosledom zaključavanja f-je `f()`.
 
 ## Qt i analiza koda
 
