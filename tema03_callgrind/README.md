@@ -86,12 +86,12 @@ gcc -g -o main.out main.c
 valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./main.out
 kcachegrind callgrind.out`
 ```
-- Možemo da pokrenemo skriptu `bash run.sh main.c` koja se već nalazi u `07_callgrind` direktorijumu.
+- Možemo da pokrenemo skriptu `bash run.sh main.c` koja se već nalazi u `01_callgrind` direktorijumu.
 - Ako kliknemo na `main` sa leve strane, imamo sledeći očekivani rezultat:
 
 ![callgrind1](images/callgrind1.png)
 
-- Ovde imamo oko 12.7% za `f()`, pa 6.4% za `g()`, pa 3.2% za `f()`, pa 6.4% za `f()`. Zapravo gledamo na neku vizuelizaciju `grafa poziva (call graph)`. Prvo imamo četiri poziva f-je `a()` u `main()` i to je ukupno 4 poziva `f()` odnosno 12.7% celog programa. Posle toga imamo `g()` i `f()` zajedno (odgovara f-ji `c()`) i na kraju imamo dva poziva f-je `f()` odnosno jedan poziv f-je `b()`. Nažalost, ne izvršavaju se samo ove f-je u programu (postoje neki implicitni pozivi) i zbog toga naš `main()` zauzima samo 29% programa. Ako skaliramo sve procente za `100/29` dobićemo sličan rezultat kao u prethodnom računu.
+- Ovde imamo oko 12.7% za `f()`, pa 6.4% za `g()`, pa 3.2% za `f()`, pa 6.4% za `f()`. Zapravo gledamo na neku vizualizaciju `grafa poziva (call graph)`. Prvo imamo četiri poziva f-je `a()` u `main()` i to je ukupno 4 poziva `f()` odnosno 12.7% celog programa. Posle toga imamo `g()` i `f()` zajedno (odgovara f-ji `c()`) i na kraju imamo dva poziva f-je `f()` odnosno jedan poziv f-je `b()`. Nažalost, ne izvršavaju se samo ove f-je u programu (postoje neki implicitni pozivi) i zbog toga naš `main()` zauzima samo 29% programa. Ako skaliramo sve procente za `100/29` dobićemo sličan rezultat kao u prethodnom računu.
 - Možemo da biramo druge f-je sa leve strane i da vidimo informacije o njima:
 
 ![callgrind2](images/callgrind2.png)
@@ -289,10 +289,64 @@ Ako prevedemo program i pokrenemo `callgrind` za analizu, možemo da očekujemo 
   * Ako povećamo broj iteracija, možemo da očekujemo drugačije rezultate, jer Erastostenovo sito
     ima veliku konstantu.
 
-### Vežbanje - callgrind (domaći)
+### 03_text
 
-- Možemo uporediti rad različitih funkcija za sortiranje preko `callgrind`-a.
-- Algoritam `KMP` je algoritam linearne složenosti za pretragu uzorka u tekstu. Naivni algoritam je kvadratne složenosti, ali se ispostavlja da je efikasniji na realnim primerima. Ovo možemo testirati.
+U ovom primeru testiramo pretragu uzorka `pattern` u tekstu `text` pomoću algoritma grube sile koji je složenosti `O(nm)` i pomoću [KMP](https://en.wikipedia.org/wiki/Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm) algoritma koji je složenosti `O(n)`. U prvoj verziji analiziramo efikasnost oba algoritma gde pretražujemo uzorak u celom tekstu kao jednoj nisci. U narednoj verziji tj. verziji `04_text` analiziramo efikasnost oba algoritma gde pretražujemo uzorak u svakoj reči u tekstu kao zasebnoj nisci. Pomoćna skripta:
+
+```bash
+#!/bin/bash  
+# Constants
+
+vcgout="callgrind.out"
+exename="bench.out"
+default_input="sample.txt"
+
+# Parameteres
+keyword=$1
+input=$2
+
+if [[ "$keyword" == "" ]]
+then
+    echo "Empty keyword!"
+    exit
+fi
+
+if [[ "$input" == "" ]]
+then
+    input="$default_input"
+fi
+
+# Compilation
+g++ -std=c++17 -g -o "$exename" main.cpp
+
+# Callgrind
+valgrind --tool=callgrind --callgrind-out-file="$vcgout" "./$exename" "$input" "$keyword"
+
+# Kcachegrind
+kcachegrind "$vcgout"
+
+# cleanup
+rm "$vcgout" "$exename"
+```
+
+- **Funkcionalnosti skripte:**
+  - Pokretanje `benchmark`-a sa podrazumevanim ulazom `sample.txt` i odabranim uzorkom: `./benchmark [pattern]`
+  - Pokretanje `benchmark`-a sa izabranim ulazom i odabranim uzorkom: `./benchmark [pattern] [input]`
+  - Proces: Prevođenje `main.cpp` izvornog koda, pokretanje `callgrind`-a nad izvršnim kodom i pokretanje `kcachegrind`-a nad dobijenim izlazom.
+- Za većinu ključnih reči nad `sample.txt` datoteci dobijamo slične performanse za oba algoritma (KMP je za 20-40% efikasniji).
+- Za specijalan slučaj (koji nije realan) `./benchmark AAAAAAAAAAAAAAAAAAAAAAAA pseudo_sample.txt`, gde se `pseudo_sample.txt` sastoji samo od dugačkog niza slova A, dobijamo da je `KMP` neuporedivo bolji od grube sile.
+- Na ovom primeru vidimo da nekad nije dovoljno da samo posmatramo složenost algoritma kako bismo procenili efikasnost jednog algoritma u odnosu na drugi.
+
+### 04_text
+
+Analogno prethodnom primeru, samo što posmatramo svaku reč kao posebnu nisku za pretragu uzorka, umesto celu datoteku kao jednu nisku.
+
+### 05_sort (domaći)
+
+- Možemo da uporedimo rad različitih funkcija za sortiranje preko `callgrind`-a:
+  - MergeSort
+  - QuickSort
+  - RadixSort
 
 ## Qt i analiza koda
 
