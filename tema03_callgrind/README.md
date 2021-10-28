@@ -28,7 +28,7 @@ Ideja profajlera je da koji delovi koda (npr. funkcije) najviše utiču na perfo
 ### Uvod u Callgrind (01_callgrind)
 
 - Pogledajmo sledeći program:
-```
+```c++
 #include <stdio.h>
 
 int global_value = 0;
@@ -140,7 +140,7 @@ kcachegrind callgrind.out`
 Na fakultetu smo do sada uglavnom govorili o složenosti programa i na osnovu toga upoređivali koja je implementacija bolja od koje. Ako su algoritmi bili iste složenosti, onda se svelo na neku diskusiju o konstanti. U nastavku imamo `5` implementacija za prebrojavanje prostih brojeva do `100000`. Na osnovu složenosti funkcije možemo da pretpostavimo otprilike koliko iteracija zahtevaju i tako da ih uporedimo.
 
 Prvi način da se prebroje svi prosti brojevi od `1` do `n` je da se za svaki broj `num` između `2` i `n` (1 nije prost broj) proveri da li on ima nekog delitelja između `2` i `num` (bez `num`) tj. da li ima `pravog delitelja`:
-```
+```c++
 int bruteforce_check(int n)
 {
     int cnt = 0;
@@ -163,7 +163,7 @@ int bruteforce_check(int n)
 
 Za svaki broj `num` važi da je najveći pravi delitelj manji od `num/2`. To možemo da iskoristimo da `duplo` povećamo efikasnost prethodnog programa:
 
-```
+```c++
 int bruteforce_check_with_optimization(int n)
 {
     int cnt = 0;
@@ -188,7 +188,7 @@ int bruteforce_check_with_optimization(int n)
 
 Svi pravi deljitelji sem korena broja (ako broj ima pravi koren) idu u paru. Primer za broj `120`: `2 i 60`, `3 i 40`, `4 i 30`, `6 i 20`, `8 i 15`, `10 i 12`. Dovoljno je da tražimo deljitelje do `sqrt(num)`. To odgovara uslovu petlje `i<=sqrt(num)` koji možemo efikasije da zapišemo kao `i*i<=num`.
 
-```
+```c++
 int bruteforce_check_with_better_optimization(int n)
 {
     int cnt = 0;
@@ -212,7 +212,7 @@ int bruteforce_check_with_better_optimization(int n)
 
 Ako je broj `p > 3` prost broj, onda je on oblika `p = 6k-1` ili `p = 6k+1`. Na osnovu ovoga možemo da napravimo još efikasniji algoritam:
 
-```
+```c++
 int smart_check(int n)
 {
     int cnt = 0;
@@ -251,7 +251,7 @@ int smart_check(int n)
 
 Ne moramo za svaki broj posebno da proveramo da li je prost. Umesto toga možemo da iskoristimo algoritam `Erastostenovo sito` kao algoritam:
 
-```
+```c++
 int sieve_of_eratosthenes(int n)
 {
     std::vector<bool> inset(n+1, true);
