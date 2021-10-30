@@ -97,3 +97,6 @@ connect(
 
 Za detaljnije objašnjene, pogledajte kod i popratne komentare u kodu.
 
+## 03_qmake
+
+TODO
