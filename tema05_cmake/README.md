@@ -410,9 +410,11 @@ Sada možemo da generišemo `build`:
 - `cd build`
 - `cmake -G "Unix Makefiles" ..`
 - `make coverage`
-- `google-chrome coverage/index.html`
+- `google-chrome coverage/index.html`. Očekivani rezultat.
 
+![](https://raw.githubusercontent.com/Robotmurlock/MATF-AZRS/main/tema05_cmake/images/01-lcov.png)
 
+![](https://raw.githubusercontent.com/Robotmurlock/MATF-AZRS/main/tema05_cmake/images/02-lcov.png)
 
 ## Reference i dodatni materijali
 
