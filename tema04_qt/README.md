@@ -69,7 +69,7 @@ Signali i slotovi se koriste za komunikaciju između objekata, a ova dva pojma s
 - **Objekat (pasivni):** `Window`
 - **Slot:** `Window::close()`
 
-![](https://raw.githubusercontent.com/Robotmurlock/MATF-AZRS/main/tema04_qt/02_qt_aplikacija/illustration.png)
+![](https://raw.githubusercontent.com/Robotmurlock/MATF-AZRS/main/tema04_qt/images/qt-signals-slots-01.png)
 
 **Signale** se emituju objekti kada se njihovo stanje promeni, a da pritom ta promena može da bude interesantna za neki drugi objekat. Kada se emituju signali, odgovarajući **slotovi** se obično izvršavaju odmah tj. kao normalne funkcije osim ako nije podešeno drugačije. Ukoliko postoji više slotova koji zavise od nekog signala, onda se izvršavaju u odgovarajućem redosledu definisanja `connect` veza. [Detaljnije](https://doc.qt.io/qt-5/signalsandslots.html).
 
