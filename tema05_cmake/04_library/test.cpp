@@ -2,41 +2,93 @@
 #include <iostream>
 #include <cassert>
 
-int main()
+void test_split_space()
 {
-    // Arange
-    const std::string data     = "hello darkness, my old friend!";
-    const std::string empty    = "";
-    const std::string all_dels = "#########";
-    const std::string mlt_dels = "hello darkness,,, my old friend!";
-    const char del1 = ' ';
-    const char del2 = ',';
-    const char del3 = '#';
+    // Arrange
+    const std::string data = "hello darkness, my old friend!";
+    const std::vector<std::string> expected_result{"hello", "darkness,", "my", "old", "friend!"};
 
     // Act
-    const std::vector<std::string> result1 = split(data, del1);;
-    const std::vector<std::string> result2 = split(data, del2); ;
-    const std::vector<std::string> result3 = split(data, del3);
-    const std::vector<std::string> result4 = split(empty, del2);
-    const std::vector<std::string> result5 = split(all_dels, del3);
-    const std::vector<std::string> result6 = split(mlt_dels, del2);
-
+    const auto result = split(data, ' ');
+    
     // Assert
-    const std::vector<std::string> expected_result1 = std::vector<std::string>{"hello", "darkness,", "my", "old", "friend!"};
-    const std::vector<std::string> expected_result2 = std::vector<std::string>{"hello darkness", " my old friend!"};
-    const std::vector<std::string> expected_result3 = split(data, del3);
-    const std::vector<std::string> expected_result4 = split(empty, del2);
-    const std::vector<std::string> expected_result5 = split(all_dels, del3);
-    const std::vector<std::string> expected_result6 = split(mlt_dels, del2);
+    assert(result == expected_result);
+}
 
-    assert(result1 == expected_result1);
-    assert(result2 == expected_result2);
-    assert(result3 == std::vector<std::string>{"hello darkness, my old friend!"});
-    assert(result4 == std::vector<std::string>{});
-    assert(result5 == std::vector<std::string>{});
-    assert(result6 == std::vector<std::string>{"hello darkness", " my old friend!"});
+void test_split_comma()
+{
+    // Arrange
+    const std::string data = "hello darkness, my old friend!";
+    const std::vector<std::string> expected_result{"hello darkness", " my old friend!"};
+
+    // Act
+    const auto result = split(data, ',');
+    
+    // Assert
+    assert(result == expected_result);
+}
+
+void test_split_hash()
+{
+    // Arrange
+    const std::string data = "hello darkness, my old friend!";
+    const std::vector<std::string> expected_result{"hello darkness, my old friend!"};
+
+    // Act
+    const auto result = split(data, '#');
+    
+    // Assert
+    assert(result == expected_result);
+}
+
+void test_split_empty()
+{
+    // Arrange
+    const std::string empty = "";
+    const std::vector<std::string> expected_result{};
+
+    // Act
+    const auto result = split(empty, ' ');
+    
+    // Assert
+    assert(result == expected_result);
+}
+
+void test_split_all_hash()
+{
+    // Arrange
+    const std::string hashes = "#################";
+    const std::vector<std::string> expected_result{};
+
+    // Act
+    const auto result = split(hashes, '#');
+    
+    // Assert
+    assert(result == expected_result);
+}
+
+void test_split_multiple_commas()
+{
+    // Arrange
+    const std::string data = "hello darkness,,, my old friend!";
+    const std::vector<std::string> expected_result{"hello darkness", " my old friend!"};
+
+    // Act
+    const auto result = split(data, ',');
+    
+    // Assert
+    assert(result == expected_result);
+}
+
+int main()
+{
+    test_split_space();
+    test_split_comma();
+    test_split_hash();
+    test_split_empty();
+    test_split_all_hash();
+    test_split_multiple_commas();
 
     std::cout << "Tests passed!" << std::endl;
-
     return 0;
 }

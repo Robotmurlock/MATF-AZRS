@@ -112,7 +112,7 @@ Naš `HelloWorld` program je modifikovan:
 int main()
 {
     std::cout << "Hello World!" << std::endl;
-    std::cout << gcd(9, 12) << std::endl;
+    std::cout << std::gcd(9, 12) << std::endl;
     return 0;
 }
 ```
@@ -157,11 +157,19 @@ set(CMAKE_CXX_FLAGS_RELEASE_INIT "-O2")
 add_executable(hello main.cpp)
 ```
 
+**Build:**
+
+- `mkdir [build]`
+- `cd [build]`
+- `cmake -DCMAKE_BUILD_TYPE=[build] -G "Unix Makefiles" ..` 
+- `make`
+
 ## Biblioteka (04_library)
 
 Želimo da napravimo biblioteku za rad sa niskama u `C++`-u. Standardna biblioteka nam već nudi `string` 
-klasu sa funkcijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okviru standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
+klasu sa funkacijama i metodama za rad sa niskama, ali postoje neke funkcije koje su nam bitne, ali se tu ne nalaze. Jedna veoma korisna f-ja, koja nije implementirana u okviru standardne biblioteke je `split` funkcija, koja prima dva argumenta: nisku i karakter razdvajanja `delimiter` i vraća niz niski razdvojenih
 po tom specijalnom karakteru. Primer:
+
 - `split("Ahoy there matey!", ' ') = ["Ahoy", "there", "matey"]`
 - `split("123,456,789", ',') = ["123", "456", "789"]`
 
