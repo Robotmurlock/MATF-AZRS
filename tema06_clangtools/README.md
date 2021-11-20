@@ -8,7 +8,7 @@
 
 U odnosu na `gcc`, implementiran je u `C++`-u korišćenjem modernijih tehnologija. Bolje predstavlja informacije u slučaju greške ili upozorenja, a uglavnom daje više upozorenja u odnosu na `gcc`.
 
-Setimo se da kada smo pisalie `Makefile` da smo imali kod oblika:
+Setimo se da kada smo pisali `Makefile` da smo imali kod oblika:
 ```
 CXX = g++
 ...
@@ -29,7 +29,7 @@ Upotrebljava se skoro identično kao i `gcc`:
 
 ## ClangTidy
 
-Alat `ClangTidy` je deo `Clang/LLVM` projekta koji dam automatski refaktoriše `C++` kod. Ova grupa alata se nazivaju `linteri (linter)`. Linteri su alati koji proveravaju kod i pronalaze stilske i programske greške.
+Alat `ClangTidy` je deo `Clang/LLVM` projekta koji nam automatski refaktoriše `C++` kod. Ova grupa alata se naziva `linteri (linter)`. Linteri su alati koji proveravaju kod i pronalaze stilske i programske greške.
 
 Dokumentacija: `man clang-tidy`
 
@@ -44,7 +44,7 @@ Standard `C++11` je dodao mnoge nove funkcionalnosti kao što su (od direktno vi
 ### Uvod (01_override)
 
 Imamo sledeći primer (`old.cpp`):
-```
+```c++
 struct Base {
     virtual void reimplementMe(int a) {}
 };
@@ -61,7 +61,8 @@ int main()
 
 Možemo da primenimo `clang-tidy` i da vidimo potencijalna mesta za refaktorisanje. Ako želimo da alat primeni direktno popravke na kod možemo da napravimo `new.cpp` i da dodamo opciju `--fix`. Postoji lista provera koje možemo da uključimo preko opcije `--checks=[PATTERN1],[PATTERN2],...,[PATTERNK]`. Ako želimo da uključimo sve opcije, onda koristimo `--checks=*`. Želimo da modernizujemo kod pa koristimo `--checks=modernize-*`. Izlaz preusmeravamo u `log.txt`:
     * `cp old.cpp new.cpp`
-    * `clang-tidy new.cpp --checks=modernize-* --fix -- --std=c++17 > log.txt`
+        * `clang-tidy new.cpp --checks="modernize-*" --fix -- --std=c++17 > log.txt`
+
 - Očekivani izlaz:
 ```
 4 warnings generated.
@@ -123,7 +124,7 @@ new.cpp:11:5: note: Potential leak of memory pointed to by 'object'
 ```
 - Takođe je primećeno potencijalno curenje memorije.
 - Datoteka `noerror.cpp` ima modifikovanu `main()` f-ju:
-```
+```c++
 auto main() -> int
 {
     Base* object = new Derived;
@@ -163,7 +164,7 @@ Ako želimo da vidimo šta sve podrazumeva `modernize-*`, možemo da pokrenemo s
     * **Pažnja:** Opcija `-fix` menja kod. Možda želite backup.
 - Neke interesatne promene:
 - `BEFORE:`
-```
+```c++
 void vprint(const std::vector<int>& vec)
 {
     for(std::vector<int>::const_iterator it=vec.cbegin(); it!=vec.cend(); it++)
@@ -172,7 +173,7 @@ void vprint(const std::vector<int>& vec)
 }
 ```
 - `AFTER:`
-```
+```c++
 void vprint(const std::vector<int>& vec)
 {
     for(int it : vec)
@@ -189,7 +190,7 @@ Sledećih par kratkih primera se odnose na refaktorisanje koda pisanog po starij
 - Sa druge strane, `nullptr` je uvek pokazivač.
 
 - Pogledajmo sledeći kod:
-```
+```c++
 #include <stdio.h>
 
 #define MY_NULL (void*)0
@@ -217,7 +218,7 @@ int main()
 - Primenjujemo `clang-tidy`:
     * `clang-tidy new.cpp --checks=modernize-use-nullptr --fix -- --std=c++17`
 - Očekivani rezultat:
-```
+```c++
 #define MY_NULL (void*)0
 
 void assignment() {
@@ -240,7 +241,7 @@ void test() {
 ### Modernize-auto (04_modernize)
 
 Ovde imamo sličan slučaj kao u jednom od prethodnih primera:
-```
+```c++
 int main()
 {
     std::vector<int> my_container;
@@ -253,7 +254,7 @@ int main()
 - Po dokumentaciji, tip treba zameniti kada to povećava čitljivost. Ako zamenimo `int` sa `auto`, to ne povećava čitljivost. Ali ako zamenimo `std::vector<int>::iterator` sa `auto`, onda to povećava čitljivost:
 - Pokrenimo `ClangTidy`:
     * `clang-tidy new.cpp --checks=modernize-use-auto --fix -- --std=c++17`
-```
+```c++
 int main()
 {
     std::vector<int> my_container;
@@ -267,7 +268,7 @@ int main()
 ### Modernize-using (05_modernize)
 
 Ključne reči `typedef` i `using` je manje-više isto u većini primera. Razlika je u tome što je `using` kompatabilan sa `template` programiranjem:
-```
+```C++
 typedef int variable;
 
 class Class{};
@@ -278,7 +279,7 @@ typedef struct { int a; } R_t, *R_p;
 - Pokrenimo `ClangTidy`:
     * `clang-tidy new.cpp --checks=modernize-use-using --fix -- --std=c++17`
 - Očekivani izlaz:
-```
+```c++
 using variable = int;
 
 class Class{};
@@ -349,16 +350,17 @@ Razvojno okruženje `qtcreator` ima opciju `Analyze` kao padajući meni i tu pos
 
 ## Reference
 
-[clang-llvm](https://clang.llvm.org/)
+[\[1\] clang-llvm](https://clang.llvm.org/)
 
-[kdab-clang-tidy](https://www.kdab.com/clang-tidy-part-1-modernize-source-code-using-c11c14/)
+[\[2\] kdab-clang-tidy](https://www.kdab.com/clang-tidy-part-1-modernize-source-code-using-c11c14/)
 
-[clang-format](https://clang.llvm.org/docs/ClangFormat.html)
+[\[3\] clang-format](https://clang.llvm.org/docs/ClangFormat.html)
 
-[clang-tidy-modernize-use-nullptr](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-nullptr.html)
+[\[4\] clang-tidy-modernize-use-nullptr](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-nullptr.html)
 
-[clang-tidy-modernize-use-auto](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-auto.html)
+[\[5\] clang-tidy-modernize-use-auto](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-auto.html)
 
-[clang-tidy-modernize-use-override](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-override.html)
+[\[6\] clang-tidy-modernize-use-override](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-override.html)
 
-[clang-tidy-modernize-use-using](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-using.html)
+[\[7\] clang-tidy-modernize-use-using](https://clang.llvm.org/extra/clang-tidy/checks/modernize-use-using.html)
+
