@@ -25,7 +25,7 @@ Možemo da zamenimo `g++` sa `clang++`. To i jeste ideja `CXX` promenljive, da m
 
 Upotrebljava se skoro identično kao i `gcc`: 
     * `clang [OPTIONS] input.c` za `C` datoteke
-    * `clang++ [OPTIONS] input.cpp` za `C++` datoteke
+        * `clang++ [OPTIONS] input.cpp` za `C++` datoteke
 
 ## ClangTidy
 
@@ -141,7 +141,7 @@ Ako želimo da vidimo šta sve podrazumeva `modernize-*`, možemo da pokrenemo s
 * `clang-tidy --list-checks -checks='*'` nam dohvata sve provere.
 * `grep "modernize"` filtrira provere koji nisu `modernize`
 
-### Cmake (02_cmake)
+### Cmake (02_cmake) - FIXME
 
 - Šta ako imamo ceo projekat koji želimo da refaktorišemo? Ako koristimo `cmake`, onda je to lako. 
 - Imamo biblioteku `sorty` koja ima jednu apstraktnu klasu `AbstractSort` čiji konstruktor prima funkciju poređenja i čisto virtuelni metod `sort()` koji sortira dobijeni niz. Takođe postoje i dve nasleđenje klase `SelectionSort` i `QuickSort` koje implementiraju odgovarajuće algoritme. 
@@ -288,33 +288,125 @@ using MyPtrType = void (Class::*)() const;
 using R_t = struct { int a; };
 using R_p = R_t *;
 ```
-**Napomena:** Primer iz dokumentacije ne radi!
+**Napomena:** Primer iz dokumentacije ne radi! Iz ovih razloga se preporučuje da se ne koristi `--fix` bez razmišljanja ili da se barem sačuva `backup` datoteke (ili projekat) koji se automatski menja. 
 
-### Readibility-identifier-naming (06_readibility)
+**Napomena:** Ne treba slepo menjati kod za sva upozorenja koja je dao `clang-tidy` alat. U nekim situacijama to nije idealno.
 
-**TODO!**
+### Readibility-identifier-naming (06_readibility) -- TODO
+
 [dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html)
+
 - Otvoriti `.clang-tidy` datoteku.
 
 ### Readability-container-size-empty (07_readibility)
 
-**TODO!**
-[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/readability-container-size-empty.html)
+Kada proveravamo da li je neka kolekcija prazna, preporučeni način je da se koristi metoda `empty()` umesto da se proverava da li je `size() == 0`, jer se na taj način dobija na čitljivosti. Pored toga, za metodu `size()` se ne garantuje da se izvršava u konstantnoj brzini:
+
+```C++
+#include <iostream>
+#include <stack>
+
+int main()
+{
+    std::stack<int> s;
+    s.push(3);
+    s.push(8);
+    s.push(9);
+    s.push(7);
+
+    while(s.size() > 0)
+    {
+        std::cout << s.top() << " ";
+        s.pop();
+    }
+
+    return 0;
+}
+```
+
+- Pokrenimo `ClangTidy`:
+  * `clang-tidy new.cpp --checks=readability-container-size-empty --fix -- --std=c++17`
+- Očekivani izlaz:
+
+```c++
+#include <iostream>
+#include <stack>
+
+int main()
+{
+    std::stack<int> s;
+    s.push(3);
+    s.push(8);
+    s.push(9);
+    s.push(7);
+
+    while(!s.empty())
+    {
+        std::cout << s.top() << " ";
+        s.pop();
+    }
+
+    return 0;
+}
+```
 
 ### Performance-implicit-conversion-in-loop (08_performance)
 
-**TODO!**
-[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/performance-implicit-conversion-in-loop.html)
+Ova vrsta provere samo proverava kod, a ne postoji mogućnost automatskog refaktorisanja preko `--fix`. Problem je što ovde dolazi do implicitne konverzije iz `pair<const string, int>` (tip iteratora mape) i `pair<string, int>`. Ove konverzije u `for` petlji usporavaju rad programa. Zbog ovakvih situacija je preporučeno da se koristi `auto` ako je to moguće.
+
+```c++
+#include <iostream>
+#include <map>
+#include <string>
+#include <utility>
+
+using namespace std;
+
+int main()
+{
+    map<string, int> table{{"aaa", 1}, {"abc", 6}, {"hello", 10}};
+    for(const pair<string, int> &t: table)
+        cout << t.first << ": " << t.second << endl;
+
+    return 0;
+}
+```
 
 ### Performance-inefficient-string-concatenation (09_performance)
 
-**TODO!**
-[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/performance-inefficient-string-concatenation.html)
+Ako treba da vršimo konkatenaciju niske kroz petlju, efikasnije je da se koristi operator `+=` tj. `a += b` umesto operatora `+` tj. `a = a + b`. Alternativa za `a += b` je `a.append(b)`, gde je povratna vrednost metode predstavlja rezultata konkatenacije.
+
+```c++
+#include <iostream>
+#include <string>
+
+int main()
+{
+    std::string a("Foo"), b("Baz");
+    for (int i = 0; i < 20000; ++i) {
+        a = a + "Bar" + b;
+    }
+    return 0;
+}
+```
 
 ### llvm-namespace-comment (10_llvm)
 
-**TODO!**
-[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/llvm-namespace-comment.html)
+Standard je da se nakon kraja okvira za `namespace` doda komenta za koji se `namespace` taj kraj odnosi. Pomoću ovo opcije je moguće ovo automatski refaktorisati.
+
+```c++
+namespace matf{
+    void f() {}
+}
+```
+
+Komanda: `clang-tidy new.cpp --checks="llvm-namespace-comment" --fix -- --std=c++17`
+
+```c++
+namespace matf{
+    void f() {}
+} // namespace matf
+```
 
 ## ClangFormat
 
