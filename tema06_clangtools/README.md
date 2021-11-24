@@ -141,7 +141,7 @@ Ako želimo da vidimo šta sve podrazumeva `modernize-*`, možemo da pokrenemo s
 * `clang-tidy --list-checks -checks='*'` nam dohvata sve provere.
 * `grep "modernize"` filtrira provere koji nisu `modernize`
 
-### Cmake (02_cmake) - FIXME
+### Cmake (02_cmake)
 
 - Šta ako imamo ceo projekat koji želimo da refaktorišemo? Ako koristimo `cmake`, onda je to lako. 
 - Imamo biblioteku `sorty` koja ima jednu apstraktnu klasu `AbstractSort` čiji konstruktor prima funkciju poređenja i čisto virtuelni metod `sort()` koji sortira dobijeni niz. Takođe postoje i dve nasleđenje klase `SelectionSort` i `QuickSort` koje implementiraju odgovarajuće algoritme. 
