@@ -11,7 +11,7 @@ void vprint(const std::vector<int>& vec)
     std::cout << std::endl;
 }
 
-auto main() -> int
+int main()
 {
     std::vector<int> vec{5, 3, 1, 4, 2};
     auto vec_copy = vec;

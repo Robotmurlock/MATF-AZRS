@@ -2,12 +2,13 @@
 #define __SORTY__
 
 #include <functional>
+#include <utility>
 #include <vector>
 
 class AbstractSort{
 public:
     AbstractSort(std::function<bool(int, int)> cmp)
-        : m_cmp(cmp)
+        : m_cmp(std::move(cmp))
         {}
     virtual ~AbstractSort() = default;
     virtual void sort(std::vector<int>& vec) = 0;
