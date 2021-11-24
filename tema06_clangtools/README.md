@@ -292,11 +292,61 @@ using R_p = R_t *;
 
 **Napomena:** Ne treba slepo menjati kod za sva upozorenja koja je dao `clang-tidy` alat. U nekim situacijama to nije idealno.
 
-### Readibility-identifier-naming (06_readibility) -- TODO
+### Readibility-identifier-naming (06_readibility)
 
-[dokumentacija](https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html)
+Pretpostavimo da više ljudi radi na jednom projektu, a da prethodno nije definisan standard za imenovanje klasa, metoda, polja, funkcija, ... U tom slučaju se smanjuje čitljivost samog projekta. Alat `clang-tidy` nam omogućava detekciju i korekciju imena koja nisu po standardu. Neophodno je samo da se definiše standard kroz `.clang-tidy` datoteku. Datoteka `.clang-tidy` može da se koristi i nezavisno od ove provere tj. možemo da definišemo jednom provere koje na interesuju u `.clang-tidy` i kada pokrećemo alat, uvek se ta datoteka uzima u obzir. Primer:
 
-- Otvoriti `.clang-tidy` datoteku.
+```yaml
+Checks: '-*,readability-identifier-naming'
+CheckOptions:
+  - { key: readability-identifier-naming.ClassCase,     value: CamelCase  }
+  - { key: readability-identifier-naming.VariableCase,  value: camelBack }
+  - { key: readability-identifier-naming.FunctionCase,  value: camelBack }
+  - { key: readability-identifier-naming.MemberPrefix,  value: m_         }
+  - { key: readability-identifier-naming.ParameterCase, value: camelBack }
+```
+
+- Za više informacija pogledati [dokumentaciju](https://clang.llvm.org/extra/clang-tidy/checks/readability-identifier-naming.html).
+- Inicijalno stanje programa:
+
+```c++
+class CoolObject{
+public:
+  void doStuff();
+  void doMoreStuff() const;
+private:
+  int value;
+};
+
+class another_object{
+public:
+  void do_some_stuff();
+  void do_very_cool_stuff();
+private:
+  int coolValue;
+};
+```
+
+- `clang-tidy new.cpp --fix -- --std=c++17 `
+
+```c++
+class CoolObject{
+public:
+  void doStuff();
+  void doMoreStuff() const;
+private:
+  int m_value;
+};
+
+class AnotherObject{
+public:
+  void doSomeStuff();
+  void doVeryCoolStuff();
+private:
+  int m_coolValue;
+};
+
+```
 
 ### Readability-container-size-empty (07_readibility)
 

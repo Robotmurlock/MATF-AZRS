@@ -1,4 +1,4 @@
-class CoolObject {
+class CoolObject{
 public:
   void doStuff();
   void doMoreStuff() const;
@@ -6,10 +6,10 @@ private:
   int m_value;
 };
 
-class AnotherObject {
+class AnotherObject{
 public:
-  void doTuff();
-  void doMoreStuff() const;
+  void doSomeStuff();
+  void doVeryCoolStuff();
 private:
-  int m_value;
+  int m_coolValue;
 };
