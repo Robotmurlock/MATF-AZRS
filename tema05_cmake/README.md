@@ -329,7 +329,7 @@ Kod opcije `target_include_directories` koristili smo ključnu reč `PUBLIC`. Al
 
 ## Projekat sa testovima (06_project_with_tests)
 
-U prethodnom smo konfigurisali `CMake` tako da nam `build` podrazumeva i izvršnu datoteku za testiranje. Ukoliko bismo imali više biblioteka i za svaku biblioteku jednu ili više izvršnih datoteka, onda želimo nekako da automatizujemo testiranje. To možemo da uradimo preko `add_test` funkcionalnosti, gde definišemo sve šta nam sve čini skup testova. Kada izvršimo build, onda možemo da pokrenemo sve testove sa `make test`, gde dobijamo informacije koji su sve testovi prošli tj. nisu prošli. Da bismo koristili ovu funkcionalnost, neophodno je da definišemo `enable_testing()` na početku `CMakeLists.txt`. Modifikujemo `CMakeLists.txt`:
+U prethodnom smo konfigurisali `CMake` tako da nam `build` podrazumeva i izvršnu datoteku za testiranje. Ukoliko bismo imali više biblioteka i za svaku biblioteku jednu ili više izvršnih datoteka, onda želimo nekako da automatizujemo testiranje. To možemo da uradimo preko `add_test` funkcionalnosti, gde definišemo šta nam sve čini skup testova. Kada izvršimo build, onda možemo da pokrenemo sve testove sa `make test`, gde dobijamo informacije koji su sve testovi prošli tj. nisu prošli. Da bismo koristili ovu funkcionalnost, neophodno je da definišemo `enable_testing()` na početku `CMakeLists.txt` (posle `project`). Modifikujemo `CMakeLists.txt`:
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
