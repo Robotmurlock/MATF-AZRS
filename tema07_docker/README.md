@@ -4,7 +4,7 @@
 
 `Docker` je projekat otvorenog koda koji nam omogućava `isporuku (deployment)` aplikacija unutar `kontejnera (container)` tako što nam daje dodatni nivo apstraktnosti i automatizacije [OS-level virtualization](https://en.wikipedia.org/wiki/OS-level_virtualization) za `Linux`.
 
-Ideja je da zapakujemo kod i sve zavisnosti u jednu standardizovani jedinicu koja se naziva `kontejner (container)`. To nam omogućava da brzo i pouzdano instaliramo aplikaciju na više okruženja. 
+Ideja je da zapakujemo kod i sve zavisnosti u jednu standardizovanu jedinicu koja se naziva `kontejner (container)`. To nam omogućava da brzo i pouzdano instaliramo aplikaciju na više okruženja. 
 
 `Docker slika kontejnera (container image)` je samostalan paket softvera koji sadrži:
 * kod
@@ -56,7 +56,7 @@ Virtuelne mašine i kontejneri daju slične benefite i sličnu izolaciju, ali fu
 
 ## Popularnost Docker-a
 
-Vrlo moguće da će u budućnosti barem osnovno poznavanje `Docker`-a biti neophodno za većinu poslova.
+Vrlo moguće da će u budućnosti barem osnovno poznavanje `Docker`-a biti neophodno za većinu programerskih poslova.
 
 ![docker2](images/docker2.png)
 
@@ -64,12 +64,12 @@ Vrlo moguće da će u budućnosti barem osnovno poznavanje `Docker`-a biti neoph
 
 Upustvo za instalaciju se nalazi na sledećem [linku](https://docs.docker.com/get-docker/).
 
-- Moguće je da je neophodno da se konfiguriše `docker` tako da može da se koristi i bez `sudo` opcije. 
+- Neophodno je da se konfiguriše `docker` tako da može da se koristi i bez `sudo` opcije. 
 
 ## Osnovne komande (01_basic)
 
 Napravili smo `Hello World!` program i želimo da ga `dokerizujemo`. Pišemo `Dockerfile`:
-```
+```dockerfile
 FROM gcc:latest
 
 COPY . /usr/src/hello-world
@@ -80,17 +80,19 @@ RUN g++ -o hello-world main.cpp
 
 CMD ["./hello-world"]
 ```
-- Analiza svake instrukcije:
-    * `FROM gcc:latest`: Dohvati već postojeću sliku za `gcc` kao `osnovni sloj` (detaljnije objašnjenje kasnije).
-    * `COPY . /usr/src/hello-world`: Kopiraj trenutni direktorijum `.` u `Docker sliku` na putanju `/usr/src/hello-world`.
-    * `WORKDIR /usr/src/hello-world`: Postavi putanju `/usr/src/hello-world` kao putanju za radni direktorijum.
-    * `RUN g++ -o hello-world main.cpp`: Izvrši komandu (u ovom slučaju kompiliraj c++ kod).
-    * `CMD ["./hello-world"]`: Podrazumevana opcija (komanda) za kontejner. Ovo npr. može da bude pokretanje servera.
+Analiza svake instrukcije:
+* `FROM gcc:latest`: Dohvati već postojeću sliku za `gcc` kao `osnovni sloj` (detaljnije objašnjenje kasnije).
+* `COPY . /usr/src/hello-world`: Kopiraj trenutni direktorijum `.` u `Docker sliku` na putanju `/usr/src/hello-world`.
+* `WORKDIR /usr/src/hello-world`: Postavi putanju `/usr/src/hello-world` kao putanju za radni direktorijum.
+* `RUN g++ -o hello-world main.cpp`: Izvrši komandu (u ovom slučaju kompiliraj c++ kod).
+* `CMD ["./hello-world"]`: Podrazumevana opcija (komanda) za kontejner. Ovo npr. može da bude pokretanje servera.
 
-- Sada je potrebno da izgradimo našu novu sliku preko komande `docker build [PATH]`. **Napomena:** Za sve `docker` komande postoje `man` strane. Argument ove komande je putanja do direktorijuma gde se nalazi `Dockerfile`. U našem slučaju je to trenutni direktorijum `.`. Opcijom `-t` dajemo ime slici (inače je ime `none`):
-    * `docker build -t hello-world .`
-- Recimo da naš program ima grešku u kodu:
-```
+Sada je potrebno da izgradimo našu novu sliku preko komande `docker build [PATH]`. **Napomena:** Za sve `docker` komande postoje `man` strane. Argument ove komande je putanja do direktorijuma gde se nalazi `Dockerfile`. U našem slučaju je to trenutni direktorijum `.`. Opcijom `-t` dajemo ime slici (inače je ime `none`):
+* `docker build -t hello-world .`
+
+Recimo da naš program ima grešku u kodu:
+
+```c++
 #include <iostream>
 
 int main()
@@ -99,7 +101,8 @@ int main()
     return 0;
 }
 ```
-- Očekivani oblik izlaza:
+Očekivani oblik izlaza:
+
 ```
 Sending build context to Docker daemon  3.072kB
 Step 1/5 : FROM gcc:latest
@@ -133,8 +136,9 @@ main.cpp:5:32: error: expected ';' before 'return'
       |     ~~~~~~                      
 The command '/bin/sh -c g++ -o hello-world main.cpp' returned a non-zero code: 1
 ```
-- Prvi put čekamo jako dugo za izgradnju slike, ali nakon toga je znatno brže, jer su slojevi keširani. Svaki korak nam predstavlja jedan sloj. Osnovni sloj je zasnovan na instrukciji `FROM gcc:latest`. To je 
+Prvi put čekamo jako dugo za izgradnju slike, ali nakon toga je znatno brže, jer su slojevi keširani. Svaki korak nam predstavlja jedan sloj. Osnovni sloj je zasnovan na instrukciji `FROM gcc:latest`. To je 
 zapravo slika koja predstavlja osnovu za našu sliku. Svaki sloj predstavlja ulaz u sledeći sloj koji se "nadograđuje". `Docker` je već uspešno izgradio prva četiri sloja. Ako ispravimo kod i pokrenemo opet sliku, dobićemo sledeći očekivani rezultat:
+
 ```
 Sending build context to Docker daemon  3.072kB
 Step 1/5 : FROM gcc:latest
@@ -156,39 +160,40 @@ Removing intermediate container eb1235f928ee
 Successfully built e83e41d7d431
 Successfully tagged hello-world:latest
 ```
-- Proverimo da li se slika nalazi na listu postojećih slika:
-    * `docker image ls`
-- Očekivani rezultat:
+Proverimo da li se slika nalazi na listu postojećih slika:
+* `docker image ls`. Očekivani rezultat:
+
 ```
 REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
 hello-world         latest              c329d9d73ac7        55 seconds ago      1.19GB
 gcc                 latest              f39d9e39afdb        23 hours ago        1.19GB
 ```
-- Zanemarimo ostale slike pored ove dve.
-- Informacije:
-    * `REPOSITORY`: ime
-    * `TAG`: verzija 
-    * `IMAGE ID`: jedinstveni `ID` 
-    * `CREATED`: proteklo vreme od kreiranja
-    * `SIZE`: dimenzija
-- Ako stavimo za `TAG` `latest` dobijamo poslednju verziju te slike. Puno ime slike je `REPOSITORY:TAG`. Primeri: `gcc:10.2`, `gcc:9`, `gcc:latest`.
+Informacije (Zanemarimo ostale slike pored ove dve):
 
-- Ostalo je još samo da pokrenemo kontejner komandom `docker run [OPTIONS] [IMAGE:TAG]`
-    * `docker run --name helloworld hello-world:latest`
-- Očekivani izlaz:
+* `REPOSITORY`: ime
+* `TAG`: verzija 
+* `IMAGE ID`: jedinstveni `ID` 
+* `CREATED`: proteklo vreme od kreiranja
+* `SIZE`: dimenzija
+
+Ako stavimo za `TAG` `latest` dobijamo poslednju verziju te slike. Puno ime slike je `REPOSITORY:TAG`. Primeri: `gcc:10.2`, `gcc:9`, `gcc:latest`.
+
+Ostalo je još samo da pokrenemo kontejner komandom `docker run [OPTIONS] [IMAGE:TAG]`
+* `docker run --name helloworld hello-world:latest`. Očekivani izlaz:
+
 ```
 Hello World!
 ```
-- Možemo da pokrenemo `docker ps` da izlistamo sve aktivne kontejnere:
-    * `docker ps`
-- Očekivani izlaz:
+Možemo da pokrenemo `docker ps` da izlistamo sve aktivne kontejnere:
+* `docker ps`. Očekivani izlaz:
+
 ```
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 ```
-- Nemamo `helloworld` u aktivnim kontejnerima, jer se aplikacija završila.
-- Možemo da izlistamo sve kontejnere tako što dodamo opciju `-a`:
-    * `docker ps -a`
-- Očekivani oblik rezulata:
+Nemamo `helloworld` u aktivnim kontejnerima, jer se aplikacija završila. Možemo da izlistamo sve kontejnere tako što dodamo opciju `-a`:
+
+* `docker ps -a`. Očekivani oblik rezulata:
+
 ```
 CONTAINER ID        IMAGE                COMMAND             CREATED             STATUS                     PORTS               NAMES
 6268111c8dfd        hello-world:latest   "./hello-world"     2 minutes ago       Exited (0) 2 minutes ago                       helloworld
@@ -199,8 +204,7 @@ CONTAINER ID        IMAGE                COMMAND             CREATED            
 
 ![docker](images/docker1.jpeg)
 
-**Dodatak:**
-- Ako pokušamo da pokrenemo neku sliku koji trenutno nemamo, a postoji na "internetu", onda će se izvršiti `docker pull` tj. dohvatiti sliku. Primer `docker run nginx`.
+**Napomena:** Ako pokušamo da pokrenemo neku sliku koji trenutno nemamo, a postoji na "internetu", onda će se izvršiti `docker pull` tj. dohvatiće se slika. Primer `docker run nginx`.
 
 ## Docker Hub (01_basic)
 
@@ -211,7 +215,7 @@ CONTAINER ID        IMAGE                COMMAND             CREATED            
 
 ![dockerhub1](images/dockerhub1.png)
 - Potrebno je da se ulogujemo na `Docker hub` preko terminala:
-    * `docker login --username=yourhubusername`
+    * `docker login --username=[YourHubUsername]`
 - Nakon ove komande je potrebno da unesemo šifru. Očekivani oblik rezultata:
 ```
 Password: 
@@ -254,12 +258,12 @@ hello-world               latest              c329d9d73ac7        38 minutes ago
 robotmurlock/helloworld   1.0                 c329d9d73ac7        38 minutes ago      1.19GB
 gcc                       latest              f39d9e39afdb        23 hours ago        1.19GB
 ```
-- Sada želimo da obrišemo `hello-world` i `robotmurlock/helloworld` slike komandom `docker image rm` ili `docker rmi` skraćeno. Potencijalno je potrebno da se doda opcija `-f` za forsiranje brisanja ako neki kontejner koristi ovu sliku ili slično:
-    * `docker rmi hello-world:latest`
-    * `docker rmi robotmurlock/helloworld:1.0 -f`
+Sada želimo da obrišemo `hello-world` i `robotmurlock/helloworld` slike komandom `docker image rm` ili `docker rmi` skraćeno. Potencijalno je potrebno da se doda opcija `-f` za forsiranje brisanja ako neki kontejner koristi ovu sliku (brisanje je neophodno čak i ako taj kontejner nije trenutno aktivan):
+* `docker rmi hello-world:latest`
+* `docker rmi robotmurlock/helloworld:1.0 -f`
 
-- Izgubili smo našu sliku, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
-    * `docker pull robotmurlock/helloworld:1.0`
+Izgubili smo našu sliku, ali nema potrebe za brigom. Možemo opet da je dohvatimo sa `Docker Hub`-a, preko `docker pull` komande:
+* `docker pull robotmurlock/helloworld:1.0`
 
 - Očekivani oblik rezultata za `docker image ls`:
 ```
@@ -277,7 +281,7 @@ Hello World!
 
 ## Promenljive i portovi (02_flaskserver)
 
-Imamo `flask` server koji se sastoji od `app.py` i `index.html`:
+Imamo [flask](https://flask.palletsprojects.com/en/2.0.x/) server koji se sastoji od `app.py` (aplikacija) i `index.html` (sadržaj):
 - `app.py`:
 ```
 from flask import Flask, render_template
@@ -336,18 +340,19 @@ color = os.environ.get('BACKGROUND_COLOR')
 
 ![flask2](images/flask2.png)
 
-- Zašto je ovo ovako komplikovano realizovano kad može u kodu da stoji `color = 'red'`? Ako želimo da dokerizujemo aplikaciju, a ova promenljiva može potencijalno da se menja kasnije (kao i mnoge druge), onda
-je potrebno da opet izgradimo sliku za aplikaciju nakon svake promene u kodu. Umesto toga možemo da stavimo `enviroment promenljivu` za boju pozadine. Ako je potrebno da se promeni pozadina, dovoljno je samo da opet pokrenemo sliku sa drugom vrednosću za tu promenljivu.
+Zašto je ovo ovako komplikovano realizovano kad može u kodu da stoji `color = 'red'`? Ako želimo da dokerizujemo aplikaciju, a ova promenljiva može potencijalno da se menja kasnije (kao i mnoge druge), onda je potrebno da opet izgradimo sliku za aplikaciju nakon svake promene u kodu. Umesto toga možemo da stavimo `promenljivu okruženja (enviroment promenljivu)` za boju pozadine. Ako je potrebno da se promeni pozadina, dovoljno je samo da opet pokrenemo sliku sa drugom vrednosću za tu promenljivu.
 
-- Želimo da dokerizujemo naš server kako bismo mogli da postavimo na unajmljeni server.
-- Neophodne stvari:
-    * Potrebno je da se instalira `python`, ako već nije instaliran.
-    * Potrebno je da se instalira `pip`, ako već nije instaliran.
-    * Potrebno je da se instalira `flask`, ako već nije instaliran.
+
+
+Želimo da dokerizujemo naš server kako bismo mogli da postavimo na unajmljeni server. Neophodne stvari:
+
+- Potrebno je da se instalira `python`, ako već nije instaliran.
+- Potrebno je da se instalira `pip`, ako već nije instaliran.
+- Potrebno je da se instalira `flask`, ako već nije instaliran.
 - Potrebne biblioteke se obično definišu u `requirements.txt` i instaliraju se sledećom komandom:
     * `pip install -r requirements.txt`
 - Na osnovu ovih informacije možemo da napišemo naš `Dockerfile`:
-```
+```dockerfile
 FROM ubuntu:20.04
 
 RUN apt-get update -y && \
@@ -361,12 +366,12 @@ RUN pip install -r requirements.txt
 
 CMD ["python", "app.py"]
 ```
-- Slojevi:
-    * Osnovni sloj je `ubuntu:20.04`
-    * Instalacija `python`-a.
-    * Kopiranje datoteka.
-    * Postavljanje radnog direktorijuma.
-    * Instalacija svih potrebnih biblioteka za `python`, što je u ovom slučaju samo `flask`.
+- **Slojevi**:
+  - Osnovni sloj je `ubuntu:20.04`
+  - Instalacija `python`-a.
+  - Kopiranje datoteka.
+  - Postavljanje radnog direktorijuma.
+  - Instalacija svih potrebnih biblioteka za `python`, što je u ovom slučaju samo `flask`.
 
 - Pravimo sliku:
     `docker build -t flaskserver .`
@@ -378,13 +383,15 @@ flaskserver               latest              c10ae5336e0d        13 seconds ago
 
 - Sada možemo da pokrenemo server sa crvenom bojom pozadine kao kontejner:
     * `docker run --name red --network="host" -e BACKGROUND_COLOR=red flaskserver:latest`
-- **Napomena:** Da bi server radio na `localhost`-u, potrebno je da se doda opcija `--network="host"`.
+- **Napomena:** Da bismo imali pristup dokerizovanom serveru na `localhost`-u, potrebno je da se doda opcija `--network="host"`.
 - Možemo da pokrenemo i server sa plavom bojom bez da pravimo opet sliku:
     * `docker run --name blue --network="host" -e BACKGROUND_COLOR=blue flaskserver:latest`
 - Ako hoćemo da pokrenemo opet isti kontejner (isto ime), potrebno je da obrišemo stari:
     * `docker rm red`
     * `docker rm blue`
-- Sve informacije o kontejneru možemo da vidimo preko komande `docker inspect [NAME]`. Rezultat je `json`. Filtrirajmo `ENV` promenljive. Očekivani oblik rezultata za `docker inspect blue` (ako je obrisan, napraviti ga opet ili koristiti drugi kontejner):
+
+Sve informacije o kontejneru možemo da vidimo preko komande `docker inspect [NAME]`. Rezultat je `json`. Filtrirajmo `ENV` promenljive. Očekivani oblik rezultata za `docker inspect blue` (ako je obrisan, treba da se napravi opet ili da se koristi drugi kontejner):
+
 ```
 "Env": [
     "BACKGROUND_COLOR=blue",
@@ -392,6 +399,7 @@ flaskserver               latest              c10ae5336e0d        13 seconds ago
 ],
 ```
 - Ako imamo više takvih promenljivih, efikasnije je da ih zapišemo u datoteku. Pravimo `env.txt` datoteku sa sledećim sadržajem:
+
 ```
 BACKGROUND_COLOR=pink
 ```
@@ -413,7 +421,7 @@ BACKGROUND_COLOR=pink
 ## ENTRYPOINT i CMD (03_anotherhello)
 
 - Imamo sledeći program:
-```
+```c++
 #include <iostream>
 #include <cstring>
 
@@ -434,7 +442,7 @@ int main(int argc, char** argv)
 ```
 - Sve što ovaj program radi je: Prima kao argument komandne linije broj `n` i ispisuje `n` puta `Hello World!`.
 - Imamo već napisan `Dockerfile` koji je veoma sličan onom iz `01_basic` zadataka:
-```
+```dockerfile
 FROM gcc:latest
 
 COPY . /usr/src/hello
@@ -449,7 +457,7 @@ CMD ["5"]
 ```
 - **Koja je razlika između ENTRYPOINT i CMD?**
     * `ENTRYPOINT` možemo da posmatramo kao "prefiks komande" tj. deo koji je "uvek" tu kao prefiks.
-    * `CMD` možemo da posmatramo kao podrazumevani "sufiks komande" tj. deo koji je "uvek" tu, ako se drugačije ne kaže.
+    * `CMD` možemo da posmatramo kao podrazumevani "sufiks komande" tj. deo koji je "uvek" tu, osim ako se drugačije ne kaže.
 - Pravimo sliku:
     * `docker build -t hello .`
 - Pokrenimo kontejner:
@@ -480,7 +488,7 @@ Dockerfile
 hello
 main.cpp
 ```
- 
+
 ## Kontejneri i skladište (04_database)
 
 Pogledajmo kod `04_database/main.cpp`. Imamo program koji dodaje rezultate ispita u bazu podataka koju ovde simuliramo preko `database.txt` datoteke. Ako prevedemo program, očekivani sadržaj datoteke `database.txt` je:
@@ -490,6 +498,20 @@ indeks: mi22174, ocena: 8
 indeks: mi22175, ocena: 9
 indeks: mi22176, ocena: 5
 indeks: mi22177, ocena: 7
+```
+
+- Napisan je i odgovarajući `Dockerfile`:
+
+```dockerfile
+FROM gcc:latest
+
+COPY . /usr/src/database
+
+WORKDIR /usr/src/database
+
+RUN g++ -o database main.cpp
+
+CMD ["./database"]
 ```
 
 - Želimo da dokerizujemo ovaj program:
@@ -504,7 +526,7 @@ indeks: mi22175, ocena: 9
 indeks: mi22176, ocena: 5
 indeks: mi22177, ocena: 7
 ```
-- Problem: Pri završetku kontejnera se brišu sve izmene nastale u tom kontejneru (izmene su lokalizovane). Ovo je veoma nezgodno ako imamo bazu podataka na serveru i pukne nam server. U tom slučaju gubimo celu bazu podataka, jer se izmene na kontejnerima ne odražavaju na slike. 
+- **Problem**: Pri završetku kontejnera se brišu sve izmene nastale u tom kontejneru (izmene su lokalizovane). Ovo je veoma nezgodno ako imamo bazu podataka na serveru i pukne nam server. U tom slučaju gubimo celu bazu podataka, jer se izmene na kontejnerima ne odražavaju na slike. 
 - Ako pokrenemo opet isti kontejner, dobićemo isti rezultat, a želimo da dobijemo nešto ovako (sa očuvanom memorijom):
 ```
 indeks: mi22173, ocena: 7
@@ -564,7 +586,7 @@ indeks: mi22177, ocena: 7
 - Postarati se da se `database.txt` očuvava kada se kontejner prekine. 
 - Nakon testiranja servera, podići sliku na `Docker Hub`.
 
-# Docker - Advanced
+# Docker - Napredni koncepti
 
 ## Docker - MySQL (07_mysql_server)
 
