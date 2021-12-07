@@ -283,7 +283,7 @@ Hello World!
 
 Imamo [flask](https://flask.palletsprojects.com/en/2.0.x/) server koji se sastoji od `app.py` (aplikacija) i `index.html` (sadržaj):
 - `app.py`:
-```
+```python
 from flask import Flask, render_template
 import os
 app = Flask(__name__)
@@ -298,7 +298,7 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0')
 ```
 - `index.html`:
-```
+```python
 <!doctype html>
 <html>
   <head>
@@ -317,6 +317,11 @@ if __name__ == '__main__':
 - Pokretanje:
     * `export FLASK_APP=app.py`
     * `flask run`
+- **Napomena:** Potencijalno je neophodno da se napravi virtuelno okruženje da bi prethodna komanda radila:
+    - `sudo apt install python3-venv`
+    - `python3 -m venv venv`
+    - `source venv/bin/activate`
+    - `pip install Flask`
 - Očekivani izlaz:
 ```
  * Serving Flask app "app.py"
@@ -331,7 +336,7 @@ if __name__ == '__main__':
 ![flask1](images/flask1.png)
 
 - Pogledajmo sledeću liniju:
-```
+```python
 color = os.environ.get('BACKGROUND_COLOR')
 ```
 - Želimo da promenimo boju pozadine i potrebno je da pokrenemo sledeću komandu `export BACKGROUND_COLOR=[COLOR]`:
@@ -356,7 +361,7 @@ Zašto je ovo ovako komplikovano realizovano kad može u kodu da stoji `color = 
 FROM ubuntu:20.04
 
 RUN apt-get update -y && \
-    apt-get install -y python-pip python-dev
+    apt-get install -y python3-pip python3-dev
 
 COPY . /usr/src/flaskserver
 
@@ -545,8 +550,9 @@ indeks: mi22177, ocena: 7
 
 - Srećom postoji opcija da se podaci čuvaju nezavisno od kontejnera. Pravimo `stalnu memoriju/particiju (volume)` koja se deli između korisnika i kontejnera.
 - Kada pokrećemo novi `docker` kontejner, potrebno je da izvršimo povezivanje preko opcie `-v [VOLUME]:[PATH]`:
-    * `docker run -v ~/data_volume:/data database`
-- Očekivani rezultat za `cat ~/data_volume/database.txt`:
+    * `mkdir data`
+    * `docker run -v ${PWD}/data:/data database`, gde `${PWD}` predstavlja trenutnu radnu putanja (ne možemo direktno da navedemo relativnu putanju).
+- Očekivani rezultat za `cat data/database.txt`:
 ```
 indeks: mi22173, ocena: 7
 indeks: mi22174, ocena: 8
@@ -579,6 +585,7 @@ indeks: mi22177, ocena: 7
 ## Vežbanje (06_practice)
 
 **Zadatak:** Pogledajte kod za `server.py` i `client.py`. Potrebno je dokerizovati server tako da važi sledeće:
+
 - Server se pokreće na `host` portu `12345`. 
 - Server prihvata `GET` zahtev na sledećem url-u: `http://localhost:[PORT]/hello`
 - Server vraća odgovor sa prefiksom `PREFIX` koji predstavlja `env` promenljivu okruženja. Podrazumevana vrednost za prefiks je `hey`.
@@ -593,7 +600,7 @@ indeks: mi22177, ocena: 7
 Ako nam je potrebna `mysql` baza podataka brzo i bez korišćenja mnogo resursa, možemo da napravimo `mysql` kontejner. Ovo je rešenje za manje aplikacije (u tom slučaju je čak i solidno rešenje).
 
 Detaljno objašnjenje o postavljanju `mysql` servera možemo da pronađemo na sledećem [linku](https://phoenixnap.com/kb/mysql-docker-container). Odavde je izvučena `mysql/setup-mysql-server-container.sh` skripta:
-```
+```docker
 docker pull mysql/mysql-server:latest
 
 docker run --name=simple-mysql-server-db -d mysql/mysql-server:latest
@@ -670,7 +677,7 @@ select * from customer;
 - Kako ovo znamo? Pa ako opet pogledamo `mysql/run-mysql-server.sh`, vidimo da je izvšeno mapiranje porta u `6603:3306`. **Napomena:** `localhost` je `alias` za `127.0.0.1`.
 
 - Pogledajmo `sql` skriptu `mysql-test-image/input.sql` koju treba da dokerizujemo:
-```
+```mysql
 create database if not exists practice;
 use practice;
 
@@ -692,7 +699,7 @@ values
     * Pravi se tabela `customer` (ako ne postoji);
     * Dodaju se redovi u `customer` tabelu u `practice` bazi.
 - Možemo da iskoristimo `mysql` sliku kao osnovu za našu sliku. To čini naš posao poprilično jednostavnim. U suštini, sve što je potrebno da uradimo je da pokrenemo `input.sql` skriptu preko `mysql` servera na odgovarajućoj adresi:
-```
+```dockerfile
 FROM mysql:latest
 
 COPY . /usr/src/database
@@ -766,7 +773,7 @@ Prethodni zadatak je bio uvod za `Docker Compose` alat. Tada smo koristili dva k
 Pre nego što pređemo na priču o `docker-compose`, potrebno je da naučimo da pišemo i čitamo `yaml` datoteke. Ideja ovog jezika je da se pišu struktuirani podaci za konfiguraciju i da bude veoma čitljiv. Sličan je `json`-u. Ekstenzija za ove datoteke je `.yml`
 
 - Ovo je primer `yaml` datoteke:
-```
+```yaml
 quiz: 
   description: >
     "This Quiz is to learn YAML."
@@ -808,7 +815,7 @@ Alat `docker-compose` služi za definisanje i pokretanje `Docker` aplikacija sa 
     * `flask-server`
 - Ideja je da sve slike koje treba da `build`-ujemo čuvamo u poddirektorijumima. To znači da naš glavni direktorijum treba da izgleda ovako:
 
-```
+```yaml
 08_compose:
     docker-compose.yml
     server:
@@ -821,22 +828,22 @@ Alat `docker-compose` služi za definisanje i pokretanje `Docker` aplikacija sa 
 
 -  Nije potrebno da se `build`-uje nova slika tj, koristi se već postojeća. Potrebno je da se to naglasi opcijom `image: mysql`. Ovim se traži odgovarajuća slika preko koje se pokreće neophodan kontejner.
 -  Definisanje promenljivih okruženja: 
-```
+```yaml
 environment:
     - MYSQL_ROOT_PASSWORD=Root_12345
 ```
 - Mapiranje portova (3):
-```
+```yaml
 ports:
     - 10001:3306
 ```
 - Podešavanje skladišta (5):
-```
+```yaml
 volumes:
     - /root/docker/mysql-server-db/conf.d:/etc/mysql/conf.d
 ```
 - Konačna konfiguracija za `mysql-server`:
-```
+```yaml
 mysql-server-db:
     image: mysql
     environment:
@@ -850,7 +857,7 @@ mysql-server-db:
 #### Konfiguracija za `flask-server`
 
 - Potrebno je prvo da napravimo `Dockerfile` za naš `flaskserver`. Ovo smo već radili u prethodnim zadacima:
-```
+```dockerfile
 FROM python:latest
 
 COPY . /usr/src/flaskserver
@@ -867,7 +874,7 @@ CMD ["python", "app.py"]
 - Ne vršimo izolaciju od `host` mreže: `network_mode: host`. To znači da će server da se pokreće na portu `5000` tj. onako kako je specifikovano u `app.py` (4).
 - Server može da se prekine ako se počne sa radom pre nego što se baza podataka pripremi, a baza podataka se sporije pokreće od servera. Naivno rešenje je `restart: on-failure`. Svaki put kada server pukne (jer nije mogao da se poveže sa bazom podataka), on se opet pokreće.
 - Konačna konfiguracija za `flask-server`:
-```
+```yaml
 flask-server:
     build: ./server
     network_mode: host
@@ -876,7 +883,7 @@ flask-server:
 
 #### Konačno rešenje:
 
-```
+```yaml
 version: '3'
 services: 
     mysql-server-db:
@@ -903,7 +910,7 @@ services:
 Ako se pozicioniramo u direktorijum `09_cmake` možemo da prevedemo `cmake` projekat tako što koristimo `docker`. Novije verzije `ubuntu` bi navodno trebalo da imaju `cmake` instaliran odmah. Ideja je da se
 ovaj primer proširi da mogu da se prevedu `qt` aplikacije. 
 
-```
+```yaml
 version: '3'
 services:
   app:
@@ -916,16 +923,16 @@ services:
 
 ## Reference
 
-[docker](https://www.docker.com/)
+[\[1\] docker](https://www.docker.com/)
 
-[vm-vs-container](https://www.backblaze.com/blog/vm-vs-containers/)
+[\[2\] vm-vs-container](https://www.backblaze.com/blog/vm-vs-containers/)
 
-[docker-use-case](https://data-flair.training/blogs/docker-use-cases/)
+[\[3\] docker-use-case](https://data-flair.training/blogs/docker-use-cases/)
 
-[free-code-camp-docker](https://www.youtube.com/watch?v=fqMOX6JJhGo&t=5897s&ab_channel=freeCodeCamp.org)
+[\[4\] free-code-camp-docker](https://www.youtube.com/watch?v=fqMOX6JJhGo&t=5897s&ab_channel=freeCodeCamp.org)
 
-[c++-docker-container](https://devblogs.microsoft.com/cppblog/c-development-with-docker-containers-in-visual-studio-code/)
+[\[5\] c++-docker-container](https://devblogs.microsoft.com/cppblog/c-development-with-docker-containers-in-visual-studio-code/)
 
-[mysql-server](https://phoenixnap.com/kb/mysql-docker-container)
+[\[6\] mysql-server](https://phoenixnap.com/kb/mysql-docker-container)
 
-[yaml-tutorial](https://www.softwaretestinghelp.com/yaml-tutorial/)
+[\[7\] yaml-tutorial](https://www.softwaretestinghelp.com/yaml-tutorial/)

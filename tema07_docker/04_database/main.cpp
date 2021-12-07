@@ -10,8 +10,7 @@ int main(int argc, char** argv)
     const std::string ispit4 = "indeks: mi22176, ocena: 5";
     const std::string ispit5 = "indeks: mi22177, ocena: 7";
 
-    std::fstream database;
-    database.open("/data/database.txt", std::fstream::out | std::fstream::app);
+    std::ofstream database("/data/database.txt");
 
     database << ispit1 << std::endl;
     database << ispit2 << std::endl;
@@ -20,6 +19,8 @@ int main(int argc, char** argv)
     database << ispit5 << std::endl;
 
     database.close();
+
+    std::cout << "DONE" << std::endl;
 
     return 0;
 }
