@@ -369,7 +369,7 @@ WORKDIR /usr/src/flaskserver
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "app.py"]
+CMD ["python3", "app.py"]
 ```
 - **Slojevi**:
   - Osnovni sloj je `ubuntu:20.04`
@@ -600,7 +600,7 @@ indeks: mi22177, ocena: 7
 Ako nam je potrebna `mysql` baza podataka brzo i bez korišćenja mnogo resursa, možemo da napravimo `mysql` kontejner. Ovo je rešenje za manje aplikacije (u tom slučaju je čak i solidno rešenje).
 
 Detaljno objašnjenje o postavljanju `mysql` servera možemo da pronađemo na sledećem [linku](https://phoenixnap.com/kb/mysql-docker-container). Odavde je izvučena `mysql/setup-mysql-server-container.sh` skripta:
-```docker
+```bash
 docker pull mysql/mysql-server:latest
 
 docker run --name=simple-mysql-server-db -d mysql/mysql-server:latest
@@ -614,9 +614,9 @@ mkdir -p /root/docker/simple-mysql-server-db/conf.d
 echo '[mysqld]' >> /root/docker/simple-mysql-server-db/conf.d/my-custom.cnf
 echo 'max_connections=250' >> /root/docker/simple-mysql-server-db/conf.d/my-custom.cnf
 ```
-- Prethodna skripta podrazumeva skidanje slike, ažuriranje naloga (root) i konfigurisanje `mysql`-a.
+- Prethodna skripta podrazumeva preuzimanje slike, ažuriranje naloga (root) i konfigurisanje `mysql`-a.
 - Za pokretanje `simple-mysql-server-db` kontejnera koristimo `mysql/run-mysql-server.sh` skriptu:
-```
+```bash
 docker run \
 --detach \
 --name=simple-mysql-server-db \
@@ -630,7 +630,7 @@ mysql
 - `--volume` je isto što i `-v`.
 
 - Testiranje da li sve radi kako treba preko skripte `test.sh`:
-```
+```bash
 mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max_connections"';
 ```
 - Opcije:
@@ -644,39 +644,51 @@ mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max
     * `mysql/connect.sh`
 - Ovo su komande koje možemo ručno ivršiti u terminalu (skripte predstavljaju jednu komandu koja nije toliko dugačka), ali poznavanje `mysql` komandi nam nije trenutno neophodno toliko.
 - Prva skripta treba da da kao rezultat `250`. Ova skripta samo testira da li `mysql-server` radi kako treba.
-```
+```bash
 mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 -e 'show global variables like "max_connections"';
 ```
 - Preko druge skripte mogu da se testiraju upiti:
-```
+```bash
 mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603
 ```
 - Primeri za testiranje:
-```
+```sql
 create database practice;
 ```
+```sql
+use practice;
 ```
+
+```sql
 create table customer(name varchar(255), surname varchar(255));
 ```
+```sql
+insert into customer (name, surname) values ("Hello", "World!");
 ```
-insert into customer (name, surname) valuse ("Hello", "World!");
-```
-```
+```sql
 select * from customer;
+```
+
+- Očekivani rezultat:
+
+```
++-------+---------+
+| name  | surname |
++-------+---------+
+| Hello | World!  |
++-------+---------+
 ```
 
 - **Napomena:** Pošto smo izdvojili skladište za kontejner. Kada se kontejner isključi, može opet da se pokrene i baza podataka će ostati očuvana. Uključivanje i isključivanje kontejnera:
     * `docker start simple-mysql-server-db`
     * `docker stop simple-mysql-server-db`
-
-- Za vežbu možemo da napravimo jednostavnu sliku kojda dodaje par klijenata u bazu podataka. Kontejner pokrećemo na sledeći način:
+- Za vežbu možemo da napravimo jednostavnu sliku koja dodaje par klijenata u bazu podataka. Kontejner pokrećemo na sledeći način:
     * `docker run --network="host" new-customers`
-
 - Ovde se podrazumeva komunikacije između dva kontejnera. To može direktno preko `bridge` mreže, ali zbog jednostavnosti, ovde mreža novog kontejnera nije izolovana od `host`-a (nas). To znači da možemo bez problema da pristupamo `http://localhost:[PORT]` adresama `host`-a. Setimo se da je adresa za `mysql-server` sledeća: 
     * `http://localhost:6603`
-- Kako ovo znamo? Pa ako opet pogledamo `mysql/run-mysql-server.sh`, vidimo da je izvšeno mapiranje porta u `6603:3306`. **Napomena:** `localhost` je `alias` za `127.0.0.1`.
-
+- Kako ovo znamo? Ako opet pogledamo `mysql/run-mysql-server.sh`, vidimo da je izvšeno mapiranje porta u `6603:3306`. **Napomena:** `localhost` je `alias` za `127.0.0.1`.
 - Pogledajmo `sql` skriptu `mysql-test-image/input.sql` koju treba da dokerizujemo:
+
 ```mysql
 create database if not exists practice;
 use practice;
@@ -734,11 +746,11 @@ CMD mysql -uroot -pRoot_12345 -h127.0.0.1 -P6603 < input.sql
 
 ![docker_compose1](images/docker_compose1.jpg)
 
-Prethodni zadatak je bio uvod za `Docker Compose` alat. Tada smo koristili dva kontejnera koji su komunicirali međusobno kako bi izvršili neku operaciju. Imali smo dva kontejnera:
+Prethodni zadatak je bio uvod za `Docker Compose` alat. Tada smo koristili dva kontejnera koji su komunicirali međusobno kako bismo izvršili neku operaciju. Imali smo dva kontejnera:
     * `simple-mysql-server-db` tj. baza podataka.
-    * `mysql-test-image` čiji je zadatak samo da testira drugi kontejner.
+        * `mysql-test-image` čiji je zadatak samo da testira drugi kontejner.
 
-- U normalnom slučaju nema smisla da pravimo `mysql-test-image` kontejner, jer njega može da zameni jedna komanda u terminalu. Realniji slučaj je da umesto ove slike koristimo `flaskserver` (što ćemo i da radimo u ovom primeru):
+- U realnom slučaju nema smisla da pravimo `mysql-test-image` kontejner, jer njega može da zameni jedna komanda u terminalu. Realniji slučaj je da umesto ove slike koristimo `flaskserver` (što ćemo i da radimo u ovom primeru):
 
 ![docker_compose1](images/docker_compose2.png)
 
@@ -751,14 +763,14 @@ Prethodni zadatak je bio uvod za `Docker Compose` alat. Tada smo koristili dva k
     vraća ceo broj između `X` i `Y`;
     * `GET http://localhost:5000/sequence?size=X` vraća X brojeva iz `U[0, 1]`.
 - Server čuva sledeće informacije u bazi podataka za svaki zahtev:
-    * `type`: Tip zahteve. Moguće vrednosti su `basic`, `range`, `sequence`.
+    * `type`: Tip zahteva. Moguće vrednosti su `basic`, `range`, `sequence`.
     * `result`: Odgovor servera.
     * `client_ip`: IP klijenta koji je poslao zahtev.
     * `time`: Datum i vreme kada je dobijen zahtev.
 
 - Skripta `client.py` služi za testiranje servera.
 - Skripta `connect.sh` služi za testiranje baze podataka.
-- Šifra za `root` nalog za bazu podataka je najverovatnije `MYSQL_ROOT_PASSWORD=Root_12345`, ako je `mysql` instaliran preko skripte iz prethodnog zadatka.
+- Šifra za `root` nalog za bazu podataka je `MYSQL_ROOT_PASSWORD=Root_12345`, ako je `mysql` instaliran preko skripte iz prethodnog zadatka.
 
 ### Analiza zahteva
 1. Potrebno je da se dokerizuje aplikacija. 
@@ -806,19 +818,19 @@ extra:
 
 ### docker-compose.yml
 
-Alat `docker-compose` služi za definisanje i pokretanje `Docker` aplikacija sa više kontejnera. Konfigurisanje se definiše u `docker-compose.yml` datoteci (1). 
+Alat `docker-compose` služi za definisanje i pokretanje `Docker` aplikacija sa više kontejnera. Konfigurisanje se definiše u `docker-compose.yml` datoteci. 
 - Postoji više verzija `docker-compose` i to je prva stavka koja se definiše:
     * `version '3'`
 - Nove verzije imaju nove funkcionalnosti.
-- Sledeća stavka su servici tj. `services`. Ovde nabrajamo slike i unutar svake od tih slika definišemo njihove konfiguracije. Naše slike su (2):
+- Sledeća stavka su servisi tj. `services`. Ovde nabrajamo slike i unutar svake od tih slika definišemo njihove konfiguracije. Naše slike su (2):
     * `mysql-server-db`
     * `flask-server`
 - Ideja je da sve slike koje treba da `build`-ujemo čuvamo u poddirektorijumima. To znači da naš glavni direktorijum treba da izgleda ovako:
 
-```yaml
-08_compose:
+```bash
+08_compose/*
     docker-compose.yml
-    server:
+    server/*
         app.py
         Dockerfile
         requirements.txt
@@ -856,6 +868,7 @@ mysql-server-db:
 
 #### Konfiguracija za `flask-server`
 
+- **Napomena:** Da bi se server testirao bez Docker-a, neophodno je da se instalira odgovarajuća biblioteka: `pip3 install mysql-connector-python`
 - Potrebno je prvo da napravimo `Dockerfile` za naš `flaskserver`. Ovo smo već radili u prethodnim zadacima:
 ```dockerfile
 FROM python:latest
@@ -866,13 +879,11 @@ WORKDIR /usr/src/flaskserver
 
 RUN pip install -r requirements.txt
 
-RUN pip install mysql-connector-python
-
 CMD ["python", "app.py"]
 ```
-- Sve potrebno za `build`-ovanje ovog kontejnera poddirektorijumu `server`. Zbog toga je prva stvar za konfiguraciju ove slike `build: ./server`, gde je `./server` putanja do `flaskserver` direktorijuma gde se nalazi `Dockerfile`.
-- Ne vršimo izolaciju od `host` mreže: `network_mode: host`. To znači da će server da se pokreće na portu `5000` tj. onako kako je specifikovano u `app.py` (4).
-- Server može da se prekine ako se počne sa radom pre nego što se baza podataka pripremi, a baza podataka se sporije pokreće od servera. Naivno rešenje je `restart: on-failure`. Svaki put kada server pukne (jer nije mogao da se poveže sa bazom podataka), on se opet pokreće.
+- Sve potrebno za `build`-ovanje ovog kontejnera poddirektorijumu `server`. Zbog toga je prva stvar za konfiguraciju ove slike `build: ./server`, gde je `./server` relativna putanja do `flaskserver` direktorijuma gde se nalazi `Dockerfile`.
+- Ne vršimo izolaciju od `host` mreže: `network_mode: host`. To znači da će server da se pokreće na portu `5000` tj. onako kako je specifikovano u `app.py`.
+- Server može da se prekine ako se počne sa radom pre nego što se baza podataka pripremi (prekid programa), a baza podataka se sporije pokreće od servera. Naivno rešenje je `restart: on-failure`. Svaki put kada server pukne (jer nije mogao da se poveže sa bazom podataka), on se opet pokreće.
 - Konačna konfiguracija za `flask-server`:
 ```yaml
 flask-server:
@@ -905,10 +916,9 @@ services:
 
 ### Docker cmake (09_cmake) 
 
-**Napomena:** Ovo je bonus primer.
+U ovom primeru je dokerizovan proces kompilacije nekog `C++` programa, gde se izlaz izlaz nakon podizanja kontejnera nalazi u `build` direktorijumu.
 
-Ako se pozicioniramo u direktorijum `09_cmake` možemo da prevedemo `cmake` projekat tako što koristimo `docker`. Novije verzije `ubuntu` bi navodno trebalo da imaju `cmake` instaliran odmah. Ideja je da se
-ovaj primer proširi da mogu da se prevedu `qt` aplikacije. 
+Ako se pozicioniramo u direktorijum `09_cmake` možemo da prevedemo `cmake` projekat tako što koristimo `docker`. Novije verzije `ubuntu` bi navodno trebalo da imaju `cmake` instaliran odmah. Ideja je da se ovaj primer proširi tako da mogu da se prevedu `qt` aplikacije. 
 
 ```yaml
 version: '3'

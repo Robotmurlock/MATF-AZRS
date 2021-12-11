@@ -13,17 +13,17 @@ import mysql.connector
 class Database:
     def __init__(self):
       self.db = mysql.connector.connect(
-                  host="127.0.0.1",
-                  user="root",
-                  password="Root_12345",
-                  port="10001",
+                  host='127.0.0.1',
+                  user='root',
+                  password='Root_12345',
+                  port='10001',
                   auth_plugin='mysql_native_password'
                 )
       self.cursor = self.db.cursor()
       
-      self.cursor.execute("create database if not exists random")
-      self.cursor.execute("use random")
-      self.cursor.execute('''
+      self.cursor.execute('create database if not exists random')
+      self.cursor.execute('use random')
+      self.cursor.execute("""
         create table if not exists logs(
           id int auto_increment primary key,
           type varchar(255),
@@ -31,16 +31,16 @@ class Database:
           client_ip varchar(255),
           time varchar(255)
         )
-      ''')
+      """)
 
-    def save(self, addr, result, type):
+    def save(self, addr, result, request_type):
       now = str(dt.now())
-      self.cursor.execute(f'''
+      self.cursor.execute(f"""
         insert into 
           logs (type, result, client_ip, time)
         values
-          ('{type}', '{result}', '{addr}', '{now}')
-      ''')
+          ('{request_type}', '{result}', '{addr}', '{now}')
+      """)
       self.db.commit()
 
     def load(self):
