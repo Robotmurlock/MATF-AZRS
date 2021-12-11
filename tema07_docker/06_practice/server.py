@@ -19,7 +19,7 @@ def hello_world():
     now = str(datetime.now())
     address = request.remote_addr
     record = address + ', ' + now + ', ' + text + '\n'
-    with open("database.txt", "a") as myfile:
+    with open("/data/database.txt", "a") as myfile:
         myfile.write(record)
 
     return prefix + ':' + text

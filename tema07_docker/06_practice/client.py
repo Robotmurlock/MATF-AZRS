@@ -13,7 +13,7 @@ texts = np.array([
 ])
 
 if __name__ == '__main__':
-    URL = 'http://localhost:5000/hello'
+    URL = 'http://localhost:12345/hello'
     PARAMS = {'text': np.random.choice(texts)}
 
     response = requests.get(url=URL, params=PARAMS)
