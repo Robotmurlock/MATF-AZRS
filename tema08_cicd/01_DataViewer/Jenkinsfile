@@ -1,0 +1,17 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Build') {
+            sh 'mkdir build'
+            sh 'cd build && qmake -o Makefile ../Application.pro'
+            sh 'cd build && make'
+        }
+        stage('Test') {
+
+        }
+        stage('Deploy') {
+
+        } 
+    }
+}
