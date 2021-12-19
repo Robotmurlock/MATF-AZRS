@@ -13,7 +13,7 @@ Ako je neki od ovih zadataka neuspešan, onda se proces zaustavlja i šalje se o
 
 **Kontinualna isporuka (continuous delivery)** je proširenje kontinualne integracije, koja stavlja akcenat na izgradnju i testiranje koda, i stavlja akcenat na isporuku koda na okruženje testiranje za/i produkciju (npr. to okruženje može da bude neki server). Ukoliko nije neophodno da ručno potvrdimo da se isporučen kod koristi na produkciji (koriste "klijenti"), onda se taj proces naziva **potpuno automatizovana kontinualna isporuka (continuous deployment)**.
 
-![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/01_manual_vs_automatic.png)
+![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/01_manual_vs_automatic.png)
 
 ## Github Akcije
 
@@ -25,7 +25,7 @@ Ako je neki od ovih zadataka neuspešan, onda se proces zaustavlja i šalje se o
 
 Možemo da konfigurišemo da se pokrene `proces rada github akcije` kada se desi neki događaj. Taj događaj može da bude komit na master grani, otvoren `issue`, ili nešto treće. Proces rada se sastoji iz niza `job`-ova (poslova) koji mogu da se izvršavaju sekvencijalno ili paralelno. Svaki posao se izvršava u sopstvenoj virtuelnoj mašini ili u kontejneru, gde posao podrazumeva pokretanje neke skripte ili korišćenje neke već postojeće akcije. 
 
-![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/02_ga_components.png)
+![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/02_ga_components.png)
 
 ### Proces rada
 
@@ -108,7 +108,7 @@ Treba da gurnemo izmene na `remote` repozitorijum:
 
 Sada možemo da otvorimo u pretraživaču naš `GitHub` repozitorijum i kliknemo na `Actions`. Tu očekujemo da se akcija uspešno završila
 
-![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/03_ga_test.png)
+![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/03_ga_test.png)
 
 Klikom na `Initial commit` možemo da vidimo koji poslovi su se izvršili. Uvom slučaju je to samo `test`. Klikom na `test` dobijamo sledeći
 
@@ -137,14 +137,14 @@ Odgovarajuća tabela:
 Primer `tsv` datoteke za istu tabelu:
 
 ```
-a	b	c
-1	2	3
-4	7	9
+a    b    c
+1    2    3
+4    7    9
 ```
 
 Čitanje i pisanje `csv` i `tsv` datoteka je implementirano kroz `Parser` biblioteku uz koji je implementiran i skup testova `ParserTest`. Deo aplikacije koji se odnosi na `GUI` je implementiran kao `DataViewer`. Pregled aplikacije:
 
-![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/04_dataviewer.png)
+![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/04_dataviewer.png)
 
 Cilj je da implementiramo `CI/CD` cevovod za `DataViewer` aplikaciju sa sledećim koracima:
 
@@ -177,31 +177,31 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-    	    - uses: actions/checkout@v2 # Preuzimanje svih datoteka sa repozitorijuma (akcija)
-    	    - name: Install Qt # Instalacija qmake alata 
-      		  uses: jurplel/install-qt-action@v2
-    		- name: create-build-dir # Kreiranje direktorijuma za build
-      		  run: mkdir build
-    		- name: build-qmake # Generisanje Makefile-a na osnovu qmake datoteke
-      		  working-directory: ./build
-      		  run: qmake -o Makefile ..
-    		- name: build-make # Generisanje izvrsnih datoteka
-      		  working-directory: ./build
-      		  run: make
-    		- name: run-test # Pokretanje testova
-      		  working-directory: ./build
-      		  run: ./ParserTest/ParserTest
-    - name: zip-app # Zipovanje aplikacije
-      run: zip -r dataviewer.zip build/DataViewer/DataViewer
-    - name: deploy-app # Isporucivanje aplikacije - vrednosti ostaju nepopunjene
-      uses: appleboy/scp-action@master
-      with:
-        host: *
-        username: *
-        password: *
-        port: 22
-        source: *
-        target: *
+            - uses: actions/checkout@v2 # Preuzimanje svih datoteka sa repozitorijuma (akcija)
+            - name: Install Qt # Instalacija qmake alata 
+                uses: jurplel/install-qt-action@v2
+            - name: create-build-dir # Kreiranje direktorijuma za build
+                run: mkdir build
+            - name: build-qmake # Generisanje Makefile-a na osnovu qmake datoteke
+                working-directory: ./build
+                run: qmake -o Makefile ..
+            - name: build-make # Generisanje izvrsnih datoteka
+                working-directory: ./build
+                run: make
+            - name: run-test # Pokretanje testova
+                working-directory: ./build
+                run: ./ParserTest/ParserTest
+            - name: zip-app # Zipovanje aplikacije
+              run: zip -r dataviewer.zip build/DataViewer/DataViewer
+            - name: deploy-app # Isporucivanje aplikacije - vrednosti ostaju nepopunjene
+              uses: appleboy/scp-action@master
+              with:
+                  host: *
+                  username: *
+                  password: *
+                  port: 22
+                  source: *
+                  target: *
 ```
 
 **Napomena:** Za svaku postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
