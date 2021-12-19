@@ -173,12 +173,12 @@ on:
     branches: [ main ]
     
 jobs:
-	build-and-test:
-    	runs-on: ubuntu-latest
+    build-and-test:
+        runs-on: ubuntu-latest
 
-    	steps:
-    		- uses: actions/checkout@v2 # Preuzimanje svih datoteka sa repozitorijuma (akcija)
-    		- name: Install Qt # Instalacija qmake alata 
+        steps:
+    	    - uses: actions/checkout@v2 # Preuzimanje svih datoteka sa repozitorijuma (akcija)
+    	    - name: Install Qt # Instalacija qmake alata 
       		  uses: jurplel/install-qt-action@v2
     		- name: create-build-dir # Kreiranje direktorijuma za build
       		  run: mkdir build
@@ -190,7 +190,18 @@ jobs:
       		  run: make
     		- name: run-test # Pokretanje testova
       		  working-directory: ./build
-      		  run: ./ParserTest/ParserTest 
+      		  run: ./ParserTest/ParserTest
+    - name: zip-app # Zipovanje aplikacije
+      run: zip -r dataviewer.zip build/DataViewer/DataViewer
+    - name: deploy-app # Isporucivanje aplikacije - vrednosti ostaju nepopunjene
+      uses: appleboy/scp-action@master
+      with:
+        host: *
+        username: *
+        password: *
+        port: 22
+        source: *
+        target: *
 ```
 
 **Napomena:** Za svaku postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
