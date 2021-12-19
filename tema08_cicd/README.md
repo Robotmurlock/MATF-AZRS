@@ -15,7 +15,104 @@ Ako je neki od ovih zadataka neuspešan, onda se proces zaustavlja i šalje se o
 
 ![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/01_manual_vs_automatic.png)
 
-## 01_FileParser
+## Github Akcije
+
+**Github akcije** nam omogućavaju automatizaciju softverskih `procesa rada (workflow)` (ne nužno samo CI/CD procesa rada). Ti procesi rada mogu da podrazumevaju <i>build</i>, testiranje, isporučivanje, ... Github nam omogućava virtuelne mašine (Linux, Windows, MacOS) za izvršavanje ovih procesa rada koji su besplatni ako se koriste u malim količinama na mesečnom nivou. 
+
+
+
+### Komponente
+
+Možemo da konfigurišemo da se pokrene `proces rada github akcije` kada se desi neki događaj. Taj događaj može da bude komit na master grani, otvoren `issue`, ili nešto treće. Proces rada se sastoji iz niza `job`-ova (poslova) koji mogu da se izvršavaju sekvencijalno ili paralelno. Svaki posao se izvršava u sopstvenoj virtuelnoj mašini ili u kontejneru, gde posao podrazumeva pokretanje neke skripte ili korišćenje neke već postojeće akcije. 
+
+![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/02_ga_components.png)
+
+### Proces rada
+
+Proces rada je konfigurabilan automatizovani proces koji pokreće jedan ili više poslova. Konfiguracija se vrši preko `yaml` datoteka i sastoji se iz:
+
+- Događaja po kojima se okida proces rada:
+  - Primeri: `pull request`, `issue`, `commit`, periodično okidanje, ...
+  - Moguće je da se proces rada pokrene i manuelno
+- Niz koraka koji se izvršavaju:
+  - Svaki korak je ili `shell` skripta koja može da bude samo i jedna komanda ili akcija
+  - Akcije su nešto nalik na funkcije u programskim jezicima, gde je ideja da se kod za iste operacije ne piše više puta
+- Pokretači (server na kojem se izvršava proces rada)
+  - Windows, Linux, MacOS
+
+Za više informacije, pogledati [zvaničnu dokumentaciju](https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions).
+
+## Primer jednostavne akcije (01_Simple)
+
+Svaki konfigurisan proces rada se čuva odvojeno u direktorijumu `.github/workflows`. U ovom primeru demonstriramo:
+
+- Kako se piše konfiguracija za `github` akciju.
+- Upoznavanje sa interfejsom.
+- Kako izgleda uspešan proces rada.
+- Kako izgleda neuspešan proces rada.
+
+Prvo je neophodno da napravimo `public` repozitorijum za testiranje. Neka se u ovom slučaju zove `Test-Github-Actions`. Kada kloniramo novi repozitorijum, neophodno je da napravimo prvu `github` akciju:
+
+- `mkdir -p .github/workflows`
+- `cd .github/workflows`
+- `vim test.yaml`
+
+Neka nam se akcija zove `test`. To definišemo na sledeći način:
+
+```yaml
+name: test
+```
+
+Sledeći korak je da definišemo događaj koji je uslov za pokretanje procesa. U ovom slučaju želimo da pokrećemo proces na `push` na `main` grani. To znači da ako imamo `development` i `main` granu, onda se ovaj proces pokreće samo na `push` na `main` granim ali ne i `development` grani:
+
+```yaml
+on:
+    push:
+        branches: [ main ]
+```
+
+Poslednji korak je da definišemo poslove. Imamo samo jedan posao koji nazivamo `test` i koji hoćemo da pokrenemo na `ubuntu-latest` okruženju. Sve što želimo da se izvršu u ovom procesu je ispis `Hello World!`:
+
+```yaml
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: echo
+              run: echo "Hello World!"
+```
+
+Konačno:
+
+```yaml
+name: test
+
+on:
+    push:
+        branches: [ main ]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - name: echo
+              run: echo "Hello World!"
+```
+
+Treba da gurnemo izmene na `remote` repozitorijum:
+
+- Pozicioniranje u koren lokalnog repozitorijuma: `cd ../..`
+- Dodavanje akcije na repozitorijum `git add .github`
+- Komitovanje izmena `git commit -m "Initial commit"`
+- `git push`
+
+Sada možemo da otvorimo u pretraživaču naš `GitHub` repozitorijum i kliknemo na `Actions`. Tu očekujemo da se akcija uspešno završila
+
+![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/03_ga_test.png)
+
+Klikom na `Initial commit` možemo da vidimo koji poslovi su se izvršili. Uvom slučaju je to samo `test`. Klikom na `test` dobijamo sledeći
+
+## Primer akcije nad Qt aplikaciji (02_DataViewer)
 
 Imamo program `01_DataViewer` za prikazivanje različitih tipova tabelarnih podataka. Trenutno su podržava `csv (comma-separated values)` i `tsv (tab-separated values)`. Primer `csv` datoteke:
 
@@ -47,7 +144,7 @@ a	b	c
 
 Čitanje i pisanje `csv` i `tsv` datoteka je implementirano kroz `Parser` biblioteku uz koji je implementiran i skup testova `ParserTest`. Deo aplikacije koji se odnosi na `GUI` je implementiran kao `DataViewer`. Pregled aplikacije:
 
-![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/02_dataviewer.png)
+![](/home/robotmurlock/Desktop/AZRS/MATF-AZRS/tema08_cicd/images/04_dataviewer.png)
 
 Cilj je da implementiramo `CI/CD` cevovod za `DataViewer` aplikaciju sa sledećim koracima:
 
@@ -57,7 +154,46 @@ Cilj je da implementiramo `CI/CD` cevovod za `DataViewer` aplikaciju sa sledeći
 4. Zapakivanje aplikacije;
 5. Postavljanje aplikacije na adresu gde je moguće tu aplikaciju preuzeti.
 
-U ovom slučaju imamo `potpuno automatizovanu kontinualnu isporuku`.
+U ovom slučaju imamo `potpuno automatizovanu kontinualnu isporuku`. 
+
+Preduslovi za okidanje:
+
+- `push` na `main` grani.
+- `pull_request` na `main` grani.
+
+Rešenje:
+
+```yaml
+name: DataParser: build-test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+	build-and-test:
+    	runs-on: ubuntu-latest
+
+    	steps:
+    		- uses: actions/checkout@v2 # Preuzimanje svih datoteka sa repozitorijuma (akcija)
+    		- name: Install Qt # Instalacija qmake alata 
+      		  uses: jurplel/install-qt-action@v2
+    		- name: create-build-dir # Kreiranje direktorijuma za build
+      		  run: mkdir build
+    		- name: build-qmake # Generisanje Makefile-a na osnovu qmake datoteke
+      		  working-directory: ./build
+      		  run: qmake -o Makefile ..
+    		- name: build-make # Generisanje izvrsnih datoteka
+      		  working-directory: ./build
+      		  run: make
+    		- name: run-test # Pokretanje testova
+      		  working-directory: ./build
+      		  run: ./ParserTest/ParserTest 
+```
+
+**Napomena:** Za svaku postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
 
 ## 02_some_python_application
 
@@ -66,4 +202,6 @@ U ovom slučaju imamo `potpuno automatizovanu kontinualnu isporuku`.
 [\[1\] Medium-What-Is-CICD](https://medium.com/devops-dudes/what-is-ci-cd-continuous-integration-continuous-delivery-in-2020-988765f5d116)
 
 [\[2\] Atlassian-Continuous-Integration-vs-Delivery-vs-Deployment](https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment)
+
+[\[3\] Github-Actions](https://github.com/features/actions)
 
