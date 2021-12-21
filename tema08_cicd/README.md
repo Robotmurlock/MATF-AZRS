@@ -112,7 +112,7 @@ Sada možemo da otvorimo u pretraživaču naš `GitHub` repozitorijum i kliknemo
 
 Klikom na `Initial commit` možemo da vidimo koji poslovi su se izvršili. Uvom slučaju je to samo `test`. Klikom na `test` dobijamo sledeći
 
-## Primer akcije nad Qt aplikaciji (02_DataViewer)
+## Primer akcije nad Qt aplikacijom (02_DataViewer)
 
 Imamo program `01_DataViewer` za prikazivanje različitih tipova tabelarnih podataka. Trenutno su podržava `csv (comma-separated values)` i `tsv (tab-separated values)`. Primer `csv` datoteke:
 
@@ -206,9 +206,22 @@ jobs:
 
 **Napomena:** Za svaku postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
 
-## 02_some_python_application
+## Primer akcije nad Python aplikacijom (03_FlaskCalculator)
 
 Osnova za ovaj primer je [ovaj](https://github.com/alanbanks229/flask_calculator_app) `github` projekat.
+
+Imamo `flask` server sa jednostavnim kalkulatorom:
+
+![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/05_flask_calculator.png)
+
+Želimo da napravimo proces preko `github` akcije koji se okida na `pull request` na `main` grani:
+
+1. Preuzimanje izvornog koda sa repozitorijuma (checkout).
+2. Pokretanje jediničnih testova (unittest).
+3. Pokretanje `flask` servera.
+4. Pokretanje `ping` testa (smoke test).
+5. Izgradnja `docker`.
+6. Ažuriranje slike na `Docker Hub`.
 
 ## Reference
 

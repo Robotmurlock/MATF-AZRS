@@ -1,8 +1,13 @@
 from flask import Flask, render_template, request
 from calculator.calculator import Calculator
+import sys
 
 Flask_App = Flask(__name__) # Creating our Flask Instance
 calculator = Calculator()
+
+@Flask_App.route('/ping', methods=['GET'])
+def ping():
+    return {'success': True}
 
 @Flask_App.route('/', methods=['GET'])
 def index():
