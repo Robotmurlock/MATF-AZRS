@@ -64,4 +64,4 @@ def operation_result():
 
 if __name__ == '__main__':
     Flask_App.debug = True
-    Flask_App.run()
+    Flask_App.run(host='0.0.0.0')
