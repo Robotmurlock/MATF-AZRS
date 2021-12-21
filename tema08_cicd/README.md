@@ -161,7 +161,7 @@ Preduslovi za okidanje:
 - `push` na `main` grani.
 - `pull_request` na `main` grani.
 
-Rešenje:
+**Rešenje:**
 
 ```yaml
 name: DataParser: build-test
@@ -210,11 +210,29 @@ jobs:
 
 Osnova za ovaj primer je [ovaj](https://github.com/alanbanks229/flask_calculator_app) `github` projekat.
 
-Imamo `flask` server sa jednostavnim kalkulatorom:
+Imamo `flask` server sa jednostavnim kalkulatorom. 
 
 ![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/05_flask_calculator.png)
 
-Želimo da napravimo proces preko `github` akcije koji se okida na `pull request` na `main` grani:
+Struktura projekta:
+
+```yaml
+[ROOT]:
+	- app.py # server na portu 5000 koji renderuje `index.html` stranicu i omogucava pristup stranici
+	- templates: # skup stranica servera
+		- index.html
+    - static: # staticke datoteke
+    	- calculator.css # css za stranicu
+    - calculator: # modul za izvrsavanje jednostavnih operacija
+    	- calculator.py # Implementacija
+    	- test_calculator.py # Jedinicni testovi
+    - utility: # Skup korisnih skripti
+    	- ping_test.py # Jednostavna skripta za testiranje servera
+    - requirements.txt # Skup neophodnih python biblioteka
+    - Dockerfile
+```
+
+Želimo da napravimo proces preko `github` akcije koji se okida na `issue` grani:
 
 1. Preuzimanje izvornog koda sa repozitorijuma (checkout).
 2. Pokretanje jediničnih testova (unittest).
@@ -222,6 +240,109 @@ Imamo `flask` server sa jednostavnim kalkulatorom:
 4. Pokretanje `ping` testa (smoke test).
 5. Izgradnja `docker`.
 6. Ažuriranje slike na `Docker Hub`.
+
+**Rešenje:**
+
+Za uslove okidanja postavljamo labelirane `issues`:
+
+```yaml
+on:
+    issues:
+        types:
+            - labeled
+```
+
+Koristimo jedan `job` koji se pokreće na `ubuntu-latest` okruženju:
+
+```yaml
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+        	...
+```
+
+Sada možemo da izvršavamo sve neophodne korake u specifikaciji zadatka. Prvo je neophodno da se preuzme izvorni kod. Za to možemo da koristimo `actions/checkout@v2`. Nakon preuzimanja koda imamo `requirements.txt` i možemo odmah da instaliramo sve neophodne biblioteke za `python` preko `pip`-a:
+
+```yaml
+- uses: actions/checkout@v2
+- name: install-pythob-libs
+run: pip install -r requirements.txt
+```
+
+Ako je ovaj korak prošao uspešno, onda imamo instalirane `flask` i `unittest` pakete. Modul `unittest` nam je neophodan za sledeći korak tj. pokretanje jediničnih testova. Od `python` skripti za pokretanje jediničnih testova imamo samo `calculator/test_calculator.py`. U opštem slučaju imamo mnogo veći broj ovakvih skripti i želimo da pokrenemo sve njih uz opciono generisanje izveštaja za pokrivenost koda testovima. Tada možemo skupimo sve testove na osnovu njihovog naziva (npr. `*/test_*`).
+
+```yaml
+- name: run-unit-tests
+run: python calculator/test_calculator.py
+```
+
+Sada želimo da pokrenemo `flask` server kako bismo na njega primenili `smoke test`. Ideja je da proverimo najjednostavnije funkcionalnosti aplikacije (da li se aplikacija pokreće?). Za to koristimo `utility/ping_test.py`:
+
+```python
+import requests
+
+response = requests.get(url='http://localhost:5000/ping')
+assert response.json()['success'], 'Ping test failed!'
+print('Ping test passed!')
+```
+
+Ovde je neophodno da nam se izvršavaju dva procesa odjednom tj `flask` i `ping_test`. Možemo da pokrenemo `flask` server u pozadini tako što dodamo `&` na kraj komande za pokretanje. Stavljamo `sleep 3` kako bismo sačekali da se `flask` server pokrene i onda pokrećemo `ping_test`:
+
+```yaml
+- name: run-flask-server
+run: python app.py &
+- name: run-flask-server-wait
+run: sleep 3
+- name: ping-test
+run: python utility/ping_test.py
+```
+
+Sada preostaje još samo da se napravi slika i da se postavi na `Docker Hub`. Poslednji korak tj. postavljanje na `Docker Hub` se ostavlja za domaći, a ovde se "fiktivno" rešava:
+
+```yaml
+- name: docker-build
+run: docker build . --file Dockerfile --tag flask-calculator:latest
+- name: docker-hub-push
+run: echo 'push to Docker Hub'
+```
+
+Konačno:
+
+```yaml
+name: Flask-Pipeline
+
+on:
+    issues:
+        types:
+            - labeled
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            #1 Preuzimaje izvodnog koda sa repozitorijuma
+            - uses: actions/checkout@v2
+            - name: install-pythob-libs
+              run: pip install -r requirements.txt
+            #2 Pokretanje jedinicnih testova
+            - name: run-unit-tests
+              run: python calculator/test_calculator.py
+            #3 Pokretanje flask servera
+            - name: run-flask-server
+              run: python app.py &
+            - name: run-flask-server-wait
+              run: sleep 3
+            #4 Ping test
+            - name: ping-test
+              run: python utility/ping_test.py
+            #5 Docker build
+            - name: docker-build
+              run: docker build . --file Dockerfile --tag flask-calculator:latest
+            #6 Postavljanje na Docker Hub
+            - name: docker-hub-push
+              run: echo 'push to Docker Hub'
+```
 
 ## Reference
 
@@ -231,5 +352,5 @@ Imamo `flask` server sa jednostavnim kalkulatorom:
 
 [\[3\] Github-Actions](https://github.com/features/actions)
 
-[\[3\] Flask-Calculator-App](https://github.com/alanbanks229/flask_calculator_app)
+[\[4\] Flask-Calculator-App](https://github.com/alanbanks229/flask_calculator_app)
 
