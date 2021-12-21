@@ -218,9 +218,9 @@ Struktura projekta:
 
 ```yaml
 [ROOT]:
-	- app.py # server na portu 5000 koji renderuje `index.html` stranicu i omogucava pristup stranici
-	- templates: # skup stranica servera
-		- index.html
+    - app.py # server na portu 5000 koji renderuje `index.html` stranicu i omogucava pristup stranici
+    - templates: # skup stranica servera
+        - index.html
     - static: # staticke datoteke
     	- calculator.css # css za stranicu
     - calculator: # modul za izvrsavanje jednostavnih operacija
