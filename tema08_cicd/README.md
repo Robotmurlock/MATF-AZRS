@@ -208,6 +208,8 @@ jobs:
 
 ## 02_some_python_application
 
+Osnova za ovaj primer je [ovaj](https://github.com/alanbanks229/flask_calculator_app) `github` projekat.
+
 ## Reference
 
 [\[1\] Medium-What-Is-CICD](https://medium.com/devops-dudes/what-is-ci-cd-continuous-integration-continuous-delivery-in-2020-988765f5d116)
@@ -215,4 +217,6 @@ jobs:
 [\[2\] Atlassian-Continuous-Integration-vs-Delivery-vs-Deployment](https://www.atlassian.com/continuous-delivery/principles/continuous-integration-vs-delivery-vs-deployment)
 
 [\[3\] Github-Actions](https://github.com/features/actions)
+
+[\[3\] Flask-Calculator-App](https://github.com/alanbanks229/flask_calculator_app)
 
