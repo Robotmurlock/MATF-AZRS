@@ -1,8 +1,8 @@
 # Kontinualna integracija i kontinualna isporuka
 
-**Kontinualna integracija (continuous integration)**  predstavlja praksu gde se teži ka čestoj spajanju verzija koda (u kontekstu verzionisanja koda), a da pritom produkcioni kod ostane kvalitetan i pouzdan. Ovde definišemo precizno razliku između `produkcionog koda` i `isporučenog koda`, gde je isporučeni kod produkcioni kod kojem "klijenti" imaju pristup. Ovaj proces uglavnom automatizujemo, gde pouzdan kod dobijemo korišćenjem automatskog testiranja, a kvalitetan kod korišćenjem `linter` ili sličnih alata. Naravno, nismo ograničeni na korišćenje samo ovih grupa alata. Za testiranje se pokreću jedinični testovi, a ako svi jedinični testovi prođu, onda se koriste i integracioni testovi. Poželjno je da se integracija verzija koda vrši što češće. Tipičan niz zadataka:
+**Kontinualna integracija (continuous integration)**  predstavlja praksu gde se teži ka čestom spajanju verzija koda (u kontekstu verzionisanja koda), a da pritom produkcioni kod ostane kvalitetan i pouzdan. Ovde definišemo precizno razliku između `produkcionog koda` i `isporučenog koda`, gde je isporučeni kod produkcioni kojem "klijenti" imaju pristup. Ovaj proces uglavnom automatizujemo, gde pouzdan kod dobijemo korišćenjem automatskog testiranja, a kvalitetan kod korišćenjem `linter` ili sličnih alata. Naravno, nismo ograničeni na korišćenje samo ovih grupa alata. Za testiranje se pokreću jedinični testovi, a ako svi jedinični testovi prođu, onda se koriste i integracioni testovi. Poželjno je da se integracija verzija koda vrši što češće. Tipičan niz zadataka:
 
-- Detekcija promena u izvornom koda u repozitorijumu na produkcionoj grani.
+- Detekcija promena u izvornom kodu u repozitorijumu na produkcionoj grani.
 - Analiza kvaliteta koda.
 - Izgradnja projekta (ako je to neophodno).
 - Pokretanje jediničnih testova.
@@ -11,15 +11,13 @@
 
 Ako je neki od ovih zadataka neuspešan, onda se proces zaustavlja i šalje se obaveštenje o neuspešnosti procesa.
 
-**Kontinualna isporuka (continuous delivery)** je proširenje kontinualne integracije, koja stavlja akcenat na izgradnju i testiranje koda, i stavlja akcenat na isporuku koda na okruženje testiranje za/i produkciju (npr. to okruženje može da bude neki server). Ukoliko nije neophodno da ručno potvrdimo da se isporučen kod koristi na produkciji (koriste "klijenti"), onda se taj proces naziva **potpuno automatizovana kontinualna isporuka (continuous deployment)**.
+**Kontinualna isporuka (continuous delivery)** je proširenje kontinualne integracije, koja stavlja akcenat na izgradnju i testiranje koda, kao i na isporuku koda na okruženje za testiranje i/ili za produkciju (npr. to okruženje može da bude neki server, virtuelna mašina ili kontejner). Ukoliko nije neophodno da ručno potvrdimo da se isporučen kod koristi na produkciji (kod koji koriste "klijenti"), onda se taj proces naziva **potpuno automatizovana kontinualna isporuka (continuous deployment)**.
 
 ![](https://github.com/Robotmurlock/MATF-AZRS/blob/main/tema08_cicd/images/01_manual_vs_automatic.png)
 
 ## Github Akcije
 
 **Github akcije** nam omogućavaju automatizaciju softverskih `procesa rada (workflow)` (ne nužno samo CI/CD procesa rada). Ti procesi rada mogu da podrazumevaju <i>build</i>, testiranje, isporučivanje, ... Github nam omogućava virtuelne mašine (Linux, Windows, MacOS) za izvršavanje ovih procesa rada koji su besplatni ako se koriste u malim količinama na mesečnom nivou. 
-
-
 
 ### Komponente
 
