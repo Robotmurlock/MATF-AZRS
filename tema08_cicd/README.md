@@ -202,7 +202,7 @@ jobs:
                   target: *
 ```
 
-**Napomena:** Za svaku postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
+**Napomena:** Za svaku akciju postoji odgovarajući `Github` repozitorijum, gde može da se pronađe implementacija i dokumentacija. 
 
 ## Primer akcije nad Python aplikacijom (03_FlaskCalculator)
 
