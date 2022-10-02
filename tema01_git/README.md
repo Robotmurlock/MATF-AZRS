@@ -73,7 +73,7 @@ pravi prazan git repozitorijum tj. kreira `.git` direktorijum koji je neophodan 
 - Potrebno da se pozicioniramo u taj direktorijum:
   * `cd FirstGitRepo`
 - Sada možemo da od ovog `FirstGitRepo` repozitorijuma napravimo git repozitorijum:
-  * `git FirstGitRepo`, Očekivani oblik rezultat:
+  * `git init`, Očekivani oblik rezultat:
 
 ```
 Initialized empty Git repository in /home/mokoyo/Desktop/AZRS/cas01/VectorExtension/.git/
@@ -102,7 +102,7 @@ Potrebno je da se nekako razlikuju promene datoteka u okviru tri sekcije (za sad
 
 Ove promene se beleže u `indeksu` tj. `.git/index` datoteci.
 
-Koristeći kamandu `git status` možemo da vidimo promene posle poslednjeg komita tj. promene u okviru radnog direktorijum koji se nalaze u `staging area` i promene koje se ne nalaze u okviru `staging area` (nalaze se samo u okviru radnog direktorijuma). 
+Koristeći kamandu `git status` možemo da vidimo promene posle poslednjeg komita tj. promene u okviru radnog direktorijuma koji se nalaze u `staging area` i promene koje se ne nalaze u okviru `staging area` (nalaze se samo u okviru radnog direktorijuma). 
 
 **Primer: Ekstenzija za vektor kolekciju standardne C++ biblioteke**. Hoćemo da napravimo mini biblioteku za funkcije koje ne postoje u standardnoj biblioteci za rad sa vektorima ili postoje, ali ako implementiramo našu verziju, onda imamo veću fleksibilnost u načinu na koji koristimo te funkcije. Konkretno, želimo da implementiramo `load` (učitava vektor iz toka podataka) i `store` (upisuje vektor u tok podataka) funkcije.
 
@@ -142,9 +142,9 @@ int main()
 }
 ```
 
-* `echo "1 2 3" >> input.txt`, Objašnjenje: `echo "1 2 3"` ispisuje `1 2 3` u terminalu, a `>>` preusmeruje taj izlaz u datoteku `input.txt`. Razlika između `>>` i `>` je u tome što `>` vrši `trunc` operaciju (briše sadržaj), a `>>` dodaje izlaz na kraj datoteke tj. vrši `append` operaciju.
+* `echo "1 2 3" >> input.txt`, Objašnjenje: `echo "1 2 3"` ispisuje `1 2 3` u terminalu (standardni izlaz), a `>>` preusmeruje taj izlaz u datoteku `input.txt`. Razlika između `>>` i `>` je u tome što `>` vrši `trunc` operaciju (briše sadržaj), a `>>` dodaje izlaz na kraj datoteke tj. vrši `append` operaciju.
 
-- Komanda `git status` nam daje informacije o stanju naših datoteka u repozitorijumu tj. da li nalazi u `working directory` (odnosno ima izmene koje nismo obeližili za sledeći komit), da li se nalazi u `staging area` (odnosno ima izmene koje smo obeležili za sledeći komit), ili se sadržaj poklapa sa verzijom lokalnog repozitorijuma (nema izmena od poslednjeg komita). Očekivani rezultat komande `git status`:
+- Komanda `git status` nam daje informacije o stanju naših datoteka u repozitorijumu tj. da li se datoteka nalazi u `working directory` (odnosno ima izmene koje nismo obeližili za sledeći komit), da li se datoteka nalazi u `staging area` (odnosno ima izmene koje smo obeležili za sledeći komit), ili se sadržaj repozitorijuma poklapa sa verzijom lokalnog repozitorijuma (nema izmena od poslednjeg komita). Očekivani rezultat komande `git status`:
 ```
 On branch master
 Changes not staged for commit:
@@ -168,7 +168,7 @@ Changes not staged for commit:
   (use "git restore <file>..." to discard changes in working directory)
 	modified:   input.txt
 ```
-- Ovo znači da se promene na `main.cpp` nalaze u okviru `staging area`, jer se izvršena komanda `git add` i zbog toga će te promene biti zabeležene na git repozitorijum kad se pozove `git commit` komanda, dok će promene na `input.txt` ostati samo u okviru radnog direktorijum.
+- Ovo znači da se promene za `main.cpp` nalaze u okviru `staging area`, jer se izvršena komanda `git add` i zbog toga će te promene biti zabeležene na git repozitorijum kad se pozove `git commit` komanda, dok će promene na `input.txt` ostati samo u okviru radnog direktorijum.
 - Komandom `git reset main.cpp HEAD` sklanjamo promene sa `staging area` i one neće biti zabeležene sledećim komitom. Možemo opet testirati komandu `git status`. Očekivani oblik rezultata (`M` je oznaka za `modified`):
 
 ```
@@ -355,14 +355,11 @@ int main()
 
 - `touch bad.txt`
 - `git add bad.txt`
-- `git commit -m "Dodata je losa datoteka bad.txt"`. Očekivani oblik izlaza:
-
-```
-HEAD is now at a76882e Restauracija: Implementirana je funkcionalnost obrtanja
-```
+- `git commit -m "Dodata je losa datoteka bad.txt"`. Očekivani oblik izlaza
 
 - Očekivani oblik rezultata za `git hist:
 ```
+* 12debba 2021-10-02 | Dodat je los datoteka bad.txt (HEAD -> master) [Robotmurlock]
 * a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja (HEAD -> master) [Robotmurlock]
 * e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
 * f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
@@ -371,10 +368,10 @@ HEAD is now at a76882e Restauracija: Implementirana je funkcionalnost obrtanja
 - `git reset --hard HEAD~` (resetujemo na stanje pretposlednjeg komita)
 - Očekivani oblik rezultata za `git hist`:
 ```
-* f0d061d 2020-10-20 | Ipak ne bih... (HEAD -> master) [Robotmurlock]
-* 47c4988 2020-10-20 | Dodat 3.txt [Robotmurlock]
-* e991818 2020-10-20 | Dodat je Hello World u 1.txt i 2.txt (tag: v1) [Robotmurlock]
-* 566876f 2020-10-20 | Inicijalni komit [Robotmurlock]
+* a76882e 2021-10-02 | Restauracija: Implementirana je funkcionalnost obrtanja (HEAD -> master) [Robotmurlock]
+* e8712f8 2021-10-02 | Implementirana je funkcionalnost obrtanja [Robotmurlock]
+* f7d0d1d 2021-10-02 | Implementiran je skelet koda [Robotmurlock]
+* 4fabb01 2021-10-02 | Inicijalni komit [Robotmurlock]
 ```
 
 - Vidimo da se poslednji komit sada obrisan, kao da se ništa nije desilo. Očekivani izlaz za komandu `ls -a`:
@@ -409,7 +406,7 @@ Recimo da smo ažurirali `README.md` datoteku i primetili smo da ima stamparske 
 
 **Primer**:
 
-- `vim README.md` (izmeniti datoteku, može i `kate` ili bilo koji drug editor umesto `vim`-a). Neka je sadržaj `# VetcorExtension`.
+- `vim README.md` (izmeniti datoteku, može i `kate` ili bilo koji drug editor umesto `vim`-a). Neka je sadržaj `# VectorExtension`.
 - `git add README.md`
 - `git commit -m "Dodat je README.md"`
 - Možemo naknadno da izmenimo poslednji komit.
@@ -441,7 +438,7 @@ Do sada smo sve radili na jednog grani tj. `master` grani (podrazumevano ime za 
 
 ### Kreiranje grane
 
-Nova grana se kreira komandom `git branch [IME GRANE]`. Da bi skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]` (slično kao za verzionisanje). Kada skačemo na neku granu sa `git checkout`, skačemo na poslednji komit. Ako ne želimo da skočimo na poslednji komit, nego npr. pretposlednji komit, onda možemo to da uradimo komandom: `git checkout [IME GRANE]~`.
+Nova grana se kreira komandom `git branch [IME GRANE]`. Da bismo skočili na drugu granu, potrebno je da iskoristimo komandu `git checkout [IME GRANE]` (slično kao za verzionisanje). Kada skačemo na neku granu sa `git checkout`, skačemo na poslednji komit. Ako ne želimo da skočimo na poslednji komit, nego npr. pretposlednji komit, onda možemo to da uradimo komandom: `git checkout [IME GRANE]~`.
 
 **Primer**. Kreiranje grane na prvi način:
 
